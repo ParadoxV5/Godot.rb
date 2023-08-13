@@ -1,0 +1,29 @@
+name: Test with Minitest
+on:
+  push:
+    paths: [.github/workflows/test.yml, lib/**, test/**, Gemfile, '*.gemspec']
+  pull_request:
+    paths: [.github/workflows/test.yml, lib/**, test/**, Gemfile, '*.gemspec']
+jobs:
+  
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        ruby-version: ['3', '3.0']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+    
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+    
+    - name: Test with Minitest
+      run: bundle exec rake test:isolated

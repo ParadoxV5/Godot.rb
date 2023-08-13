@@ -1,0 +1,23 @@
+name: Package with RubyGems
+on: {release: {types: [published]}}
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+    
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3'
+    
+    - name: Package Gem
+      run: gem build --output .gem *.gemspec
+    
+    - name: Publish to RubyGems
+      run: gem push .gem
+      env:
+        GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
