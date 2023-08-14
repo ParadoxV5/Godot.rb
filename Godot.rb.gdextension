@@ -1,0 +1,11 @@
+[configuration]
+entry_symbol = "ruby_gdextension_main"
+compatibility_minimum = 4.1
+
+;[dependencies]
+;platform.architecture = {
+;  "relative/path/to/source/": "path/to/export/dir"
+;}
+
+[libraries]
+;autodetect_library_prefix = "path/to/libruby.gdextension"

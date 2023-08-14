@@ -3,7 +3,7 @@
 
 ## License
 
-### [`include/godot`](include/godot/)
+### [`include/godot/`](include/godot/)
 
 Copyright (c) 2014-present Godot Engine contributors. https://godotengine.org/license/
 
