@@ -1,5 +1,5 @@
 [configuration]
-entry_symbol = "ruby_gdextension_main"
+entry_symbol = "godot_rb_main"
 compatibility_minimum = 4.1
 
 ;[dependencies]
@@ -8,4 +8,4 @@ compatibility_minimum = 4.1
 ;}
 
 [libraries]
-;autodetect_library_prefix = "path/to/libruby.gdextension"
+;autodetect_library_prefix = "path/to/libgodot_rb"
