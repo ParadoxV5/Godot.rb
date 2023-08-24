@@ -2,7 +2,13 @@ name: Generate Documentation with YARD
 on:
   push:
     branches: [main]
-    paths: [.github/workflows/documentation.yml, doc/**, lib/**, README.md]
+    paths:
+    - .github/workflows/documentation.yml
+    - .yardopts
+    - docs/**
+    - lib/**
+    - README.md
+
 concurrency:
   group: pages
   cancel-in-progress: true
