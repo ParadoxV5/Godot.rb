@@ -23,16 +23,13 @@ OS = File.join(
 # @see OS
 OUT_DIR = File.join('bin', OS)
 
-desc "[TODO] compile `godot_rb.c` and symlink Ruby libs for <#{OS}>"
+desc "[TODO] compile Godot.rb & symlink libs for <#{OS}>"
 task :default
-
-desc "[TODO] compile `godot_rb.c` and copy Ruby libs for <#{OS}>"
-task :all
 
 desc "[TODO] compile `godot_rb.c` for <#{OS}>"
 task :main
 
-#TODO: Task for each dep lib with param choosing copy or symlink
+#TODO: Task for symlinking each dep lib
 
-desc "[TODO] delete the directory `#{OUT_DIR}`>"
+desc "[TODO] delete the directory `#{OUT_DIR}`"
 task :clean
