@@ -1,4 +1,4 @@
-~~Move aside, [🐍](https://github.com/touilleMan/godot-python/tree/godot4-meson), there’s a new sheriff in town!~~
+~~Move aside, [Python](https://github.com/touilleMan/godot-python/tree/godot4-meson), there’s a new sheriff in town!~~
 
 # Godot.rb – CRuby in Godot Engine [![justforfunnoreally.dev badge](https://img.shields.io/badge/justforfunnoreally-dev-9ff)](https://justforfunnoreally.dev)
 
@@ -9,7 +9,7 @@
 [TBA]
 
 ### 🔜 Planned
-* Other platforms – Only Windows, [RubyInstaller](https://rubyinstaller.org) non-Devkit + MinGW tested currently.
+* More platforms – Only Windows, [RubyInstaller](https://rubyinstaller.org) non-Devkit + MinGW tested currently.
 * [TBA]
 
 ### 🧊 Anti-Features
@@ -23,15 +23,17 @@
 [The GitHub Actions workflow](.github/workflows/build_and_test.yml)
 automatically builds and tests relevant commits on all supported platforms and architectures, or you can also
 [manually activate the CI](https://docs.github.com/actions/using-workflows/manually-running-a-workflow).
+
 When it concludes, the CI stores all successive builds in in one convenient
 [download](https://docs.github.com/actions/managing-workflow-runs/downloading-workflow-artifacts).
+
 These downloads are distributable (suitable for [publishing](../../releases)) –
 libraries for all platform-architectures (that built successfully) included,
 and development-only files (e.g., [C source files](src/)) are not included.
 
 ## Building locally
 
-As you may’ve guessed, you need [CRuby Ruby](https://www.ruby-lang.org) and a basic set of C compiler toolkit.
+As you may’ve guessed, you need [CRuby Ruby](https://www.ruby-lang.org) and a basic `gcc` set.
 
 Then, run the following in the project root.
 
@@ -58,7 +60,7 @@ Copyright (c) 2014-present Godot Engine contributors. https://godotengine.org/li
 ### Bundled 3rd-party libraries in [`bin/`](bin/) (in builds)
 
 #### “libruby” – [CRuby](https://www.ruby-lang.org)
-[custom terms](https://github.com/ruby/ruby/blob/v3_2_2/COPYING#L25-L30).
+Distributing in compliance with [its custom terms](https://github.com/ruby/ruby/blob/v3_2_2/COPYING#L25-L30)
 
 ### The rest of this project
 
