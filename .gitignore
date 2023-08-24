@@ -1,11 +1,10 @@
 # JetBrains
-/.idea/
+/**/.idea/
 
 # C
-Makefile
+/bin/
 
 # Ruby
 /.gem_rbs_collection/
 /Gemfile.lock
 /rbs_collection.lock.yaml
-/mkmf.log
