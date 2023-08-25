@@ -1,21 +1,23 @@
 # frozen_string_literal: true
 
-raise NotImplementedError, 'only CRuby supported' unless 'ruby' == RUBY_ENGINE
+warn 'only CRuby supported' unless 'ruby' == RUBY_ENGINE
 
 # @return `"<architecture>/<platform>"`
 # @see RbConfig::CONFIG
 OS = File.join(
-  case host = RbConfig::CONFIG['host_cpu']
-  when /x64/
+  case target = RbConfig::CONFIG['target_cpu']
+  when 'x64'
     'x86_64'
   else
-    raise NotImplementedError, "host_cpu `#{host}` not supported"
+    warn "target_cpu `#{target}` not supported"
+    ".#{target}"
   end,
-  case host = RbConfig::CONFIG['host_os']
-  when /mingw32/
+  case target = RbConfig::CONFIG['target_os']
+  when 'mingw32'
     'windows'
   else
-    raise NotImplementedError, "host_os `#{host}` not supported"
+    warn "target_os `#{target}` not supported"
+    ".#{target}"
   end
 )
 
