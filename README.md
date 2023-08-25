@@ -20,11 +20,11 @@
 
 ### GitHub Actions CI (Coming Soon)
 
-[The GitHub Actions workflow](.github/workflows/build_and_test.yml)
+[The GitHub Actions workflow](.github/workflows/workflow.yml)
 automatically builds and tests relevant commits on all supported platforms and architectures, or you can also
 [manually activate the CI](https://docs.github.com/actions/using-workflows/manually-running-a-workflow).
 
-When it concludes, the CI stores all successive builds in in one convenient
+When it concludes, the CI stores all successive builds in one convenient
 [download](https://docs.github.com/actions/managing-workflow-runs/downloading-workflow-artifacts).
 
 These downloads are distributable (suitable for [publishing](../../releases)) –

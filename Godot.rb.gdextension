@@ -3,9 +3,9 @@ entry_symbol = "godot_rb_main"
 compatibility_minimum = 4.1
 
 ;[dependencies]
-;platform.architecture = {
+;architecture.platform = {
 ;  "relative/path/to/source/": "path/to/export/dir"
 ;}
 
 [libraries]
-;autodetect_library_prefix = "path/to/libgodot_rb"
+x86_64.windows = "bin/x86_64/windows/debug.lib"

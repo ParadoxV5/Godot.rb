@@ -3,8 +3,8 @@
   * `<architecture>/`
     * `<platform>/`
       (incompatibilities are more likely across different arches than platforms)
-      * `debug.<ext>`
-      * `release.<ext>`
+      * `debug.lib`
+      * `release.lib`
       * `<libruby>`
       * additional Ruby dependency libs
 
