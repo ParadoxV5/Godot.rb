@@ -1,14 +1,13 @@
 #include "setup.h"
 
 static char* arg0 = "main";
-bool godot_rb_setup_core(void) {
+static bool godot_rb_setup_core(void) {
   // On Windows, the argc/v pointers are rather return vars as their original contents are discarded.
   // https://github.com/ruby/ruby/blob/v3_2_2/win32/win32.c#L923-L926
   int argc = 1;
   char** argv = &arg0;
   ruby_sysinit(&argc, &argv);
-  int err = ruby_setup();
-  if(err) {
+  if(ruby_setup()) {
     godot_rb_error("Ruby ran into a problem while starting.", __func__, __FILE__, __LINE__);
     return false;
   }
@@ -16,7 +15,7 @@ bool godot_rb_setup_core(void) {
   return true;
 }
 
-bool (*godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {
+static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {
   [GDEXTENSION_INITIALIZATION_CORE] = godot_rb_setup_core
 };
 // Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
