@@ -9,7 +9,7 @@ bool godot_rb_setup_core(void) {
   ruby_sysinit(&argc, &argv);
   int err = ruby_setup();
   if(err) {
-    printf("Error %i", err);//TODO: Error
+    godot_rb_error("Ruby ran into a problem while starting.", __func__, __FILE__, __LINE__);
     return false;
   }
   ruby_script("godot_rb.c");
@@ -24,10 +24,10 @@ bool (*godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {
 void godot_rb_setup(__attribute__((unused)) void* userdata, GDExtensionInitializationLevel p_level) {
   bool (*func)(void) = godot_rb_setup_functions[p_level];
   if(func) {
-    printf("Godot.rb\tsetting up level %u...\n", p_level);
+    printf("setting up Godot.rb init level %u...\n", p_level);
     if(func()) {
       godot_rb_init_levels[p_level] = true;
-      printf("Godot.rb\tlevel %u set up.\n", p_level);
+      printf("Godot.rb init level %u set up.\n", p_level);
     }
   }
 }
