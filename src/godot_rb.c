@@ -6,7 +6,7 @@
 bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
 GDExtensionInterfaceGetProcAddress godot_rb_get_proc = NULL;
 GDExtensionClassLibraryPtr godot_rb_library = NULL;
-struct godot_rb_gdextension;
+struct godot_rb_gdextension godot_rb_gdextension;
 
 __attribute__((used)) GDExtensionBool godot_rb_main(
   GDExtensionInterfaceGetProcAddress p_get_proc_address,
