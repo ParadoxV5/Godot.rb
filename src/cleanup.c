@@ -1,6 +1,6 @@
 #include "cleanup.h"
 
-static void godot_rb_cleanup_core() {
+static void godot_rb_cleanup_core(void) {
   if(ruby_cleanup(EXIT_SUCCESS))
     godot_rb_error("Ruby ran into a problem while exiting.", __func__, __FILE__, __LINE__);
 }

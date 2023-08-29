@@ -48,3 +48,5 @@ The `Rakefile` has all the building steps. Ruby [bundles](https://github.com/rub
 
 This builds Godot.rb for your device’s platform-architecture – and only that platform-architecture pair.
 It also (if necessary) symlinks `libruby` and additional dependencies instead of duplicating them.
+(As such, you need admin elevation on Windows if you don’t have
+[symlink permissions](https://learn.microsoft.com/windows/security/threat-protection/security-policy-settings/create-symbolic-links))

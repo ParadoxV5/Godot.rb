@@ -37,11 +37,33 @@ directory O_DIR = File.join(BIN_DIR, '.o', '')
 SRC_DIR = 'src'
 src_dir_size = SRC_DIR.size
 # C intermediate `.o`s and their corresponding sources
-# @return `{"src/*.c" => "bin/.o/*.o"}`
-O_C = Dir[File.join SRC_DIR, '**', '*.c'].to_h {|source| [
+# @return `{"bin/.o/*.o" => "src/*.c"}`
+O_C = Dir[File.join(SRC_DIR, '**', '*.c')].to_h {|source| [
   File.join(O_DIR, source[src_dir_size..]).tap { _1[-1] = 'o' },
   source
 ] }
+
+begin
+  require 'ruby_installer'
+rescue LoadError
+  warn 'non-RubyInstaller2 not supported'
+  # RubyInstaller has its stuff in its own self-contained folder
+  RubyInstaller = nil
+end
+
+# @return `libruby.so`’s directory: `"/<path>/<to>"`
+LIBRUBY_DIR = RbConfig::CONFIG[RubyInstaller ? 'bindir' : 'libdir']
+# @return `libruby.so`, the file name (dependant on platform and possibly architecture)
+LIBRUBY_SO = RbConfig::CONFIG['LIBRUBY_SO']
+# `libruby` & dependencies in the output directory and their original locations
+# @return `{"bin/<architecture>/<platform>/<lib.so>" => "/<path>/<to>/<lib.so>", …}`
+LIBS = {File.join(OUT_DIR, LIBRUBY_SO) => File.join(LIBRUBY_DIR, LIBRUBY_SO)}
+if RubyInstaller
+  %w[libgmp-10.dll].each do|lib|
+    LIBS[File.join(OUT_DIR, lib)] =
+      File.join(LIBRUBY_DIR, 'ruby_builtin_dlls', lib)
+  end
+end
 
 # Build modes and their compiler flags
 # @return `{'debug' => ["flag", …], 'release' => …}`
@@ -60,24 +82,17 @@ task default: %i[c libruby]
 desc "compile `godot_rb.c` for <#{OS}>"
 multitask c: (O_C.keys << OUT_DIR) do
   sh(
-    *%W[
-      gcc
-      -shared
-      -o#{OUT_DIR}debug.lib
-    ],
+    'gcc',
+    "-o#{OUT_DIR}debug.lib",
+    '-shared',
     *O_C.keys,
-    *%W[
-      -L#{RbConfig::CONFIG['libdir']}
-      -L#{
-        RbConfig::CONFIG['bindir'] # RubyInstaller
-      }
-      -l#{RbConfig::CONFIG['LIBRUBY_SO']}
-    ]
+    "-L#{LIBRUBY_DIR}",
+    "-l:#{RbConfig::CONFIG['LIBRUBY_SO']}"
   )
 end
 
 O_C.each do|name, source|
-  file name => [source, O_DIR] do
+  file name => [O_DIR, source] do
     sh *%W[
       gcc
       -o#{name}
@@ -90,9 +105,12 @@ O_C.each do|name, source|
   end
 end
 
-desc "[TODO] symlink “libruby” and dependencies for <#{OS}>"
-task :libruby
-#TODO: Task for symlinking each dep lib
+desc "[TODO] symlink `libruby` and dependencies for <#{OS}>"
+multitask libruby: LIBS.keys
+
+LIBS.each do|name, source|
+  file(name => [OUT_DIR, source]) { File.symlink(source, name) }
+end
 
 desc "[TODO] delete the intermediate directory `#{O_DIR}`"
 task :mostlyclean
