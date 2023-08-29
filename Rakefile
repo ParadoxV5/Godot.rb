@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-warn 'only CRuby supported' unless 'ruby' == RUBY_ENGINE
+warn 'only CRuby supported', category: :experimental if 'ruby' != RUBY_ENGINE
 
 # @return `"<architecture>/<platform>"`
 # @see RbConfig::CONFIG
@@ -9,14 +9,14 @@ OS = File.join(
   when 'x64'
     'x86_64'
   else
-    warn "target_cpu `#{target}` not supported"
+    warn "target_cpu `#{target}` not supported", category: :experimental
     ".#{target}"
   end,
   case target = RbConfig::CONFIG['target_os']
   when 'mingw32'
     'windows'
   else
-    warn "target_os `#{target}` not supported"
+    warn "target_os `#{target}` not supported", category: :experimental
     ".#{target}"
   end
 )
@@ -55,7 +55,7 @@ O_C = Dir[File.join(SRC_DIR, '**', '*.c')].to_h {|source| [
 begin
   require 'ruby_installer'
 rescue LoadError
-  warn 'non-RubyInstaller2 not supported'
+  warn 'non-RubyInstaller2 not supported', category: :experimental
   # RubyInstaller has its stuff in its own self-contained folder
   RubyInstaller = nil
 end
@@ -76,12 +76,14 @@ if RubyInstaller
   end
 end
 
-desc "compile Godot.rb & symlink libs for <#{OS}>"
-task default: %i[debug libruby]
-desc "compile in both modes & symlink libs for <#{OS}>"
+puts "architecture/platform:\t#{OS}", '' unless $VERBOSE.nil?
+
+desc 'compile Godot.rb for debug builds & symlink libs'
+task default: %i[c libruby]
+desc 'compile Godot.rb for both build types & symlink libs'
 task all: [OUT_RELEASE, :default]
-desc "compile `godot_rb.c` for <#{OS}>"
-task debug: OUT_DEBUG
+desc 'compile Godot.rb for debug builds'
+task c: OUT_DEBUG
 
 {
   OUT_DEBUG => %w[
@@ -91,20 +93,24 @@ task debug: OUT_DEBUG
     -O2
   ]
 }.each {|name, flags| file name do
-  Rake::Task[:c].invoke(name, *flags)
+  Rake::Task[:compile].invoke(name, *flags)
 end }
 
-multitask :c, %i[name] => (O_C.keys << OUT_DIR) do|_, args|
+l_libruby_dir = "-L#{LIBRUBY_DIR}"
+l_libruby_file = "-l:#{LIBRUBY_FILE}"
+multitask :compile, %i[name] => (O_C.keys << OUT_DIR) do|_, args|
   sh('gcc',
     *args.extras,
     "-o#{args.name}",
     '-shared',
     *O_C.keys,
-    "-L#{LIBRUBY_DIR}",
-    "-l:#{RbConfig::CONFIG['LIBRUBY_SO']}"
+    l_libruby_dir,
+    l_libruby_file
   )
 end
 
+i_h_dir = "-I#{RbConfig::CONFIG['rubyhdrdir']}"
+i_arch_h_dir = "-I#{RbConfig::CONFIG['rubyarchhdrdir']}"
 O_C.each do|name, source|
   file name, %i[_] => [O_DIR, source] do|_, args|
     sh('gcc',
@@ -112,14 +118,14 @@ O_C.each do|name, source|
       "-o#{name}",
       '-c',
       '-Iinclude',
-      "-I#{RbConfig::CONFIG['rubyhdrdir']}",
-      "-I#{RbConfig::CONFIG['rubyarchhdrdir']}",
+       i_h_dir,
+       i_arch_h_dir,
       source
     )
   end
 end
 
-desc "symlink `libruby` and dependencies for <#{OS}>"
+desc "symlink `libruby` and dependencies"
 multitask libruby: LIBS.keys
 
 LIBS.each do|name, source|
