@@ -79,6 +79,7 @@ BUILD_FLAGS = {
 desc "[WIP] compile Godot.rb & symlink libs for <#{OS}>"
 task default: %i[c libruby]
 
+#TODO: `multifile`? [blocked by “release mode builds”]
 desc "compile `godot_rb.c` for <#{OS}>"
 multitask c: (O_C.keys << OUT_DIR) do
   sh(
@@ -105,15 +106,21 @@ O_C.each do|name, source|
   end
 end
 
-desc "[TODO] symlink `libruby` and dependencies for <#{OS}>"
+desc "symlink `libruby` and dependencies for <#{OS}>"
 multitask libruby: LIBS.keys
 
 LIBS.each do|name, source|
   file(name => [OUT_DIR, source]) { File.symlink(source, name) }
 end
 
-desc "[TODO] delete the intermediate directory `#{O_DIR}`"
-task :mostlyclean
+require 'fileutils'
 
-desc "[TODO] delete the output directories `#{O_DIR}` & `#{OUT_DIR}`"
-task clean: :mostlyclean
+desc "delete the intermediate directory `#{O_DIR}`"
+task :mostlyclean do
+  FileUtils.remove_dir O_DIR
+end
+
+desc "delete the output directories `#{O_DIR}` & `#{OUT_DIR}`"
+task clean: :mostlyclean do
+  FileUtils.remove_dir OUT_DIR
+end
