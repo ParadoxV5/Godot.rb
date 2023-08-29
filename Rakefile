@@ -32,6 +32,15 @@ directory OUT_DIR = File.join(BIN_DIR, OS, '')
 # @return `"bin/.o/"`
 directory O_DIR = File.join(BIN_DIR, '.o', '')
 
+# Output lib for debug builds
+# @return `"bin/<architecture>/<platform>/debug.lib"`
+# @see OUT_DIR
+OUT_DEBUG = File.join(OUT_DIR, 'debug.lib')
+# Output lib for release builds
+# @return `"bin/<architecture>/<platform>/release.lib"`
+# @see OUT_DIR
+OUT_RELEASE = File.join(OUT_DIR, 'release.lib')
+
 # C sources directory
 # @return `"src"`
 SRC_DIR = 'src'
@@ -52,12 +61,14 @@ rescue LoadError
 end
 
 # @return `libruby.so`’s directory: `"/<path>/<to>"`
+# @see LIBRUBY_FILE
 LIBRUBY_DIR = RbConfig::CONFIG[RubyInstaller ? 'bindir' : 'libdir']
 # @return `libruby.so`, the file name (dependant on platform and possibly architecture)
-LIBRUBY_SO = RbConfig::CONFIG['LIBRUBY_SO']
+# @see LIBRUBY_DIR
+LIBRUBY_FILE = RbConfig::CONFIG['LIBRUBY_SO']
 # `libruby` & dependencies in the output directory and their original locations
 # @return `{"bin/<architecture>/<platform>/<lib.so>" => "/<path>/<to>/<lib.so>", …}`
-LIBS = {File.join(OUT_DIR, LIBRUBY_SO) => File.join(LIBRUBY_DIR, LIBRUBY_SO)}
+LIBS = {File.join(OUT_DIR, LIBRUBY_FILE) => File.join(LIBRUBY_DIR, LIBRUBY_FILE)}
 if RubyInstaller
   %w[libgmp-10.dll].each do|lib|
     LIBS[File.join(OUT_DIR, lib)] =
@@ -65,26 +76,28 @@ if RubyInstaller
   end
 end
 
-# Build modes and their compiler flags
-# @return `{'debug' => ["flag", …], 'release' => …}`
-BUILD_FLAGS = {
-  'debug' => %w[],
-  'release' => %w[
+desc "compile Godot.rb & symlink libs for <#{OS}>"
+task default: %i[debug libruby]
+desc "compile in both modes & symlink libs for <#{OS}>"
+task all: [OUT_RELEASE, :default]
+desc "compile `godot_rb.c` for <#{OS}>"
+task debug: OUT_DEBUG
+
+{
+  OUT_DEBUG => %w[
+  ],
+  OUT_RELEASE => %w[
     -DNDEBUG
     -O2
   ]
-}
-#TODO: release mode builds
+}.each {|name, flags| file name do
+  Rake::Task[:c].invoke(name, *flags)
+end }
 
-desc "[WIP] compile Godot.rb & symlink libs for <#{OS}>"
-task default: %i[c libruby]
-
-#TODO: `multifile`? [blocked by “release mode builds”]
-desc "compile `godot_rb.c` for <#{OS}>"
-multitask c: (O_C.keys << OUT_DIR) do
-  sh(
-    'gcc',
-    "-o#{OUT_DIR}debug.lib",
+multitask :c, %i[name] => (O_C.keys << OUT_DIR) do|_, args|
+  sh('gcc',
+    *args.extras,
+    "-o#{args.name}",
     '-shared',
     *O_C.keys,
     "-L#{LIBRUBY_DIR}",
@@ -93,16 +106,16 @@ multitask c: (O_C.keys << OUT_DIR) do
 end
 
 O_C.each do|name, source|
-  file name => [O_DIR, source] do
-    sh *%W[
-      gcc
-      -o#{name}
-      -c
-      -Iinclude
-      -I#{RbConfig::CONFIG['rubyhdrdir']}
-      -I#{RbConfig::CONFIG['rubyarchhdrdir']}
-      #{source}
-    ]
+  file name, %i[_] => [O_DIR, source] do|_, args|
+    sh('gcc',
+      *args.extras,
+      "-o#{name}",
+      '-c',
+      '-Iinclude',
+      "-I#{RbConfig::CONFIG['rubyhdrdir']}",
+      "-I#{RbConfig::CONFIG['rubyarchhdrdir']}",
+      source
+    )
   end
 end
 
@@ -120,7 +133,7 @@ task :mostlyclean do
   FileUtils.remove_dir O_DIR
 end
 
-desc "delete the output directories `#{O_DIR}` & `#{OUT_DIR}`"
+desc "delete out directories `#{O_DIR}` & `#{OUT_DIR}`"
 task clean: :mostlyclean do
   FileUtils.remove_dir OUT_DIR
 end
