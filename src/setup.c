@@ -24,9 +24,9 @@ void godot_rb_setup(__attribute__((unused)) void* userdata, GDExtensionInitializ
   bool (*func)(void) = godot_rb_setup_functions[p_level];
   if(func) {
     printf("setting up Godot.rb init level %u...\n", p_level);
-    if(func()) {
-      godot_rb_init_levels[p_level] = true;
-      printf("Godot.rb init level %u set up.\n", p_level);
-    }
+    if(!func())
+      return;
+    printf("Godot.rb init level %u set up.\n", p_level);
   }
+  godot_rb_init_levels[p_level] = true;
 }

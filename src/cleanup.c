@@ -12,11 +12,8 @@ void godot_rb_cleanup(__attribute__((unused)) void* userdata, GDExtensionInitial
   void (*func)(void) = godot_rb_cleanup_functions[p_level];
   if(func) {
     printf("cleaning up Godot.rb init level %u...\n", p_level);
-    if(godot_rb_init_levels[p_level]) {
-      func();
-      godot_rb_init_levels[p_level] = false;
-      printf("Godot.rb init level %u cleaned up.\n", p_level);
-    } else
-      godot_rb_warn("Godot.rb hasn't set this init level up.", __func__, __FILE__, __LINE__);
+    func();
+    printf("Godot.rb init level %u cleaned up.\n", p_level);
   }
+  godot_rb_init_levels[p_level] = false;
 }
