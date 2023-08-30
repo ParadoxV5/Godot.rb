@@ -8,4 +8,5 @@ compatibility_minimum = 4.1
 ;}
 
 [libraries]
-x86_64.windows = "bin/x86_64/windows/debug.lib"
+x86_64.windows.debug   = "bin/x86_64/windows/debug.lib"
+x86_64.windows.release = "bin/x86_64/windows/release.lib"
