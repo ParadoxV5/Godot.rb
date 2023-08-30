@@ -1,4 +1,4 @@
-~~*Move aside, [Python](https://github.com/touilleMan/godot-python/tree/godot4-meson), there’s a new sheriff in town!*~~
+~~*Move aside, [Py](https://github.com/touilleMan/godot-python/tree/godot4-meson), there’s a new sheriff in town!*~~
 
 # Godot.rb – Ruby in [Godot Engine](https://godotengine.org) [![justforfunnoreally.dev badge](https://img.shields.io/badge/justforfunnoreally-dev-9ff)](https://justforfunnoreally.dev)
 

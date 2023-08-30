@@ -122,7 +122,7 @@ BUILD_FLAGS.to_h do|build, flags|
 end => o_dir__out # {"…/.debug.o" => "…/debug.lib", …}`
 
 desc 'compile Godot.rb for debug builds & symlink libs'
-task default: %i[o_dir__out.each_value.first libruby]
+task default: [o_dir__out.each_value.first, :libruby]
 desc 'compile Godot.rb for all build types & symlink libs'
 task all: %i[c libruby]
 desc 'compile Godot.rb for all build types'
