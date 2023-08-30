@@ -7,10 +7,11 @@
 
 ### 1 – Servers
 * Godot Engine servers
+* Partial Ruby integration via Ruby modules/classes in [`lib`](../lib/)
 
 ### 2 – Scene
 * GDScript classes
-* Ruby integration
+* Full Ruby integration via C
 
 ### 3 – Editor
-* Editor-exclusive features
+* Godot Engine Editor and Editor-exclusive features
