@@ -90,7 +90,7 @@ BUILD_FLAGS.to_h do|build, flags|
   
   # Compile Object Binaries (`.o`)
   C__O_NAMES.map {|source, o_name| File.join(o_dir, o_name).tap do|o0|
-    file o0 => o_dir do
+    file o0 => [source, o_dir] do
       sh('gcc',
          *flags,
          '-c',
