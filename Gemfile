@@ -3,7 +3,6 @@ source 'https://rubygems.org'
 ruby '~> 3.0'
 
 gem 'rake', '~> 13.0.0'
-gem 'fileutils', '~> 1.0'
 
 # Development Apps
 group :development do
