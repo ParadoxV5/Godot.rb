@@ -11,5 +11,5 @@ find_package(Ruby 3.2 EXACT REQUIRED)
 include_directories(../include ${Ruby_INCLUDE_DIRS})
 link_libraries(${Ruby_LIBRARY})
 
-file(GLOB SOURCES *.c)
+file(GLOB_RECURSE SOURCES *.c)
 add_library(Godot_rb SHARED ${SOURCES})

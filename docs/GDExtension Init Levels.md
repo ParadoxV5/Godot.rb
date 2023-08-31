@@ -11,7 +11,7 @@
 
 ### 2 – Scene
 * GDScript classes
-* Full Ruby integration via C
+* Full Ruby integration via C bindings in [`src/ruby`](../src/ruby/)
 
 ### 3 – Editor
 * Godot Engine Editor and Editor-exclusive features

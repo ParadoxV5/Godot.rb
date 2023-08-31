@@ -2,7 +2,6 @@
 #include "setup.h"
 #include "cleanup.h"
 
-// Uninitialized API variables
 bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
 GDExtensionInterfaceGetProcAddress godot_rb_get_proc = NULL;
 GDExtensionClassLibraryPtr godot_rb_library = NULL;
@@ -15,15 +14,15 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
 ) {
   // Set up de/initialization functions
   r_initialization->minimum_initialization_level = GDEXTENSION_INITIALIZATION_CORE;
-  r_initialization->initialize = &godot_rb_setup;
-  r_initialization->deinitialize = &godot_rb_cleanup;
-  // Save GDExtension Interface
+  r_initialization->initialize = godot_rb_setup;
+  r_initialization->deinitialize = godot_rb_cleanup;
+  // Save GDExtension
   godot_rb_get_proc = p_get_proc_address;
   godot_rb_library = p_library;
   // Initialize API variables
   for(GDExtensionInitializationLevel i = 0; i < GDEXTENSION_MAX_INITIALIZATION_LEVEL; ++i)
     godot_rb_init_levels[i] = false;
-  // Save GDExtension API
+  // Save GDExtension Interface
   #define LOAD(proc_t, proc) godot_rb_gdextension.proc = (proc_t)godot_rb_get_proc(#proc);
   LOAD(GDExtensionInterfacePrintErrorWithMessage, print_error_with_message)
   LOAD(GDExtensionInterfacePrintWarningWithMessage, print_warning_with_message)

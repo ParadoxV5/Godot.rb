@@ -1,5 +1,7 @@
 #include "setup.h"
 
+// Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
+// https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
 static char* arg0 = "main";
 static bool godot_rb_setup_core(void) {
   // On Windows, the argc/v pointers are rather return vars as their original contents are discarded.
@@ -38,8 +40,6 @@ static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEV
   godot_rb_setup_servers,
   godot_rb_setup_scene
 };
-// Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
-// https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
 void godot_rb_setup(__attribute__((unused)) void* userdata, GDExtensionInitializationLevel p_level) {
   bool (*func)(void) = godot_rb_setup_functions[p_level];
   if(func) {
