@@ -1,0 +1,13 @@
+OS: String
+RubyInstaller: Module?
+
+SRC: String
+BIN: String
+OUT: String
+
+LIBRUBY_DIR: String
+LIBRUBY_NAME: String
+LIBS: Hash[String, String]
+
+C__O_NAMES: Hash[String, String]
+BUILD_FLAGS: Hash[String, Array[String]]

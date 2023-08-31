@@ -21,6 +21,11 @@ OS = File.join(
   end
 )
 
+# RubyInstaller has its stuff in its own self-contained folder
+# @return [boolish] the `RubyInstaller` module for Windows RubyInstaller, or `nil` for non-RubyInstaller
+RubyInstaller ||= nil
+warn 'non-RubyInstaller2 not supported', category: :experimental unless RubyInstaller
+
 # C sources directory
 # @return `"src"`
 SRC = 'src'
@@ -31,11 +36,6 @@ BIN = 'bin'
 # @return `"bin/<architecture>/<platform>/"`
 # @see OS
 directory OUT = File.join(BIN, OS, '')
-
-# RubyInstaller has its stuff in its own self-contained folder
-# @return [boolish] the `RubyInstaller` module for Windows RubyInstaller, or `nil` for non-RubyInstaller
-RubyInstaller ||= nil
-warn 'non-RubyInstaller2 not supported', category: :experimental unless RubyInstaller
 
 # @return `libruby.so`’s directory: `"/<path>/<to>"`
 # @see LIBRUBY_NAME
