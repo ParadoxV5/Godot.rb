@@ -35,7 +35,7 @@ BIN = 'bin'
 # Output directory
 # @return `"bin/<architecture>/<platform>/"`
 # @see OS
-directory OUT = File.join(BIN, OS, '')
+OUT = File.join(BIN, OS, '')
 
 # @return `libruby.so`’s directory: `"/<path>/<to>"`
 # @see LIBRUBY_NAME
@@ -79,14 +79,16 @@ BUILD_FLAGS = {
     -O2
   ]
 }
-BUILD_FLAGS.to_h do|build, flags|
+BUILD_FLAGS.map do|build, flags|
   out = File.join(OUT, "#{build}.lib")
   o_dir_name = ".#{build}.o"
   directory o_dir = File.join(OUT, o_dir_name)
   
   # Compile Object Binaries (`.o`)
-  C__O_NAMES.map {|source, o_name| File.join(o_dir, o_name).tap do|o0|
-    file o0 => [source, o_dir] do
+  C__O_NAMES.map do|source, o_name|
+    o0 = File.join(o_dir, o_name)
+    directory o0_dir = File.dirname(o0)
+    file o0 => [source, o0_dir] do
       sh('gcc',
          *flags,
          '-c',
@@ -98,11 +100,11 @@ BUILD_FLAGS.to_h do|build, flags|
          source
       )
     end
-  end } => o
+    o0
+  end => o
   
   # Link Shared Library (`.so`)
-  file out => o_dir_name
-  multitask o_dir_name => o do
+  file out => o do
     sh('gcc',
        *flags,
        '-shared',
@@ -113,26 +115,25 @@ BUILD_FLAGS.to_h do|build, flags|
        l_libruby_name
     )
   end
+  multitask build => [*o, out]
   
-  [o_dir, out]
-end => o_dir__out # {"…/.debug.o" => "…/debug.lib", …}`
+  o_dir
+end => o_dirs # {"…/.debug.o" => "…/debug.lib", …}`
 
 desc 'compile Godot.rb for debug builds & symlink libs'
-task default: [o_dir__out.each_value.first, :libruby]
+task default: [BUILD_FLAGS.each_key.first, :libruby]
 desc 'compile Godot.rb for all build types & symlink libs'
-task all: %i[c libruby]
-desc 'compile Godot.rb for all build types'
-multitask c: o_dir__out.values
+task all: (BUILD_FLAGS.keys << 'libruby')
 
 desc "symlink `libruby` and dependencies"
 multitask libruby: LIBS.keys
-LIBS.each {|symlink, lib| file symlink => OUT do
+LIBS.each {|symlink, lib| file_create symlink => OUT do
   ln_sf lib, symlink
 end }
 
-desc "delete the intermediate directories such as `#{o_dir__out.each_key.first}`"
+desc "delete the intermediate directories such as `#{o_dirs.first}`"
 task :mostlyclean do
-  rm_rf o_dir__out.keys
+  rm_rf o_dirs
 end
 desc "delete the output directory `#{OUT}`"
 task :clean do

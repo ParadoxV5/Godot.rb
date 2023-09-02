@@ -5,12 +5,12 @@
 #include <godot/gdextension_interface.h>
 
 
-// GDExtension (initialize by entry function) //
+// GDExtension (initialized by entry function) //
 extern bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
 extern GDExtensionInterfaceGetProcAddress godot_rb_get_proc;
 extern GDExtensionClassLibraryPtr godot_rb_library;
 
-// GDExtension Interface (initialize by entry function) //
+// GDExtension Interface (initialized by entry function) //
 extern struct godot_rb_gdextension {
   GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
   GDExtensionInterfacePrintWarningWithMessage print_warning_with_message;
@@ -20,7 +20,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantDestroy variant_destroy;
 } godot_rb_gdextension;
 
-// Ruby Binding Modules/Classes (initialize at level `SCENE` except `Godot` at `SERVERS`)
+// Ruby Binding Modules/Classes (initialized at level `SCENE` except `Godot` at `SERVERS`)
 extern VALUE
   godot_rb_mGodot,
   godot_rb_cVariant;
@@ -34,7 +34,9 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
 
 // Error Helpers //
 
-void godot_rb_error(const char* message, const char* func, const char* file, int32_t line);
 void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line);
+void godot_rb_error(const char* message, const char* func, const char* file, int32_t line);
+// (assumes level `CORE` set up)
+bool godot_rb_protect(VALUE (* function)(VALUE args), VALUE args, const char* func, const char* file, int32_t line);
 
 #endif
