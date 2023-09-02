@@ -14,7 +14,16 @@ extern GDExtensionClassLibraryPtr godot_rb_library;
 extern struct godot_rb_gdextension {
   GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
   GDExtensionInterfacePrintWarningWithMessage print_warning_with_message;
+  GDExtensionInterfaceMemAlloc mem_alloc;
+  GDExtensionInterfaceMemFree mem_free;
+  GDExtensionInterfaceVariantNewCopy variant_new_copy;
+  GDExtensionInterfaceVariantDestroy variant_destroy;
 } godot_rb_gdextension;
+
+// Ruby Binding Modules/Classes (initialize at level `SCENE` except `Godot` at `SERVERS`)
+extern VALUE
+  godot_rb_mGodot,
+  godot_rb_cVariant;
 
 // Entry Function
 __attribute__((used)) GDExtensionBool godot_rb_main(

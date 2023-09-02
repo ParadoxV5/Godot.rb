@@ -1,4 +1,5 @@
 #include "setup.h"
+#include "ruby/variant.h"
 
 // Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
 // https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
@@ -20,18 +21,20 @@ static bool godot_rb_setup_core(void) {
 static bool godot_rb_setup_servers(void) {
   int state;
   const int line = __LINE__ + 1;
-  rb_protect(rb_require_string, rb_str_new_cstr("./addons/Godot.rb/lib/godot.rb"), &state);
+  rb_protect(rb_require_string, rb_str_new_lit("./addons/Godot.rb/lib/godot.rb"), &state);
   if(state) { // Handle exception
     VALUE message = rb_funcall(rb_errinfo(), rb_intern("inspect"), 0);
     rb_set_errinfo(Qnil); // Clear exception
-    godot_rb_error(StringValuePtr(message), __func__ , __FILE__, line);
+    godot_rb_error(StringValueCStr(message), __func__ , __FILE__, line);
     return false;
   }
+  godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
+  rb_gc_register_mark_object(godot_rb_mGodot);
   return true;
 }
 
-/** Dummy */
 static bool godot_rb_setup_scene(void) {
+  godot_rb_init_Variant(); //TODO: protect
   return true;
 }
 

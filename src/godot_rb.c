@@ -5,7 +5,9 @@
 bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
 GDExtensionInterfaceGetProcAddress godot_rb_get_proc = NULL;
 GDExtensionClassLibraryPtr godot_rb_library = NULL;
+
 struct godot_rb_gdextension godot_rb_gdextension;
+VALUE godot_rb_mGodot;
 
 __attribute__((used)) GDExtensionBool godot_rb_main(
   GDExtensionInterfaceGetProcAddress p_get_proc_address,
@@ -26,6 +28,10 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   #define LOAD(proc_t, proc) godot_rb_gdextension.proc = (proc_t)godot_rb_get_proc(#proc);
   LOAD(GDExtensionInterfacePrintErrorWithMessage, print_error_with_message)
   LOAD(GDExtensionInterfacePrintWarningWithMessage, print_warning_with_message)
+  LOAD(GDExtensionInterfaceMemAlloc, mem_alloc)
+  LOAD(GDExtensionInterfaceMemFree, mem_free)
+  LOAD(GDExtensionInterfaceVariantNewCopy, variant_new_copy)
+  LOAD(GDExtensionInterfaceVariantDestroy, variant_destroy)
   // Success
   return true;
 }
