@@ -37,6 +37,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
 void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line);
 void godot_rb_error(const char* message, const char* func, const char* file, int32_t line);
 // (assumes level `CORE` set up)
-bool godot_rb_protect(VALUE (* function)(VALUE args), VALUE args, const char* func, const char* file, int32_t line);
+// Note: This discards the return of the passed function
+bool godot_rb_protect(VALUE (* function)(VALUE value), VALUE value, const char* func, const char* file, int32_t line);
 
 #endif

@@ -24,9 +24,10 @@ VALUE godot_rb_cVariant_alloc(VALUE klass) {
   return TypedData_Wrap_Struct(klass, &godot_rb_cVariant_type, godot_rb_gdextension.mem_alloc(VARIANT_SIZE));
 }
 
-void godot_rb_init_Variant() {
+__attribute__((used)) VALUE godot_rb_init_Variant(__attribute__((unused)) VALUE value) {
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_alloc);
+  return godot_rb_cVariant;
 }
 
 GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self) {

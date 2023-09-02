@@ -25,20 +25,32 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   for(GDExtensionInitializationLevel i = 0; i < GDEXTENSION_MAX_INITIALIZATION_LEVEL; ++i)
     godot_rb_init_levels[i] = false;
   // Save GDExtension Interface
-  #define LOAD(proc_t, proc) godot_rb_gdextension.proc = (proc_t)godot_rb_get_proc(#proc);
-  LOAD(GDExtensionInterfacePrintErrorWithMessage, print_error_with_message)
-  LOAD(GDExtensionInterfacePrintWarningWithMessage, print_warning_with_message)
-  LOAD(GDExtensionInterfaceMemAlloc, mem_alloc)
-  LOAD(GDExtensionInterfaceMemFree, mem_free)
-  LOAD(GDExtensionInterfaceVariantNewCopy, variant_new_copy)
-  LOAD(GDExtensionInterfaceVariantDestroy, variant_destroy)
+  #define l(proc_t, proc) godot_rb_gdextension.proc = (proc_t)godot_rb_get_proc(#proc);
+  l(GDExtensionInterfacePrintErrorWithMessage, print_error_with_message)
+  l(GDExtensionInterfacePrintWarningWithMessage, print_warning_with_message)
+  l(GDExtensionInterfaceMemAlloc, mem_alloc)
+  l(GDExtensionInterfaceMemFree, mem_free)
+  l(GDExtensionInterfaceVariantNewCopy, variant_new_copy)
+  l(GDExtensionInterfaceVariantDestroy, variant_destroy)
   // Success
   return true;
 }
 
+void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line) {
+  godot_rb_gdextension.print_warning_with_message(message, message, func, file, line, false);
+}
 void godot_rb_error(const char* message, const char* func, const char* file, int32_t line) {
   godot_rb_gdextension.print_error_with_message  (message, message, func, file, line, false);
 }
-void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line) {
-  godot_rb_gdextension.print_warning_with_message(message, message, func, file, line, false);
+
+bool godot_rb_protect(VALUE (* function)(VALUE value), VALUE value, const char* func, const char* file, int32_t line) {
+  int state;
+  rb_protect(function, value, &state);
+  if(state) { // Handle exception
+    value = rb_funcall(rb_errinfo(), rb_intern("inspect"), 0);
+    rb_set_errinfo(Qnil); // Clear exception
+    godot_rb_error(StringValueCStr(value), __func__ , __FILE__, line);
+    return false;
+  }
+  return true;
 }

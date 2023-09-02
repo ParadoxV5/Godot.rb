@@ -4,7 +4,7 @@
 
 extern rb_data_type_t godot_rb_cVariant_type;
 
-void godot_rb_init_Variant();
+__attribute__((unused)) VALUE godot_rb_init_Variant(__attribute__((unused)) VALUE klass);
 
 GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self);
 // Return is `#initialize`d (usable)
