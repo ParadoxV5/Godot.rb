@@ -1,0 +1,15 @@
+module Godot
+  interface _ToGodot[out G < Variant] def to_godot: () -> G end
+  
+  type variant = _ToGodot[Variant]
+  class Variant
+    def self.allocate: () -> instance
+    def initialize: (*variant args) -> void
+    
+    def godot_send: (*variant args) -> variant
+    
+    def to_godot: () -> self
+    def nonzero?: () -> bool
+    def zero?: () -> bool
+  end
+end
