@@ -16,14 +16,16 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfacePrintWarningWithMessage print_warning_with_message;
   GDExtensionInterfaceMemAlloc mem_alloc;
   GDExtensionInterfaceMemFree mem_free;
+  GDExtensionInterfaceVariantConstruct variant_construct;
   GDExtensionInterfaceVariantNewCopy variant_new_copy;
   GDExtensionInterfaceVariantDestroy variant_destroy;
+  GDExtensionInterfaceVariantCall variant_call;
 } godot_rb_gdextension;
 
 // Ruby Binding Modules/Classes (initialized at level `SCENE` except `Godot` at `SERVERS`)
-extern VALUE
-  godot_rb_mGodot,
-  godot_rb_cVariant;
+extern VALUE godot_rb_mGodot, godot_rb_cVariant;
+// `Godot::Variant` immediate subclasses, or 0 (i.e., `Qfalse`) for auto-converted ones (i.e., the trileans).
+extern VALUE godot_rb_Variants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
 
 // Entry Function
 __attribute__((used)) GDExtensionBool godot_rb_main(

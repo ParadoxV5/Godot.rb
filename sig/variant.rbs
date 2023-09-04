@@ -10,6 +10,5 @@ module Godot
     
     def to_godot: () -> self
     def nonzero?: () -> bool
-    def zero?: () -> bool
   end
 end

@@ -2,11 +2,10 @@
 
 module Godot
   class Variant
-    #def self.allocate: () -> instance
-    #def initialize: (*variant args) -> instance
+    #def initialize: (*variant args) -> void
     #def godot_send: (*variant args) -> variant
+    #def nonzero? () -> bool
     
     def to_godot = self
-    def nonzero? = !zero?
   end
 end
