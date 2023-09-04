@@ -1,12 +1,18 @@
 module Godot
   interface _ToGodot[out G < Variant] def to_godot: () -> G end
   
-  type variant = _ToGodot[Variant]
+  type variant = Variant? | bool
+  type variant_like = _ToGodot[Variant]
   class Variant
-    def self.allocate: () -> instance
-    def initialize: (*variant args) -> void
+    VARIANTS: Array[singleton(Variant)?]
     
-    def godot_send: (*variant args) -> variant
+    def self.allocate: () -> instance
+    
+    private def __godot_send__: (interned? meth, Array[variant_like] args) -> [variant, Integer, Integer, Integer]
+    private def __godot_send__!: (interned? meth, *variant_like args) -> variant
+    
+    def initialize: (*variant_like args) -> void
+    def godot_send: (interned meth, *variant_like args) -> variant
     
     def to_godot: () -> self
     def nonzero?: () -> bool
