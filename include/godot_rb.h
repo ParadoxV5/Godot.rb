@@ -4,7 +4,6 @@
 #include <ruby.h>
 #include <godot/gdextension_interface.h>
 
-
 // GDExtension (initialized by entry function) //
 extern bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
 extern GDExtensionInterfaceGetProcAddress godot_rb_get_proc;
@@ -24,8 +23,8 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantBooleanize variant_booleanize;
 } godot_rb_gdextension;
 
-// Ruby Binding Modules/Classes (initialized at level `SCENE` except `Godot` at `SERVERS`)
-extern VALUE godot_rb_mGodot, godot_rb_cVariant;
+// Ruby Binding Constants (initialized at level `SCENE` except `Godot` at `SERVERS`)
+extern VALUE godot_rb_mGodot, godot_rb_cVariant, godot_rb_cVariant_c_VARIANTS;
 
 // Entry Function
 __attribute__((used)) GDExtensionBool godot_rb_main(
@@ -34,12 +33,21 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   GDExtensionInitialization* r_initialization
 );
 
-// Helpers //
+// Variant Helpers
+GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self);
+// Return is `#initialize`d (usable)
+VALUE godot_rb_cVariant_from_variant(GDExtensionConstVariantPtr variant);
 
-void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line);
-void godot_rb_error(const char* message, const char* func, const char* file, int32_t line);
+// General Helpers //
+
+#define godot_rb_require_relative(name) rb_require_string(rb_str_new_lit("./addons/Godot.rb/lib/godot/"#name".rb"))
+
+#define godot_rb_warn (message) \
+  godot_rb_gdextension.print_warning_with_message(message, message, __func__, __FILE__, __LINE__, false)
+#define godot_rb_error(message) \
+  godot_rb_gdextension.print_error_with_message  (message, message, __func__, __FILE__, __LINE__, false)
 // (assumes level `CORE` set up)
 // Note: This discards the return of the passed function
-bool godot_rb_protect(VALUE (* function)(VALUE value), VALUE value, const char* func, const char* file, int32_t line);
+bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value));
 
 #endif

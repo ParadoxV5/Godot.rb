@@ -40,20 +40,13 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   return true;
 }
 
-void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line) {
-  godot_rb_gdextension.print_warning_with_message(message, message, func, file, line, false);
-}
-void godot_rb_error(const char* message, const char* func, const char* file, int32_t line) {
-  godot_rb_gdextension.print_error_with_message  (message, message, func, file, line, false);
-}
-
-bool godot_rb_protect(VALUE (* function)(VALUE value), VALUE value, const char* func, const char* file, int32_t line) {
+bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value)) {
   int state;
-  rb_protect(function, value, &state);
+  rb_protect(function, Qnil, &state);
   if(state) { // Handle exception
-    value = rb_funcall(rb_errinfo(), rb_intern("inspect"), 0);
+    VALUE message = rb_funcall(rb_errinfo(), rb_intern("full_message"), 0);
     rb_set_errinfo(Qnil); // Clear exception
-    godot_rb_error(StringValueCStr(value), __func__ , __FILE__, line);
+    godot_rb_error(StringValueCStr(message));
     return false;
   }
   return true;

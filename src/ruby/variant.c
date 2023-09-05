@@ -1,4 +1,4 @@
-#include "variant.h"
+#include "variants.h"
 VALUE godot_rb_cVariant, godot_rb_cVariant_c_VARIANTS;
 
 /** Fetch size from `extension_api.json` */
@@ -91,7 +91,8 @@ VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_to_variant(self)) ? Qtrue : Qfalse;
 }
 
-__attribute__((used)) VALUE godot_rb_init_Variant(__attribute__((unused)) VALUE value) {
+void godot_rb_init_Variant() {
+  godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
   rb_gc_register_mark_object(godot_rb_cVariant);
   godot_rb_cVariant_c_VARIANTS = rb_const_get(godot_rb_cVariant, rb_intern("VARIANTS"));
@@ -99,5 +100,4 @@ __attribute__((used)) VALUE godot_rb_init_Variant(__attribute__((unused)) VALUE 
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_alloc);
   rb_define_method(godot_rb_cVariant, "__godot_send__", godot_rb_cVariant_i___godot_send__, 2);
   rb_define_method(godot_rb_cVariant, "nonzero?", godot_rb_cVariant_i_nonzero_, 0);
-  return godot_rb_cVariant;
 }

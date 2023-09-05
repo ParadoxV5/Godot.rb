@@ -2,7 +2,7 @@
 
 static void core(void) {
   if(ruby_cleanup(EXIT_SUCCESS))
-    godot_rb_error("Ruby ran into a problem while exiting.", __func__, __FILE__, __LINE__);
+    godot_rb_error("Ruby ran into a problem while exiting.");
 }
 
 static void (* const godot_rb_cleanup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core};
