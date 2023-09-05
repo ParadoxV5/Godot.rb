@@ -33,7 +33,9 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   l(VariantConstruct, variant_construct)
   l(VariantNewCopy, variant_new_copy)
   l(VariantDestroy, variant_destroy)
+  l(VariantGetType, variant_get_type)
   l(VariantCall, variant_call)
+  l(VariantBooleanize, variant_booleanize)
   // Success
   return true;
 }

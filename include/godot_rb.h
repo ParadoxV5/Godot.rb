@@ -19,7 +19,9 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantConstruct variant_construct;
   GDExtensionInterfaceVariantNewCopy variant_new_copy;
   GDExtensionInterfaceVariantDestroy variant_destroy;
+  GDExtensionInterfaceVariantGetType variant_get_type;
   GDExtensionInterfaceVariantCall variant_call;
+  GDExtensionInterfaceVariantBooleanize variant_booleanize;
 } godot_rb_gdextension;
 
 // Ruby Binding Modules/Classes (initialized at level `SCENE` except `Godot` at `SERVERS`)
@@ -32,7 +34,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   GDExtensionInitialization* r_initialization
 );
 
-// Error Helpers //
+// Helpers //
 
 void godot_rb_warn (const char* message, const char* func, const char* file, int32_t line);
 void godot_rb_error(const char* message, const char* func, const char* file, int32_t line);

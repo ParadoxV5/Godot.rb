@@ -1,6 +1,5 @@
 #include "variant.h"
-VALUE godot_rb_cVariant;
-VALUE godot_rb_Variants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX] = {};
+VALUE godot_rb_cVariant, godot_rb_cVariant_c_VARIANTS;
 
 /** Fetch size from `extension_api.json` */
 #define VARIANT_SIZE 24
@@ -29,10 +28,20 @@ GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self) {
   );
 }
 VALUE godot_rb_cVariant_from_variant(GDExtensionConstVariantPtr variant) {
-  // TODO find which subclass to instantiate
-  VALUE self = rb_obj_alloc(godot_rb_cVariant);
-  GDExtensionVariantPtr self_variant = godot_rb_cVariant_to_variant(self);
-  godot_rb_gdextension.variant_new_copy(self_variant, variant);
+  GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
+  switch(variant_type) {
+    case GDEXTENSION_VARIANT_TYPE_OBJECT:
+      if(godot_rb_gdextension.variant_booleanize(variant)) // Null check
+        break;
+      return Qnil;
+    case GDEXTENSION_VARIANT_TYPE_BOOL:
+      return godot_rb_gdextension.variant_booleanize(variant) ? Qtrue : Qfalse;
+    case GDEXTENSION_VARIANT_TYPE_NIL:
+      return Qnil;
+    default: break;
+  }
+  VALUE self = rb_obj_alloc(rb_ary_entry(godot_rb_cVariant_c_VARIANTS, variant_type));
+  godot_rb_gdextension.variant_new_copy(godot_rb_cVariant_to_variant(self), variant);
   return self;
 }
 
@@ -78,10 +87,17 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
   );
 }
 
+VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
+  return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_to_variant(self)) ? Qtrue : Qfalse;
+}
+
 __attribute__((used)) VALUE godot_rb_init_Variant(__attribute__((unused)) VALUE value) {
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
   rb_gc_register_mark_object(godot_rb_cVariant);
+  godot_rb_cVariant_c_VARIANTS = rb_const_get(godot_rb_cVariant, rb_intern("VARIANTS"));
+  rb_gc_register_mark_object(godot_rb_cVariant_c_VARIANTS);
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_alloc);
   rb_define_method(godot_rb_cVariant, "__godot_send__", godot_rb_cVariant_i___godot_send__, 2);
+  rb_define_method(godot_rb_cVariant, "nonzero?", godot_rb_cVariant_i_nonzero_, 0);
   return godot_rb_cVariant;
 }
