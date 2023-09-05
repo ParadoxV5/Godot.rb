@@ -30,7 +30,8 @@ module Godot
       when 1 then if meth # INVALID_METHOD
         NoMethodError.new(
           "undefined or invalid method `#{meth}'",
-          meth, args,
+          meth, #: String # Squelch possibly-incorrect RBS
+          args,
           receiver: self
         )
       else # Constructor

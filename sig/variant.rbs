@@ -2,7 +2,7 @@ module Godot
   interface _ToGodot[out G < Variant] def to_godot: () -> G end
   
   type variant = Variant? | bool
-  type variant_like = _ToGodot[Variant]
+  type variant_like = Object & _ToGodot[Variant]
   class Variant
     VARIANTS: Array[singleton(Variant)?]
     
