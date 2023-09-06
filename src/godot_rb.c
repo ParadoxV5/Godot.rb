@@ -37,6 +37,8 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   l(VariantGetType, variant_get_type)
   l(VariantCall, variant_call)
   l(VariantBooleanize, variant_booleanize)
+  l(StringToUtf8Chars, string_to_utf8_chars)
+  l(StringToUtf32Chars, string_to_utf32_chars)
   // Success
   return true;
 }

@@ -1,0 +1,8 @@
+module Godot
+  class String < Variant
+    VARIANT_TYPE: 4
+    
+    def to_s: () -> String
+    def to_str: () -> String
+  end
+end

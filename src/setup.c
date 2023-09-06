@@ -23,6 +23,7 @@ static VALUE servers_unprotected(__attribute__((unused)) VALUE value) {
   godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
   rb_gc_register_mark_object(godot_rb_mGodot);
   godot_rb_init_Variant();
+  godot_rb_init_String();
   godot_rb_init_Mixins();
   rb_obj_freeze(godot_rb_cVariant_c_VARIANTS);
   return ret;

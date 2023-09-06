@@ -22,6 +22,8 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantGetType variant_get_type;
   GDExtensionInterfaceVariantCall variant_call;
   GDExtensionInterfaceVariantBooleanize variant_booleanize;
+  GDExtensionInterfaceStringToUtf8Chars string_to_utf8_chars;
+  GDExtensionInterfaceStringToUtf32Chars string_to_utf32_chars;
 } godot_rb_gdextension;
 
 // Ruby Binding Constants (initialized at level `SCENE` except `Godot` at `SERVERS`)
