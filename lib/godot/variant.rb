@@ -3,6 +3,7 @@
 module Godot
   class Variant
     VARIANTS = Array.new 38 # VARIANT_MAX
+    VARIANT_TYPE = 0
     
     # @param meth [interned] the method name or `nil` for {#initialize}
     private def __godot_send__!(meth, *args)

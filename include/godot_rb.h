@@ -15,6 +15,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfacePrintWarningWithMessage print_warning_with_message;
   GDExtensionInterfaceMemAlloc mem_alloc;
   GDExtensionInterfaceMemFree mem_free;
+  GDExtensionInterfaceGetVariantFromTypeConstructor get_variant_from_type_constructor;
   GDExtensionInterfaceVariantConstruct variant_construct;
   GDExtensionInterfaceVariantNewCopy variant_new_copy;
   GDExtensionInterfaceVariantDestroy variant_destroy;
@@ -41,6 +42,7 @@ VALUE godot_rb_cVariant_from_variant(GDExtensionConstVariantPtr variant);
 // General Helpers //
 
 #define godot_rb_require_relative(name) rb_require_string(rb_str_new_lit("./addons/Godot.rb/lib/godot/"#name".rb"))
+#define godot_rb_idVARIANT_TYPE rb_intern("VARIANT_TYPE")
 
 #define godot_rb_warn (message) \
   godot_rb_gdextension.print_warning_with_message(message, message, __func__, __FILE__, __LINE__, false)

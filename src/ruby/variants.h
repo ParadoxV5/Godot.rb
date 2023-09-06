@@ -3,5 +3,6 @@
 #include <godot_rb.h>
 
 void godot_rb_init_Variant();
+void godot_rb_init_Mixins();
 
 #endif

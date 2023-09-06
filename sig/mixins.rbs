@@ -1,0 +1,12 @@
+module Godot
+  module Mixins
+    module  NilClass include _ToGodot[Variant] end
+    class ::NilClass include NilClass end
+    
+    module  TrueClass include _ToGodot[Variant] end
+    class ::TrueClass include TrueClass end
+    
+    module  FalseClass include _ToGodot[Variant] end
+    class ::FalseClass include FalseClass end
+  end
+end

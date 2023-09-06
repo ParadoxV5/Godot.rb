@@ -30,6 +30,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   l(PrintWarningWithMessage, print_warning_with_message)
   l(MemAlloc, mem_alloc)
   l(MemFree, mem_free)
+  l(GetVariantFromTypeConstructor, get_variant_from_type_constructor)
   l(VariantConstruct, variant_construct)
   l(VariantNewCopy, variant_new_copy)
   l(VariantDestroy, variant_destroy)

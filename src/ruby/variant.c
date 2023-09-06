@@ -54,7 +54,7 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
   GDExtensionCallError error;
   if(NIL_P(meth)) { // Constructor
     godot_rb_gdextension.variant_construct(
-      FIX2INT(rb_const_get_from(CLASS_OF(self), rb_intern("VARIANT_TYPE"))),
+      FIX2INT(rb_const_get_from(CLASS_OF(self), godot_rb_idVARIANT_TYPE)),
       self_variant,
       argv,
       argc,
