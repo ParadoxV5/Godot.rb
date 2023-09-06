@@ -10,7 +10,7 @@ static bool core(void) {
   int argc = 1;
   char** argv = &arg0;
   ruby_sysinit(&argc, &argv);
-  if(ruby_setup()) {
+  if RB_UNLIKELY(ruby_setup()) {
     godot_rb_error("Ruby ran into a problem while starting.");
     return false;
   }
@@ -38,11 +38,11 @@ static bool scene(void) {
 static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, servers/*, scene*/};
 void godot_rb_setup(__attribute__((unused)) void* userdata, GDExtensionInitializationLevel p_level) {
   bool (*func)(void) = godot_rb_setup_functions[p_level];
-  if(func) {
-    if(p_level && !godot_rb_init_levels[p_level - 1])
+  if RB_LIKELY(func) {
+    if RB_UNLIKELY(p_level && !godot_rb_init_levels[p_level - 1])
       return;
     printf("setting up Godot.rb init level %u...\n", p_level);
-    if(!func())
+    if RB_UNLIKELY(!func())
       return;
   }
   godot_rb_init_levels[p_level] = true;

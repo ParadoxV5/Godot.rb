@@ -31,7 +31,7 @@ VALUE godot_rb_cVariant_from_variant(GDExtensionConstVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
-      if(godot_rb_gdextension.variant_booleanize(variant)) // Null check
+      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) // Null check
         break;
       return Qnil;
     case GDEXTENSION_VARIANT_TYPE_BOOL:
@@ -52,7 +52,7 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
   for(long i = 0; i < argc; ++i)
     argv[i] = godot_rb_cVariant_to_variant(rb_ary_entry(args, i));
   GDExtensionCallError error;
-  if(NIL_P(meth)) { // Constructor
+  if RB_UNLIKELY(NIL_P(meth)) { // Constructor
     godot_rb_gdextension.variant_construct(
       FIX2INT(rb_const_get_from(CLASS_OF(self), godot_rb_idVARIANT_TYPE)),
       self_variant,

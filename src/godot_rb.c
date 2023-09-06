@@ -46,10 +46,11 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
 bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value)) {
   int state;
   rb_protect(function, Qnil, &state);
-  if(state) { // Handle exception
-    VALUE message = rb_funcall(rb_errinfo(), rb_intern("full_message"), 0);
+  if RB_UNLIKELY(state) { // Handle exception
+    VALUE error = rb_errinfo();
     rb_set_errinfo(Qnil); // Clear exception
-    godot_rb_error(StringValueCStr(message));
+    error = rb_funcall(error, rb_intern("full_message"), 0);
+    godot_rb_error(StringValueCStr(error));
     return false;
   }
   return true;
