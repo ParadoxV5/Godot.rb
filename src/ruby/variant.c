@@ -22,10 +22,10 @@ VALUE godot_rb_cVariant_alloc(VALUE klass) {
 }
 
 GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self) {
-  return rb_check_typeddata(
-    rb_convert_type(self, RUBY_T_DATA, "Godot::Variant", "to_godot"),
-    &godot_rb_cVariant_type
-  );
+  return rb_check_typeddata(self, &godot_rb_cVariant_type);
+}
+GDExtensionVariantPtr godot_rb_obj_to_variant(VALUE self) {
+  return godot_rb_cVariant_to_variant(rb_convert_type(self, RUBY_T_DATA, "Godot::Variant", "to_godot"));
 }
 
 GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
@@ -50,11 +50,11 @@ VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant) {
 }
 
 VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
-  GDExtensionUninitializedVariantPtr self_variant = godot_rb_cVariant_to_variant(self);
+  GDExtensionUninitializedVariantPtr self_variant = godot_rb_obj_to_variant(self);
   long argc = rb_array_len(args);
   GDExtensionConstVariantPtr argv[argc];
   for(long i = 0; i < argc; ++i)
-    argv[i] = godot_rb_cVariant_to_variant(rb_ary_entry(args, i));
+    argv[i] = godot_rb_obj_to_variant(rb_ary_entry(args, i));
   GDExtensionCallError error;
   if RB_UNLIKELY(NIL_P(meth)) { // Constructor
     godot_rb_gdextension.variant_construct(
@@ -68,7 +68,7 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
     GDExtensionUninitializedVariantPtr ret;
     godot_rb_gdextension.variant_call(
       self_variant,
-      godot_rb_cVariant_to_variant(rb_to_symbol(meth)),
+      godot_rb_cVariant_to_variant(rb_to_symbol(meth)), //FIXME: actually this needs to be a StringName not a Variant; it’s C++ magic even if it works
       argv,
       argc,
       ret,

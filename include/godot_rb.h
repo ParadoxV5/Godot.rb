@@ -25,6 +25,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantBooleanize variant_booleanize;
   GDExtensionInterfaceStringToUtf8Chars string_to_utf8_chars;
   GDExtensionInterfaceStringToUtf32Chars string_to_utf32_chars;
+  GDExtensionInterfaceStringNewWithUtf32CharsAndLen string_new_with_utf32_chars_and_len;
 } godot_rb_gdextension;
 
 // Ruby Binding Constants (initialized at level `SCENE` except `Godot` at `SERVERS`)
@@ -37,7 +38,10 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   GDExtensionInitialization* r_initialization
 );
 
-// Variant Helpers
+// Variant Helpers //
+// Like {#godot_rb_cVariant_to_variant}, but calls {#to_godot} as needed
+GDExtensionVariantPtr godot_rb_obj_to_variant(VALUE self);
+// @param self must be a Godot::Variant; use {#godot_rb_obj_to_variant} if not necessarily
 GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self);
 // Return is `#initialize`d (usable)
 VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant);

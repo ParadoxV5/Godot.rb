@@ -8,5 +8,8 @@ module Godot
     
     module  FalseClass include _ToGodot[Variant] end
     class ::FalseClass include FalseClass end
+    
+    module  String include _ToGodot[Godot::String] end
+    class ::String include String end
   end
 end

@@ -3,7 +3,13 @@
 #include <godot_rb.h>
 
 void godot_rb_init_Variant();
+
+typedef void* GDExtensionString;
+#include <ruby/encoding.h>
+// {#godot_rb_init_String}
+extern rb_encoding* godot_rb_encoding_UTF32;
 void godot_rb_init_String();
+
 void godot_rb_init_Mixins();
 
 #endif
