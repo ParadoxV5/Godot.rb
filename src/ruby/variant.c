@@ -2,7 +2,7 @@
 VALUE godot_rb_cVariant, godot_rb_cVariant_c_VARIANTS;
 
 /** Fetch size from `extension_api.json` */
-#define VARIANT_SIZE 24
+#define VARIANT_SIZE 40
 size_t godot_rb_cVariant_size(__attribute__((unused)) const void* data) { return VARIANT_SIZE; }
 void godot_rb_cVariant_free(GDExtensionVariantPtr data) {
   godot_rb_gdextension.variant_destroy(data);
