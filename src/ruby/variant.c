@@ -27,16 +27,20 @@ GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self) {
     &godot_rb_cVariant_type
   );
 }
-VALUE godot_rb_cVariant_from_variant(GDExtensionConstVariantPtr variant) {
+
+GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
+VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
-      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) // Null check
+      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) // Non-null check
         break;
       return Qnil;
-    case GDEXTENSION_VARIANT_TYPE_BOOL:
-      return godot_rb_gdextension.variant_booleanize(variant) ? Qtrue : Qfalse;
-    case GDEXTENSION_VARIANT_TYPE_NIL:
+    case GDEXTENSION_VARIANT_TYPE_BOOL: {
+      GDExtensionBool the_bool;
+      variant_to_bool(&the_bool, variant);
+      return the_bool ? Qtrue : Qfalse;
+    } case GDEXTENSION_VARIANT_TYPE_NIL:
       return Qnil;
     default: break;
   }

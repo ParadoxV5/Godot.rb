@@ -15,6 +15,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfacePrintWarningWithMessage print_warning_with_message;
   GDExtensionInterfaceMemAlloc mem_alloc;
   GDExtensionInterfaceMemFree mem_free;
+  GDExtensionInterfaceGetVariantToTypeConstructor get_variant_to_type_constructor;
   GDExtensionInterfaceGetVariantFromTypeConstructor get_variant_from_type_constructor;
   GDExtensionInterfaceVariantConstruct variant_construct;
   GDExtensionInterfaceVariantNewCopy variant_new_copy;
@@ -39,7 +40,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
 // Variant Helpers
 GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self);
 // Return is `#initialize`d (usable)
-VALUE godot_rb_cVariant_from_variant(GDExtensionConstVariantPtr variant);
+VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant);
 
 // General Helpers //
 
