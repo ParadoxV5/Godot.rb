@@ -33,6 +33,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   l(GetVariantToTypeConstructor, get_variant_to_type_constructor)
   l(GetVariantFromTypeConstructor, get_variant_from_type_constructor)
   l(VariantConstruct, variant_construct)
+  l(VariantNewNil, variant_new_nil)
   l(VariantNewCopy, variant_new_copy)
   l(VariantDestroy, variant_destroy)
   l(VariantGetType, variant_get_type)

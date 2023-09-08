@@ -16,45 +16,54 @@ rb_data_type_t godot_rb_cVariant_type = {
   },
   .flags = RUBY_TYPED_FREE_IMMEDIATELY
 };
-//TODO: Documentation: warn that `#allocate`d variants are unusable
-VALUE godot_rb_cVariant_alloc(VALUE klass) {
-  return TypedData_Wrap_Struct(klass, &godot_rb_cVariant_type, godot_rb_gdextension.mem_alloc(VARIANT_SIZE));
-}
 
-GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self) {
-  return rb_check_typeddata(self, &godot_rb_cVariant_type);
+GDExtensionVariantPtr godot_rb_variant_alloc() { return godot_rb_gdextension.mem_alloc(VARIANT_SIZE); }
+VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant) {
+  return TypedData_Wrap_Struct(klass, &godot_rb_cVariant_type, variant);
 }
-GDExtensionVariantPtr godot_rb_obj_to_variant(VALUE self) {
-  return godot_rb_cVariant_to_variant(rb_convert_type(self, RUBY_T_DATA, "Godot::Variant", "to_godot"));
+//TODO: Documentation: warn that `#allocate`d variants are semi-unusable
+VALUE godot_rb_cVariant_c_allocate(VALUE self) {
+  GDExtensionVariantPtr variant = godot_rb_variant_alloc();
+    //FIXME: what if returning `NULL` for unsuccessful?
+  godot_rb_gdextension.variant_new_nil(variant); // Zero-initialize it to prevent invalid GC frees
+  return godot_rb_wrap_variant(self, variant);
 }
 
 GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
-VALUE godot_rb_obj_from_variant(GDExtensionVariantPtr variant) {
+VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
       if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) // Non-null check
         break;
+      //fall-through
+    case GDEXTENSION_VARIANT_TYPE_NIL:
+      godot_rb_gdextension.variant_destroy(variant);
       return Qnil;
     case GDEXTENSION_VARIANT_TYPE_BOOL: {
       GDExtensionBool the_bool;
       variant_to_bool(&the_bool, variant);
+      godot_rb_gdextension.variant_destroy(variant);
       return the_bool ? Qtrue : Qfalse;
-    } case GDEXTENSION_VARIANT_TYPE_NIL:
-      return Qnil;
-    default: break;
+    }
+    default:;
   }
-  VALUE self = rb_obj_alloc(godot_rb_cVariants[variant_type]);
-  godot_rb_gdextension.variant_new_copy(godot_rb_cVariant_to_variant(self), variant);
-  return self;
+  return godot_rb_wrap_variant(godot_rb_cVariants[variant_type], variant);
+}
+
+GDExtensionVariantPtr godot_rb_cVariant_get_variant(VALUE self) {
+  return rb_check_typeddata(self, &godot_rb_cVariant_type);
+}
+GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self) {
+  return godot_rb_cVariant_get_variant(rb_convert_type(self, RUBY_T_DATA, "Godot::Variant", "to_godot"));
 }
 
 VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
-  GDExtensionVariantPtr self_variant = godot_rb_obj_to_variant(self);
+  GDExtensionVariantPtr self_variant = godot_rb_obj_get_variant(self);
   long argc = rb_array_len(args);
   GDExtensionConstVariantPtr argv[argc];
   for(long i = 0; i < argc; ++i)
-    argv[i] = godot_rb_obj_to_variant(rb_ary_entry(args, i));
+    argv[i] = godot_rb_obj_get_variant(rb_ary_entry(args, i));
   VALUE ret;
   GDExtensionCallError error;
   if RB_UNLIKELY(NIL_P(meth)) { // Constructor
@@ -67,16 +76,16 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
     );
     ret = self;
   } else { // Method call
-    GDExtensionUninitializedVariantPtr ret_variant = godot_rb_gdextension.mem_alloc(VARIANT_SIZE);
+    GDExtensionUninitializedVariantPtr ret_variant = godot_rb_variant_alloc();
     godot_rb_gdextension.variant_call(
       self_variant,
-      godot_rb_cVariant_to_variant(rb_to_symbol(meth)), //FIXME: actually this needs to be a StringName not a Variant; it’s C++ magic even if it works
+      godot_rb_cVariant_get_variant(rb_to_symbol(meth)), //FIXME: actually this needs to be a StringName not a Variant; it’s C++ magic even if it works
       argv,
       argc,
       ret_variant,
       &error
     );
-    ret = godot_rb_obj_from_variant(ret_variant); // Dubious reuse of variable <:
+    ret = godot_rb_parse_variant(ret_variant); // Dubious reuse of variable <:
     //FIXME: A variant is built regardless if the call raised error
     godot_rb_gdextension.mem_free(ret_variant);
   }
@@ -95,7 +104,8 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
         default: expectation = " (expected %"PRIsVALUE")";
       }
       rb_raise(rb_eTypeError, "wrong argument type %"PRIsVALUE"%s", CLASS_OF(self), expectation, godot_rb_cVariants[error.expected]);
-    } case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
+    }
+    case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
       VALUE kwargs = rb_hash_new_capa(1);
       rb_hash_aset(kwargs, rb_intern("receiver"), self);
       rb_exc_raise(rb_class_new_instance_kw(4, (VALUE[]) {
@@ -106,7 +116,8 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
         args,
         kwargs
       }, rb_eNoMethodError, RB_PASS_KEYWORDS));
-    } default: // TOO_MANY_ARGUMENTS, TOO_FEW_ARGUMENTS
+    }
+    default: // TOO_MANY_ARGUMENTS, TOO_FEW_ARGUMENTS
       rb_raise(rb_eArgError,
         "wrong number of arguments (given %ld, expected %"PRId32")",
         argc,
@@ -117,13 +128,13 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
 }
 
 VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
-  return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_to_variant(self)) ? Qtrue : Qfalse;
+  return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
 }
 
 void godot_rb_init_Variant() {
   godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
-  rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_alloc);
+  rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_c_allocate);
   rb_define_method(godot_rb_cVariant, "__godot_send__", godot_rb_cVariant_i___godot_send__, 2);
   rb_define_method(godot_rb_cVariant, "nonzero?", godot_rb_cVariant_i_nonzero_, 0);
 }

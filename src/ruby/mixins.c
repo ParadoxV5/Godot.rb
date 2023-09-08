@@ -21,9 +21,10 @@ __attribute__((used)) VALUE godot_rb_mString_i_to_godot(VALUE self) {
     (char32_t*)StringValuePtr(self),
     RSTRING_LEN(self) / sizeof(char32_t) // UTF-32 has fixed bytes/char
   );
-  self = rb_obj_alloc(godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING]);
-  variant_from_string(godot_rb_cVariant_to_variant(self), &string);
-  return self;
+  GDExtensionVariantPtr self_variant = godot_rb_variant_alloc();
+  variant_from_string(self_variant, &string);
+  //FIXME: destroy string
+  return godot_rb_wrap_variant(godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING], self_variant);
 }
 
 void godot_rb_init_Mixins() {
@@ -33,28 +34,28 @@ void godot_rb_init_Mixins() {
   #define d(module) \
     mod = rb_const_get(space, rb_intern(#module)); \
     rb_define_method(mod, "to_godot", godot_rb_m##module##_i_to_godot, 0);
-  #define t(tril, variant_type, get_variant) \
-    d(tril##Class) \
-    godot_rb_m##tril##Class_variant = rb_obj_alloc(godot_rb_cVariant); \
-    get_variant; \
-    rb_gc_register_mark_object(godot_rb_m##tril##Class_variant); \
-    mod = rb_singleton_class(godot_rb_m##tril##Class_variant); \
+  #define t(Trilean, variant_type) \
+    d(Trilean##Class) \
+    rb_gc_register_mark_object(godot_rb_m##Trilean##Class_variant); \
+    mod = rb_singleton_class(godot_rb_m##Trilean##Class_variant); \
     rb_const_set(mod, godot_rb_idVARIANT_TYPE, INT2FIX(GDEXTENSION_VARIANT_TYPE_##variant_type)); \
-    rb_define_method(mod, "nonzero?", godot_rb_m##tril##Class_i_nonzero_, 0); \
-    rb_define_method(mod,  "inspect",  godot_rb_m##tril##Class_i_inspect, 0);
-  VALUE t( Nil, NIL, (
-    (GDExtensionInterfaceVariantNewNil)godot_rb_get_proc("variant_new_nil")
-  )(godot_rb_cVariant_to_variant(godot_rb_mNilClass_variant)) )
+    rb_define_method(mod, "nonzero?", godot_rb_m##Trilean##Class_i_nonzero_, 0); \
+    rb_define_method(mod, "inspect",  godot_rb_m##Trilean##Class_i_inspect , 0);
+  
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_NIL] = godot_rb_cVariant;
+  godot_rb_mNilClass_variant = rb_obj_alloc(godot_rb_cVariant); // Utilizing `Variant.allocate`
+  VALUE t(Nil, NIL)
   
   GDExtensionVariantFromTypeConstructorFunc variant_from_bool =
     godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL);
-  #define b(capscase, downcase) \
-    a_bool = downcase; \
-    t(capscase, BOOL, variant_from_bool(godot_rb_cVariant_to_variant(godot_rb_m##capscase##Class_variant), &a_bool))
-  GDExtensionBool
-    b(True , true )
-    b(False, false)
+  GDExtensionBool the_bool;
+  #define b(Boolean, boolean) \
+    variant = godot_rb_variant_alloc(); \
+    the_bool = boolean; \
+    variant_from_bool(variant, &the_bool); \
+    godot_rb_m##Boolean##Class_variant = godot_rb_wrap_variant(godot_rb_cVariant, variant); \
+    t(Boolean, BOOL)
+  GDExtensionVariantPtr b(True, true) b(False, false)
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL] = godot_rb_cVariant;
   
   rb_gc_register_mark_object(encoding_UTF32 = rb_enc_from_encoding(godot_rb_encoding_UTF32));

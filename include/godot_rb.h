@@ -18,6 +18,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceGetVariantToTypeConstructor get_variant_to_type_constructor;
   GDExtensionInterfaceGetVariantFromTypeConstructor get_variant_from_type_constructor;
   GDExtensionInterfaceVariantConstruct variant_construct;
+  GDExtensionInterfaceVariantNewNil variant_new_nil;
   GDExtensionInterfaceVariantNewCopy variant_new_copy;
   GDExtensionInterfaceVariantDestroy variant_destroy;
   GDExtensionInterfaceVariantGetType variant_get_type;
@@ -39,12 +40,18 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
 );
 
 // Variant Helpers //
+extern GDExtensionVariantPtr godot_rb_variant_alloc();
+// @note The variant will be freed when the returned Variant gets GC-ed.
+VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant);
+// @note The variant will be freed when the returned Variant gets GC-ed or,
+//   for auto-converted variants (i.e., the trileans), by the time this function returns.
+VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant);
 // Like {#godot_rb_cVariant_to_variant}, but calls {#to_godot} as needed
-GDExtensionVariantPtr godot_rb_obj_to_variant(VALUE self);
+// @note Do not free the returned variant; GC takes care of it
+GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self);
 // @param self must be a Godot::Variant; use {#godot_rb_obj_to_variant} if not necessarily
-GDExtensionVariantPtr godot_rb_cVariant_to_variant(VALUE self);
-// Return is `#initialize`d (usable)
-VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant);
+// @note Do not free the returned variant; GC takes care of it
+GDExtensionVariantPtr godot_rb_cVariant_get_variant(VALUE self);
 
 // General Helpers //
 
