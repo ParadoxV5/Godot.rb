@@ -2,7 +2,7 @@ module Godot
   interface _ToGodot[out G < Variant] def to_godot: () -> G end
   
   type variant = Variant | bool?
-  type variant_like = Object & _ToGodot[Variant]
+  type variant_like = Kernel & _ToGodot[Variant]
   class Variant
     VARIANT_TYPE: Integer
     
@@ -12,6 +12,11 @@ module Godot
     
     def initialize: (*variant_like args) -> void
     def godot_send: (interned meth, *variant_like args) -> variant
+    
+    def [] : (variant_like key) -> variant
+    def get: (variant_like key) -> variant?
+    def []=: (variant_like key, variant_like value) -> variant
+    def set: (variant_like key, variant_like value) -> variant?
     
     def to_godot: () -> self
     def nonzero?: () -> bool

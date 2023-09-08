@@ -19,6 +19,17 @@ module Godot
       __godot_send__(meth, args)
     end
     
+    def get(...)
+      self.[](...)
+    rescue KeyError => e
+      warn e.full_message
+    end
+    def set(...)
+      self.[]=(...)
+    rescue KeyError => e
+      warn e.full_message
+    end
+    
     def to_godot = self
   end
 end
