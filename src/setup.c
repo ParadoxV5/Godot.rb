@@ -25,7 +25,9 @@ static VALUE servers_unprotected(__attribute__((unused)) VALUE value) {
   godot_rb_init_Variant();
   godot_rb_init_String();
   godot_rb_init_Mixins();
-  rb_obj_freeze(godot_rb_cVariant_c_VARIANTS);
+  // Skip NIL since it points to the same class as BOOL
+  for(GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
+    rb_gc_register_mark_object(godot_rb_cVariants[i]);
   return ret;
 }
 static bool servers(void) { return godot_rb_protect(servers_unprotected); }

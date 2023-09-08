@@ -29,7 +29,7 @@ extern struct godot_rb_gdextension {
 } godot_rb_gdextension;
 
 // Ruby Binding Constants (initialized at level `SCENE` except `Godot` at `SERVERS`)
-extern VALUE godot_rb_mGodot, godot_rb_cVariant, godot_rb_cVariant_c_VARIANTS;
+extern VALUE godot_rb_mGodot, godot_rb_cVariant, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
 
 // Entry Function
 __attribute__((used)) GDExtensionBool godot_rb_main(

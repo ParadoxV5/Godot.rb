@@ -11,7 +11,6 @@ f(False, false)
 
 VALUE encoding_UTF32;
 GDExtensionVariantFromTypeConstructorFunc variant_from_string;
-VALUE godot_rb_cString; //XXX: refactorings are on the TODO list
 __attribute__((used)) VALUE godot_rb_mString_i_to_godot(VALUE self) {
   // Godot Engine Strings are UTF-32 Native Endian.
   // While the GDExtension API provides converters for the most popular encodings, Ruby support even more.
@@ -22,7 +21,7 @@ __attribute__((used)) VALUE godot_rb_mString_i_to_godot(VALUE self) {
     (char32_t*)StringValuePtr(self),
     RSTRING_LEN(self) / sizeof(char32_t) // UTF-32 has fixed bytes/char
   );
-  self = rb_obj_alloc(godot_rb_cString);
+  self = rb_obj_alloc(godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING]);
   variant_from_string(godot_rb_cVariant_to_variant(self), &string);
   return self;
 }
@@ -46,6 +45,7 @@ void godot_rb_init_Mixins() {
   VALUE t( Nil, NIL, (
     (GDExtensionInterfaceVariantNewNil)godot_rb_get_proc("variant_new_nil")
   )(godot_rb_cVariant_to_variant(godot_rb_mNilClass_variant)) )
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_NIL] = godot_rb_cVariant;
   
   GDExtensionVariantFromTypeConstructorFunc variant_from_bool =
     godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL);
@@ -55,11 +55,9 @@ void godot_rb_init_Mixins() {
   GDExtensionBool
     b(True , true )
     b(False, false)
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL] = godot_rb_cVariant;
   
   rb_gc_register_mark_object(encoding_UTF32 = rb_enc_from_encoding(godot_rb_encoding_UTF32));
-  rb_gc_register_mark_object(
-    godot_rb_cString = rb_ary_entry(godot_rb_cVariant_c_VARIANTS, GDEXTENSION_VARIANT_TYPE_STRING)
-  );
   variant_from_string = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
   d(String)
 }

@@ -1,5 +1,5 @@
 #include "variants.h"
-VALUE godot_rb_cVariant, godot_rb_cVariant_c_VARIANTS;
+VALUE godot_rb_cVariant, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
 
 /** Fetch size from `extension_api.json` */
 #define VARIANT_SIZE 40
@@ -29,7 +29,7 @@ GDExtensionVariantPtr godot_rb_obj_to_variant(VALUE self) {
 }
 
 GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
-VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant) {
+VALUE godot_rb_obj_from_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
@@ -44,17 +44,18 @@ VALUE godot_rb_cVariant_from_variant(GDExtensionVariantPtr variant) {
       return Qnil;
     default: break;
   }
-  VALUE self = rb_obj_alloc(rb_ary_entry(godot_rb_cVariant_c_VARIANTS, variant_type));
+  VALUE self = rb_obj_alloc(godot_rb_cVariants[variant_type]);
   godot_rb_gdextension.variant_new_copy(godot_rb_cVariant_to_variant(self), variant);
   return self;
 }
 
 VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
-  GDExtensionUninitializedVariantPtr self_variant = godot_rb_obj_to_variant(self);
+  GDExtensionVariantPtr self_variant = godot_rb_obj_to_variant(self);
   long argc = rb_array_len(args);
   GDExtensionConstVariantPtr argv[argc];
   for(long i = 0; i < argc; ++i)
     argv[i] = godot_rb_obj_to_variant(rb_ary_entry(args, i));
+  VALUE ret;
   GDExtensionCallError error;
   if RB_UNLIKELY(NIL_P(meth)) { // Constructor
     godot_rb_gdextension.variant_construct(
@@ -64,31 +65,55 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
       argc,
       &error
     );
+    ret = self;
   } else { // Method call
-    GDExtensionUninitializedVariantPtr ret;
+    GDExtensionUninitializedVariantPtr ret_variant = godot_rb_gdextension.mem_alloc(VARIANT_SIZE);
     godot_rb_gdextension.variant_call(
       self_variant,
       godot_rb_cVariant_to_variant(rb_to_symbol(meth)), //FIXME: actually this needs to be a StringName not a Variant; it’s C++ magic even if it works
       argv,
       argc,
-      ret,
+      ret_variant,
       &error
     );
-    self = godot_rb_cVariant_from_variant(ret); // Dubious reuse of variable <:
+    ret = godot_rb_obj_from_variant(ret_variant); // Dubious reuse of variable <:
+    //FIXME: A variant is built regardless if the call raised error
+    godot_rb_gdextension.mem_free(ret_variant);
   }
-  // ret, error, argument, expected
-  return rb_ary_new_from_args(
-    4,
-    self,
-    /*
-      These latter two are fixed 32-bits, which C standard specifies as `long` or shorter.
-      Although Fixnum is 1 bit shorter than `long`, I doubt anyöne’s gonna go to billions anyways.
-      The enum has but half a dozen possibilities. Not our problem if someone gave an out-of-range error code.
-    */
-    INT2FIX(error.error),
-    LONG2FIX(error.argument),
-    LONG2FIX(error.expected)
-  );
+  switch(error.error) {
+    case GDEXTENSION_CALL_OK:
+      break;
+    case GDEXTENSION_CALL_ERROR_METHOD_NOT_CONST:
+      rb_frozen_error_raise(self, "can't modify %+"PRIsVALUE" frozen by Godot Engine", self);
+    case GDEXTENSION_CALL_ERROR_INSTANCE_IS_NULL:
+      rb_frozen_error_raise(self, "%+"PRIsVALUE" is null (you might have freed it)", self);
+    case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
+      char* expectation; switch(error.expected) {
+        case GDEXTENSION_VARIANT_TYPE_OBJECT: expectation = ""; break;
+        case GDEXTENSION_VARIANT_TYPE_BOOL  : expectation = " (expected true|false)"; break;
+        case GDEXTENSION_VARIANT_TYPE_NIL   : expectation = " (expected nil)"; break;
+        default: expectation = " (expected %"PRIsVALUE")";
+      }
+      rb_raise(rb_eTypeError, "wrong argument type %"PRIsVALUE"%s", CLASS_OF(self), expectation, godot_rb_cVariants[error.expected]);
+    } case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
+      VALUE kwargs = rb_hash_new_capa(1);
+      rb_hash_aset(kwargs, rb_intern("receiver"), self);
+      rb_exc_raise(rb_class_new_instance_kw(4, (VALUE[]) {
+        RB_UNLIKELY(NIL_P(meth))
+          ? rb_sprintf("don't know how to initialize with %+"PRIsVALUE, args)
+          : rb_sprintf("undefined or invalid method `%"PRIsVALUE"'", meth),
+        RB_UNLIKELY(NIL_P(meth)) ? meth : rb_intern("initialize"),
+        args,
+        kwargs
+      }, rb_eNoMethodError, RB_PASS_KEYWORDS));
+    } default: // TOO_MANY_ARGUMENTS, TOO_FEW_ARGUMENTS
+      rb_raise(rb_eArgError,
+        "wrong number of arguments (given %ld, expected %"PRId32")",
+        argc,
+        error.expected ? error.expected : error.argument // https://github.com/godotengine/godot/pull/80844
+      );
+  }
+  return ret;
 }
 
 VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
@@ -98,9 +123,6 @@ VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
 void godot_rb_init_Variant() {
   godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
-  rb_gc_register_mark_object(godot_rb_cVariant);
-  godot_rb_cVariant_c_VARIANTS = rb_const_get(godot_rb_cVariant, rb_intern("VARIANTS"));
-  rb_gc_register_mark_object(godot_rb_cVariant_c_VARIANTS);
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_alloc);
   rb_define_method(godot_rb_cVariant, "__godot_send__", godot_rb_cVariant_i___godot_send__, 2);
   rb_define_method(godot_rb_cVariant, "nonzero?", godot_rb_cVariant_i_nonzero_, 0);

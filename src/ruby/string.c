@@ -29,7 +29,7 @@ VALUE godot_rb_cString_i_to_str(VALUE self) {
 void godot_rb_init_String() {
   VALUE cString = rb_define_class("String", godot_rb_cVariant);
   rb_const_set(cString, godot_rb_idVARIANT_TYPE, INT2FIX(GDEXTENSION_VARIANT_TYPE_STRING));
-  rb_ary_store(godot_rb_cVariant_c_VARIANTS, GDEXTENSION_VARIANT_TYPE_STRING, cString);
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING] = cString;
   variant_to_string = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
   // Endian test for UTF-32 -> `char[]`
   volatile char32_t sample = 1;
