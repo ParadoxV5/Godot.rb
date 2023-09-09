@@ -1,8 +1,10 @@
 #include "setup.h"
 #include "ruby/variants.h"
 
-// Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
-// https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
+/**
+  Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
+  https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
+*/
 static char* arg0 = "main";
 static bool core(void) {
   // On Windows, the argc/v pointers are rather return vars as their original contents are discarded.
