@@ -17,14 +17,18 @@ rb_data_type_t godot_rb_cVariant_type = {
   .flags = RUBY_TYPED_FREE_IMMEDIATELY
 };
 
-GDExtensionVariantPtr godot_rb_variant_alloc() { return godot_rb_gdextension.mem_alloc(VARIANT_SIZE); }
+GDExtensionUninitializedVariantPtr godot_rb_variant_alloc() {
+  GDExtensionUninitializedVariantPtr mem = godot_rb_gdextension.mem_alloc(VARIANT_SIZE);
+  if RB_LIKELY(mem)
+    return mem;
+  rb_raise(rb_eNoMemError, "Godot Engine out of memory");
+}
 VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant) {
   return TypedData_Wrap_Struct(klass, &godot_rb_cVariant_type, variant);
 }
 //TODO: Documentation: warn that `#allocate`d variants are semi-unusable
 VALUE godot_rb_cVariant_c_allocate(VALUE self) {
   GDExtensionVariantPtr variant = godot_rb_variant_alloc();
-    //FIXME: what if returning `NULL` for unsuccessful?
   godot_rb_gdextension.variant_new_nil(variant); // Zero-initialize it to prevent invalid GC frees
   return godot_rb_wrap_variant(self, variant);
 }
