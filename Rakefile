@@ -64,7 +64,7 @@ src_dir_size = SRC.size
 # C sources and file names of their corresponding  intermediate `.o`s
 # @return `{"src/*.c" => "*.o"}`
 # @see SRC
-C__O_NAMES = Dir[File.join(SRC, '**', '*.c')].to_h {|source| [
+C__O_NAMES = Dir[File.join(SRC, '**', '*.c'), sort: false].to_h {|source| [
   source,
   source[src_dir_size..].tap { _1[-1] = 'o' }
 ] }

@@ -131,6 +131,11 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
   return ret;
 }
 
+VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
+  godot_rb_gdextension.variant_new_copy(godot_rb_cVariant_get_variant(self), godot_rb_obj_get_variant(other));
+  return other;
+}
+
 VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
 }
@@ -139,6 +144,7 @@ void godot_rb_init_Variant() {
   godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_c_allocate);
+  rb_define_private_method(godot_rb_cVariant, "initialize_copy", godot_rb_cVariant_i_initialize_copy, 1);
   rb_define_method(godot_rb_cVariant, "__godot_send__", godot_rb_cVariant_i___godot_send__, 2);
   rb_define_method(godot_rb_cVariant, "nonzero?", godot_rb_cVariant_i_nonzero_, 0);
 }
