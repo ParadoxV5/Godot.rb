@@ -1,4 +1,8 @@
-## Output Structure
+# Godot Engine and GDExtension Feature Tags
+
+Reference: [Godot Docs: Feature tags § Default features](https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html#default-features)
+
+## Appendix: Output Structure
 * `bin/`
   * `<architecture>/`
     * `<platform>/`
@@ -8,7 +12,7 @@
       * `<libruby>`
       * additional Ruby dependency libs
 
-### Platforms
+## Platforms
 * windows
 * macos
 * linuxbsd
@@ -18,7 +22,7 @@
 * ios
 * uwp
 
-### Architectures
+## Architectures
 * x86
   * x86_64
   * x86_32
@@ -34,7 +38,11 @@
   * wasm32
   * wasm64
 
-### Build Types
-* editor
+## Build Types
+* ~~editor~~ (we currently fall it back to ‘debug’)
 * debug
 * release
+
+## Float Precision
+* ~~single (default Godot Engine config)~~ (we currently fall it back to ‘double’)
+* double

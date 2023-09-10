@@ -2,6 +2,14 @@
 
 # Godot.rb – Ruby in [Godot Engine](https://godotengine.org) [![justforfunnoreally.dev badge](https://img.shields.io/badge/justforfunnoreally-dev-9ff)](https://justforfunnoreally.dev)
 
+> ### Caution: This project is still developing.
+> 
+> While the Ruby land designs are mostly set, the C side code are all still experiments.
+> Even the core components see occasional rewrites.
+> 
+> Moreöver, [the lead maintainer](https://github.com/ParadoxV5) is a C novice,
+> so thank you early adopters for beïng prepared to encounter and report segfaults and core dumps 😅.
+
 
 ## Features
 
