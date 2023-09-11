@@ -78,6 +78,24 @@ GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self);
 */
 GDExtensionVariantPtr godot_rb_cVariant_get_variant(VALUE self);
 
+/** @see godot_rb_variant_call */
+typedef void (* godot_rb_variant_call_function)(
+  GDExtensionVariantPtr self_variant,
+  VALUE func,
+  long argc,
+  GDExtensionConstVariantPtr* argv,
+  uintmax_t var,
+  GDExtensionCallError* r_error
+);
+/**
+  @param func
+    a function name (RBS: `interned`);
+    this is reported in the event of a {rb_eNoMethodError} ({GDEXTENSION_CALL_ERROR_INVALID_METHOD})
+  @param var
+    an extra arg directly passed to the function for your various purposes
+  @return if no {GDExtensionCallError error} raised, otherwise it {rb_raise go-tos instead of returning}
+*/
+void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, uintmax_t var);
 
 // General Helpers //
 

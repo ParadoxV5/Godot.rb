@@ -13,12 +13,6 @@ module Godot
   class Variant
     VARIANT_TYPE = 0
     
-    def initialize(args) = __godot_send__(nil, args)
-    def godot_send(meth, *args)
-      raise TypeError, 'nil is not a symbol nor a string' if meth.nil?
-      __godot_send__(meth, args)
-    end
-    
     def get(...)
       self.[](...)
     rescue KeyError => e

@@ -7,8 +7,6 @@ module Godot
     VARIANT_TYPE: Integer
     
     def self.allocate: () -> instance
-    
-    private def __godot_send__: (interned? meth, Array[variant_like] args) -> variant
     private def initialize_copy: (instance other) -> void
     
     def initialize: (*variant_like args) -> void
