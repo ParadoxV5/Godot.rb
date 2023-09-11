@@ -27,7 +27,7 @@ VALUE godot_rb_cString_i_to_str(VALUE self) {
 //FIXME: possible multiplication overflow (though one should use a buffer instead if they need a quintillion chars)
 
 void godot_rb_init_String() {
-  VALUE cString = rb_define_class("String", godot_rb_cVariant);
+  VALUE cString = rb_define_class_under(godot_rb_mGodot, "String", godot_rb_cVariant);
   rb_const_set(cString, godot_rb_idVARIANT_TYPE, INT2FIX(GDEXTENSION_VARIANT_TYPE_STRING));
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING] = cString;
   // Endian test for UTF-32 -> `char[]`

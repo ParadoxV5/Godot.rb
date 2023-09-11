@@ -108,8 +108,6 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
 /** (initialized at level `SERVERS`) */
 extern rb_encoding* godot_rb_encoding_UTF32;
 
-#define godot_rb_warn (message) \
-  godot_rb_gdextension.print_warning_with_message(message, message, __func__, __FILE__, __LINE__, false)
 #define godot_rb_error(message) \
   godot_rb_gdextension.print_error_with_message  (message, message, __func__, __FILE__, __LINE__, false)
 /**

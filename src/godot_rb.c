@@ -69,8 +69,20 @@ bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value)) {
   if RB_UNLIKELY(state) { // Handle exception
     VALUE error = rb_errinfo();
     rb_set_errinfo(Qnil); // Clear exception
+    VALUE backtrace = rb_ary_entry(rb_funcall(error, rb_intern("backtrace_locations"), 0), 0);
+    VALUE file = rb_funcall(backtrace, rb_intern("path" ), 0);
+    backtrace  = rb_funcall(backtrace, rb_intern("label"), 0);
+    int32_t line;
+    rb_integer_pack(rb_funcall(backtrace, rb_intern("lineno"), 0), &line, 1, sizeof(int32_t), 0, INTEGER_PACK_2COMP);
     error = rb_funcall(error, rb_intern("full_message"), 0);
-    godot_rb_error(StringValueCStr(error));
+    char* message = StringValueCStr(error);
+    godot_rb_gdextension.print_error_with_message(
+      message, message,
+      StringValueCStr(backtrace),
+      StringValueCStr(file),
+      line,
+      false
+    );
     return false;
   }
   return true;

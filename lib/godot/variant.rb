@@ -16,12 +16,12 @@ module Godot
     def get(...)
       self.[](...)
     rescue KeyError => e
-      warn "#{caller(1, 1)&.first}: #{e.detailed_message}"
+      warn "#{e.backtrace&.first}: #{e.detailed_message}"
     end
     def set(...)
       self.[]=(...)
     rescue KeyError => e
-      warn "#{caller(1, 1)&.first}: #{e.detailed_message}"
+      warn "#{e.backtrace&.first}: #{e.detailed_message}"
     end
     
     def to_godot = self
