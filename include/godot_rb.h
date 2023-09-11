@@ -29,6 +29,8 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantDuplicate  variant_duplicate;
   GDExtensionInterfaceVariantDestroy    variant_destroy;
   GDExtensionInterfaceVariantGetType    variant_get_type;
+  GDExtensionInterfaceVariantGet        variant_get;
+  GDExtensionInterfaceVariantSet        variant_set;
   GDExtensionInterfaceVariantCall       variant_call;
   GDExtensionInterfaceVariantBooleanize variant_booleanize;
   GDExtensionInterfaceStringToUtf8Chars  string_to_utf8_chars;
@@ -45,6 +47,7 @@ extern struct godot_rb_gdextension {
 
 /** Stand-ins for Godot Engine internal types */
 typedef void* GDExtensionString, GDExtensionStringName;
+
 
 // Ruby Binding Constants (initialized at level `SERVERS`) //
 
@@ -96,6 +99,7 @@ typedef void (* godot_rb_variant_call_function)(
   @return if no {GDExtensionCallError error} raised, otherwise it {rb_raise go-tos instead of returning}
 */
 void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, uintmax_t var);
+
 
 // General Helpers //
 

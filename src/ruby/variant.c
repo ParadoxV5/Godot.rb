@@ -69,6 +69,40 @@ GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self) {
 }
 
 
+#define a(get_value_variant, meth, ret) { \
+  GDExtensionVariantPtr value_variant = get_value_variant; \
+  GDExtensionBool success = false; \
+  godot_rb_gdextension.meth( \
+    godot_rb_obj_get_variant(self), \
+    godot_rb_obj_get_variant(key), \
+    value_variant, \
+    &success \
+  ); \
+  if RB_LIKELY(success) \
+    return ret; \
+  VALUE kwargs = rb_hash_new_capa(2); \
+  rb_hash_aset(kwargs, rb_intern("receiver"), self); \
+  rb_hash_aset(kwargs, rb_intern("key"), key); \
+  rb_exc_raise(rb_class_new_instance_kw( \
+    2, \
+    (VALUE[]){rb_sprintf("key not found: %+"PRIsVALUE, key), kwargs}, \
+    rb_eKeyError, \
+    RB_PASS_KEYWORDS) \
+  ); \
+}
+
+/*TODO: docs
+> The bracket syntax can be used to access properties of any Object, not just Dictionaries.
+> Keep in mind it will cause a script error when attempting to index a non-existing property.
+> To avoid this, use the [Object.get()](https://docs.godotengine.org/en/stable/classes/class_object.html#id1)
+> and [Object.set()](https://docs.godotengine.org/en/stable/classes/class_object.html#id6) methods instead.
+⸺ https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html#dictionary */
+__attribute__((used)) VALUE godot_rb_cVariant_i__aref(VALUE self, VALUE key)
+  a(godot_rb_variant_alloc(), variant_get, godot_rb_parse_variant(value_variant))
+__attribute__((used)) VALUE godot_rb_cVariant_i__aset(VALUE self, VALUE key, VALUE value)
+  a(godot_rb_obj_get_variant(value), variant_set, value)
+
+
 void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, uintmax_t var) {
   
   GDExtensionVariantPtr self_variant = godot_rb_obj_get_variant(self);
@@ -102,12 +136,12 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
     case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
       VALUE kwargs = rb_hash_new_capa(1);
       rb_hash_aset(kwargs, rb_intern("receiver"), self);
-      rb_exc_raise(rb_class_new_instance_kw(4, (VALUE[]){
+      rb_exc_raise(rb_class_new_instance_kw( 4, (VALUE[]){
         rb_sprintf("undefined method `%"PRIsVALUE"', or cannot call it with %+"PRIsVALUE, func, args),
         func,
         args,
         kwargs
-      }, rb_eNoMethodError, RB_PASS_KEYWORDS));
+      }, rb_eNoMethodError, RB_PASS_KEYWORDS) );
     }
     
     default: // TOO_MANY_ARGUMENTS, TOO_FEW_ARGUMENTS
@@ -153,7 +187,7 @@ static void godot_rb_cVariant_impl_godot_send(
   ret_variant,
   r_error
 ); }
-VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
+__attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
   VALUE meth, args;
   rb_scan_args(argc, argv, "1*", &meth, &args);
   GDExtensionVariantPtr ret_variant = godot_rb_variant_alloc();
@@ -168,7 +202,7 @@ VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
 }
 
 
-VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
+__attribute__((used)) VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
 }
 
@@ -179,6 +213,9 @@ void godot_rb_init_Variant() {
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_c_allocate);
   rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -2);
   rb_define_private_method(godot_rb_cVariant, "initialize_copy", godot_rb_cVariant_i_initialize_copy, 1);
-  rb_define_method(godot_rb_cVariant, "godot_send", godot_rb_cVariant_i_godot_send, -1);
-  rb_define_method(godot_rb_cVariant, "nonzero?", godot_rb_cVariant_i_nonzero_, 0);
+  #define m(meth, func, arity) rb_define_method(godot_rb_cVariant, #meth, godot_rb_cVariant_i_##func, arity);
+  m([]        , _aref     ,  1)
+  m([]=       , _aset     ,  2)
+  m(godot_send, godot_send, -1)
+  m(nonzero?  , nonzero_  ,  0)
 }
