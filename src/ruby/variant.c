@@ -177,16 +177,11 @@ static void godot_rb_cVariant_impl_godot_send(
   VALUE meth,
   long argc,
   GDExtensionConstVariantPtr* argv,
-  GDExtensionVariantPtr ret_variant,
+  GDExtensionVariantPtr r_return,
   GDExtensionCallError* r_error
-) { godot_rb_gdextension.variant_call(
-  self_variant,
-  godot_rb_cVariant_get_variant(rb_to_symbol(meth)), //FIXME: actually this needs to be a StringName not a Variant; it’s C++ magic even if it works
-  argv,
-  argc,
-  ret_variant,
-  r_error
-); }
+) {
+  godot_rb_gdextension.variant_call(self_variant, godot_rb_obj_to_string_name(meth), argv, argc, r_return, r_error);
+}
 __attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
   VALUE meth, args;
   rb_scan_args(argc, argv, "1*", &meth, &args);
