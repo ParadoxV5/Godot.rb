@@ -31,7 +31,7 @@
 
 ## Appendix Docs – [`docs/`](docs/)
 
-* [`Building.md`](docs/Building.md)
+* [`Building.md`](docs/dev/Building.md)
 * …
 
 

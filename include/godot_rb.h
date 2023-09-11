@@ -26,7 +26,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceGetVariantFromTypeConstructor get_variant_from_type_constructor;
   GDExtensionInterfaceVariantConstruct  variant_construct;
   GDExtensionInterfaceVariantNewNil     variant_new_nil;
-  GDExtensionInterfaceVariantNewCopy    variant_new_copy;
+  GDExtensionInterfaceVariantDuplicate  variant_duplicate;
   GDExtensionInterfaceVariantDestroy    variant_destroy;
   GDExtensionInterfaceVariantGetType    variant_get_type;
   GDExtensionInterfaceVariantCall       variant_call;

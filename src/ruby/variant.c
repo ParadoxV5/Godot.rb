@@ -33,6 +33,11 @@ VALUE godot_rb_cVariant_c_allocate(VALUE self) {
   return godot_rb_wrap_variant(self, variant);
 }
 
+VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
+  godot_rb_gdextension.variant_duplicate(godot_rb_cVariant_get_variant(self), godot_rb_obj_get_variant(other), false);
+  return other;
+}
+
 GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
 VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
@@ -131,10 +136,6 @@ VALUE godot_rb_cVariant_i___godot_send__(VALUE self, VALUE meth, VALUE args) {
   return ret;
 }
 
-VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
-  godot_rb_gdextension.variant_new_copy(godot_rb_cVariant_get_variant(self), godot_rb_obj_get_variant(other));
-  return other;
-}
 
 VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
