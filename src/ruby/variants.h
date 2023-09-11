@@ -18,6 +18,11 @@ GDExtensionString godot_rb_mString_to_string(VALUE self);
 */
 GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
 
+#define init(klass, type) void godot_rb_init_##klass() { \
+  VALUE c##klass = rb_define_class_under(godot_rb_mGodot, #klass, godot_rb_cVariant); \
+  rb_const_set(c##klass, godot_rb_idVARIANT_TYPE, INT2FIX(GDEXTENSION_VARIANT_TYPE_##type)); \
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_##type] = c##klass;
+
 void godot_rb_init_Variant();
 void godot_rb_init_String();
 void godot_rb_init_StringName();

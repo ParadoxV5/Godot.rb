@@ -17,5 +17,5 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self) {
   return string_name;
 }
 
-void godot_rb_init_StringName() {
+init(StringName, STRING_NAME)
 }
