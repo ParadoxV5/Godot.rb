@@ -6,4 +6,12 @@ module Godot
     def to_str: () -> String
   end
   
+  class Object < Variant
+    VARIANT_TYPE: 24
+    alias call godot_send
+  end
+  
+  def self.const_defined?: (Symbol name, ?boolish inherit) -> singleton(Object)
+  def self.const_missing: (Symbol name) -> singleton(Object)
+  
 end

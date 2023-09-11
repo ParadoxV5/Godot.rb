@@ -44,20 +44,24 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   l(StringToUtf8Chars,  string_to_utf8_chars)
   l(StringToUtf32Chars, string_to_utf32_chars)
   l(StringNewWithUtf32CharsAndLen, string_new_with_utf32_chars_and_len)
+  l(ObjectGetClassName, object_get_class_name)
   // Load GDExtension API
-  godot_rb_gdextension.variant_from_string = (
-    (GDExtensionInterfaceGetVariantFromTypeConstructor)godot_rb_get_proc("get_variant_from_type_constructor")
-  )(GDEXTENSION_VARIANT_TYPE_STRING);
-  godot_rb_gdextension.string_from_variant = (
-    (GDExtensionInterfaceGetVariantToTypeConstructor)godot_rb_get_proc("get_variant_to_type_constructor")
-  )(GDEXTENSION_VARIANT_TYPE_STRING);
-  godot_rb_gdextension.string_name_from_string = (
-    (GDExtensionInterfaceVariantGetPtrConstructor)godot_rb_get_proc("variant_get_ptr_constructor")
-  )(GDEXTENSION_VARIANT_TYPE_STRING_NAME, 2); // Constructor #2
+  godot_rb_gdextension.variant_from_string      = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
+  godot_rb_gdextension.variant_from_string_name = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME);
+  godot_rb_gdextension.variant_from_object      = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_OBJECT);
+  godot_rb_gdextension.string_from_variant      = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
+  godot_rb_gdextension.string_name_from_variant = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME);
+  godot_rb_gdextension.object_from_variant      = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_OBJECT);
+  GDExtensionInterfaceVariantGetPtrConstructor variant_get_ptr_constructor =
+    (GDExtensionInterfaceVariantGetPtrConstructor)godot_rb_get_proc("variant_get_ptr_constructor");
+  godot_rb_gdextension.string_from_string_name = variant_get_ptr_constructor(GDEXTENSION_VARIANT_TYPE_STRING, 2);
+  godot_rb_gdextension.string_name_from_string = variant_get_ptr_constructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME, 2);
+    // Both Constructor #2
   GDExtensionInterfaceVariantGetPtrDestructor variant_get_ptr_destructor =
     (GDExtensionInterfaceVariantGetPtrDestructor)godot_rb_get_proc("variant_get_ptr_destructor");
   godot_rb_gdextension.string_destroy      = variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_STRING     );
   godot_rb_gdextension.string_name_destroy = variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME);
+  godot_rb_gdextension.object_destroy      = variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_OBJECT     );
   
   // Success
   return true;

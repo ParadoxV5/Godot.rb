@@ -44,8 +44,10 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
-      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) // Non-null check
+      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
+        // “godot_rb_parse_object”
         break;
+      }
       //fall-through
     case GDEXTENSION_VARIANT_TYPE_NIL:
       godot_rb_gdextension.variant_destroy(variant);
@@ -205,6 +207,7 @@ __attribute__((used)) VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
 void godot_rb_init_Variant() {
   godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
+  variant_to_bool   = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL  );
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_m_allocate);
   rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -2);
   rb_define_private_method(godot_rb_cVariant, "initialize_copy", godot_rb_cVariant_i_initialize_copy, 1);

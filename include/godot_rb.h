@@ -15,7 +15,7 @@ extern GDExtensionClassLibraryPtr godot_rb_library;
 
 // GDExtension Interface (initialized by entry function) //
 
-/** @experimental Some members may get moved to file-private globals instead. */
+/** @deprecated Members shall be moved to file-private globals instead. */
 extern struct godot_rb_gdextension {
   //TODO: Categorize
   GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
@@ -36,13 +36,21 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceStringToUtf8Chars  string_to_utf8_chars;
   GDExtensionInterfaceStringToUtf32Chars string_to_utf32_chars;
   GDExtensionInterfaceStringNewWithUtf32CharsAndLen string_new_with_utf32_chars_and_len;
+  GDExtensionInterfaceObjectGetClassName object_get_class_name;
   // String APIs
-  GDExtensionVariantFromTypeConstructorFunc variant_from_string;
   GDExtensionTypeFromVariantConstructorFunc string_from_variant;
+  GDExtensionVariantFromTypeConstructorFunc variant_from_string;
   GDExtensionPtrDestructor string_destroy;
   // StringName APIs
+  GDExtensionTypeFromVariantConstructorFunc string_name_from_variant;
+  GDExtensionPtrConstructor string_from_string_name;
   GDExtensionPtrConstructor string_name_from_string;
+  GDExtensionVariantFromTypeConstructorFunc variant_from_string_name;
   GDExtensionPtrDestructor string_name_destroy;
+  // Object APIs
+  GDExtensionTypeFromVariantConstructorFunc object_from_variant;
+  GDExtensionVariantFromTypeConstructorFunc variant_from_object;
+  GDExtensionPtrDestructor object_destroy;
 } godot_rb_gdextension;
 
 

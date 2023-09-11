@@ -3,7 +3,7 @@
 #include <godot_rb.h>
 
 /** Stand-ins for Godot Engine internal types */
-typedef void* GDExtensionString, * GDExtensionStringName;
+typedef void* GDExtensionString, * GDExtensionStringName, * GDExtensionObject;
 
 /**
   Serialize a Ruby String into a {GDExtensionString Godot internal String}
@@ -26,6 +26,7 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
 void godot_rb_init_Variant(void);
 void godot_rb_init_String(void);
 void godot_rb_init_StringName(void);
+void godot_rb_init_Object(void);
 void godot_rb_init_Mixins(void);
 
 #endif
