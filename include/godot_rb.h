@@ -45,9 +45,6 @@ extern struct godot_rb_gdextension {
   GDExtensionPtrDestructor string_name_destroy;
 } godot_rb_gdextension;
 
-/** Stand-ins for Godot Engine internal types */
-typedef void* GDExtensionString, GDExtensionStringName;
-
 
 // Ruby Binding Constants (initialized at level `SERVERS`) //
 

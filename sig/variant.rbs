@@ -4,6 +4,7 @@ module Godot
   type variant = Variant | bool?
   type variant_like = Kernel & _ToGodot[Variant]
   class Variant
+    include Godot
     VARIANT_TYPE: Integer
     
     def self.allocate: () -> instance

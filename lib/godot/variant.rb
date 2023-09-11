@@ -11,6 +11,7 @@ module Godot
   # Ruby programmers should treat them similar to {Rational}s – unlike immediate values such as {Integer}s,
   # two `Variant`s may be distinct Ruby instances even if they reference the same Godot-internal data.
   class Variant
+    include Godot
     VARIANT_TYPE = 0
     
     def get(...)
