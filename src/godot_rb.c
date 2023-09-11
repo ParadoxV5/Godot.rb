@@ -27,7 +27,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   // Load GDExtension Interface
   #define l(proc_t, proc) godot_rb_gdextension.proc = (GDExtensionInterface##proc_t)godot_rb_get_proc(#proc);
   l(PrintErrorWithMessage, print_error_with_message)
-  l(PrintWarningWithMessage, print_warning_with_message)
+  l(PrintScriptErrorWithMessage, print_script_error_with_message)
   l(MemAlloc, mem_alloc)
   l(MemFree,  mem_free)
   l(GetVariantToTypeConstructor,   get_variant_to_type_constructor)
@@ -63,26 +63,45 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   return true;
 }
 
-bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value)) {
+bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value), VALUE* var_p) {
   int state;
-  rb_protect(function, Qnil, &state);
+  bool has_var_p = var_p ? true : false;
+  if RB_LIKELY(has_var_p) // there’ll be more user calls than our internal calls
+    *var_p = rb_protect(function, *var_p, &state);
+  else
+    rb_protect(function, Qnil, &state);
   if RB_UNLIKELY(state) { // Handle exception
     VALUE error = rb_errinfo();
     rb_set_errinfo(Qnil); // Clear exception
-    VALUE backtrace = rb_ary_entry(rb_funcall(error, rb_intern("backtrace_locations"), 0), 0);
-    VALUE file = rb_funcall(backtrace, rb_intern("path" ), 0);
-    backtrace  = rb_funcall(backtrace, rb_intern("label"), 0);
-    int32_t line;
-    rb_integer_pack(rb_funcall(backtrace, rb_intern("lineno"), 0), &line, 1, sizeof(int32_t), 0, INTEGER_PACK_2COMP);
-    error = rb_funcall(error, rb_intern("full_message"), 0);
-    char* message = StringValueCStr(error);
-    godot_rb_gdextension.print_error_with_message(
-      message, message,
-      StringValueCStr(backtrace),
-      StringValueCStr(file),
-      line,
-      false
-    );
+    if RB_LIKELY(has_var_p) // ditto
+      *var_p = error;
+    VALUE full_message = rb_funcall(error, rb_intern("full_message"), 0);
+    char* message = StringValueCStr(full_message);
+    GDExtensionInterfacePrintErrorWithMessage print_error =
+      RB_LIKELY(rb_obj_is_kind_of(error, rb_eStandardError))
+      ? godot_rb_gdextension.print_script_error_with_message
+      : godot_rb_gdextension.print_error_with_message;
+    // So manu {Qnil} checks ugh
+    VALUE backtrace = rb_funcall(error, rb_intern("backtrace_locations"), 0);
+    if RB_LIKELY(!NIL_P(backtrace)) {
+      backtrace = rb_ary_entry(backtrace, 0);
+      if RB_LIKELY(!NIL_P(backtrace)) {
+        VALUE func = rb_funcall(backtrace, rb_intern("label"), 0);
+        VALUE file = rb_funcall(backtrace, rb_intern("path" ), 0);
+        int32_t line;
+        rb_integer_pack(rb_funcall(backtrace, rb_intern("lineno"), 0), &line, 1, sizeof(int32_t), 0, INTEGER_PACK_2COMP);
+        print_error(
+          message, message,
+          StringValueCStr(func),
+          RB_UNLIKELY(NIL_P(file)) ? "Godot.rb" : StringValueCStr(file), // may be {Qnil} too
+          line,
+          has_var_p
+        );
+        return false;
+      }
+    }
+    // No backtrace info available if it reaches this point
+    print_error(message, message, __func__, "Godot.rb", __LINE__, has_var_p);
     return false;
   }
   return true;

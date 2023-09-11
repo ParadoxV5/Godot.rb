@@ -27,7 +27,7 @@ VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant) {
   return TypedData_Wrap_Struct(klass, &godot_rb_cVariant_type, variant);
 }
 //TODO: Documentation: warn that `#allocate`d variants are semi-unusable
-VALUE godot_rb_cVariant_c_allocate(VALUE self) {
+VALUE godot_rb_cVariant_m_allocate(VALUE self) {
   GDExtensionVariantPtr variant = godot_rb_variant_alloc();
   godot_rb_gdextension.variant_new_nil(variant); // Zero-initialize it to prevent invalid GC frees
   return godot_rb_wrap_variant(self, variant);
@@ -205,7 +205,7 @@ __attribute__((used)) VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
 void godot_rb_init_Variant() {
   godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
-  rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_c_allocate);
+  rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_m_allocate);
   rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -2);
   rb_define_private_method(godot_rb_cVariant, "initialize_copy", godot_rb_cVariant_i_initialize_copy, 1);
   #define m(meth, func, arity) rb_define_method(godot_rb_cVariant, #meth, godot_rb_cVariant_i_##func, arity);

@@ -18,8 +18,8 @@ extern GDExtensionClassLibraryPtr godot_rb_library;
 /** @experimental Some members may get moved to file-private globals instead. */
 extern struct godot_rb_gdextension {
   //TODO: Categorize
-  GDExtensionInterfacePrintErrorWithMessage   print_error_with_message;
-  GDExtensionInterfacePrintWarningWithMessage print_warning_with_message;
+  GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
+  GDExtensionInterfacePrintScriptErrorWithMessage print_script_error_with_message;
   GDExtensionInterfaceMemAlloc mem_alloc;
   GDExtensionInterfaceMemFree  mem_free;
   GDExtensionInterfaceGetVariantToTypeConstructor   get_variant_to_type_constructor;
@@ -107,11 +107,18 @@ extern rb_encoding* godot_rb_encoding_UTF32;
 
 #define godot_rb_error(message) \
   godot_rb_gdextension.print_error_with_message  (message, message, __func__, __FILE__, __LINE__, false)
-/**
+/** `begin`–`rescue`s the passed function.
+  If an exception occurs, log a Script Error or, for non-{rb_eStandardError}s, a generic Error.
   (assumes level `CORE` set up)
-  @note This passes {Qnil} to the passed function and discards its return
+  @param var the pointer to an extra arg
+  * if not {NULL}:
+    * The arg gets directly passed to the function for your various purposes.
+    * The memory will store the return of calling the function if successful or the exception if not.
+    * The Godot Engine Editor gets pinged if an exception raises
+  * if {NULL}:
+    * This function passes {Qnil} to the passed function and discards its return.
 */
-bool godot_rb_protect(VALUE (*function)(__attribute__((unused)) VALUE value));
+bool godot_rb_protect(VALUE (*function)(VALUE var), VALUE* p_var);
 
 /** Entry Function */
 __attribute__((used)) GDExtensionBool godot_rb_main(
