@@ -4,17 +4,16 @@
 VALUE godot_rb_cString_i_to_s(VALUE self) {
   GDExtensionString string;
   godot_rb_gdextension.string_from_variant(&string, godot_rb_cVariant_get_variant(self));
-  // UTF-32 is the fastest – possibly-constant-time – function for counting chars as no encoding conversions necessary.
-  // UTF-8 is up to 4bytes/char.
-  GDExtensionInt length = godot_rb_gdextension.string_to_utf32_chars(&string, NULL, 0) * 4;
-  char str[length];
-  length = godot_rb_gdextension.string_to_utf8_chars(&string, str, length);
-  godot_rb_gdextension.string_destroy(&string);
+  string2str_utf8
   return rb_utf8_str_new(str, length);
 }
+//FIXME: possible multiplication and casting overflows (though one should use buffers instead if they need 2GiB strings)
 
 rb_encoding* godot_rb_encoding_UTF32;
-/** Convert into a frozen UTF-32 Ruby String; faster than {#to_s} for all but short strings */
+/**
+  Convert into a frozen UTF-32 Ruby String;
+  faster than {#to_s} for all but short strings since Godot Engine Strings are already UTF-32
+*/
 VALUE godot_rb_cString_i_to_str(VALUE self) {
   GDExtensionString string;
   godot_rb_gdextension.string_from_variant(&string, godot_rb_cVariant_get_variant(self));
@@ -24,7 +23,7 @@ VALUE godot_rb_cString_i_to_str(VALUE self) {
   godot_rb_gdextension.string_destroy(&string);
   return rb_obj_freeze(rb_enc_str_new((char*)str, length * sizeof(char32_t), godot_rb_encoding_UTF32));
 }
-//FIXME: possible multiplication overflow (though one should use a buffer instead if they need a quintillion chars)
+//FIXME: possible multiplication and casting overflows (though one should use buffers instead if they need 2GiB strings)
 
 init(String, STRING)
   // Endian test for UTF-32 -> `char[]`

@@ -45,9 +45,22 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
       if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
-        // “godot_rb_parse_object”
-        break;
+        // “`godot_rb_parse_object`”
+        GDExtensionObject object;
+        godot_rb_gdextension.object_from_variant(&object, variant);
+        GDExtensionStringName class_name_str;
+        godot_rb_gdextension.object_get_class_name(&object, godot_rb_library, &class_name_str);
+        godot_rb_gdextension.object_destroy(&object);
+        VALUE class_name = godot_rb_sym_from_string_name(class_name_str);
+        godot_rb_gdextension.string_name_destroy(class_name_str);
+        // “`godot_rb_wrap_object`”
+        return TypedData_Wrap_Struct(
+          rb_const_get_at(godot_rb_mGodot, SYM2ID(class_name)), // calls {Godot#const_missing} as needed
+          &godot_rb_cVariant_type,
+          variant
+        );
       }
+      
       //fall-through
     case GDEXTENSION_VARIANT_TYPE_NIL:
       godot_rb_gdextension.variant_destroy(variant);

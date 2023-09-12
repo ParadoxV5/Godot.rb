@@ -11,7 +11,5 @@ module Godot
     alias call godot_send
   end
   
-  def self.const_defined?: (Symbol name, ?boolish inherit) -> singleton(Object)
   def self.const_missing: (Symbol name) -> singleton(Object)
-  
 end

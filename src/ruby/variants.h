@@ -18,6 +18,19 @@ GDExtensionString godot_rb_mString_to_string(VALUE self);
 */
 GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
 
+VALUE godot_rb_sym_from_string_name(GDExtensionConstStringNamePtr string_name);
+
+#define string2str_utf8 \
+  /*
+  * Since Godot Engine Strings are UTF-32,
+    counting chars in UTF-32 does not require re-encoding and thus is the fastest ((probably) constant time).
+  * UTF-8 is up to 4bytes/char.
+  */ \
+  GDExtensionInt length = godot_rb_gdextension.string_to_utf32_chars(&string, NULL, 0) * 4; \
+  char str[length]; \
+  length = godot_rb_gdextension.string_to_utf8_chars(&string, str, length); \
+  godot_rb_gdextension.string_destroy(&string);
+
 #define init(klass, type) void godot_rb_init_##klass(void) { \
   VALUE c##klass = rb_define_class_under(godot_rb_mGodot, #klass, godot_rb_cVariant); \
   rb_const_set(c##klass, godot_rb_idVARIANT_TYPE, INT2FIX(GDEXTENSION_VARIANT_TYPE_##type)); \
