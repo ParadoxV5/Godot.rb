@@ -31,7 +31,7 @@ module Godot
     if Engine.has_singleton(name) # First, check Singletons
       Engine.get_singleton(name)
     elsif ClassDB.class_exists(name) # Second, check classes
-      Class.new const_get(Godot::ClassDB.get_parent_class(name))
+      Class.new const_get(Godot::ClassDB.get_parent_class(name)) #: singleton(Object)
     #elsif false # Third, check Autoloads (FIXME: #help-wanted)
     else
       super # raise {NameError}

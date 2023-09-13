@@ -1,5 +1,5 @@
 module Godot
-  VERSION: String
+  VERSION: ::String
   
   def self.const_missing: (Symbol name) -> (singleton(Object) | Object)
 end
