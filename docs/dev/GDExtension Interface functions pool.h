@@ -40,7 +40,6 @@ GDExtensionInterfaceWorkerThreadPoolAddNativeGroupTask worker_thread_pool_add_na
 GDExtensionInterfaceWorkerThreadPoolAddNativeTask worker_thread_pool_add_native_task;
 
 /* INTERFACE: Object */
-GDExtensionInterfaceGlobalGetSingleton global_get_singleton;
 GDExtensionInterfaceObjectCastTo object_cast_to;
 GDExtensionInterfaceObjectGetInstanceId object_get_instance_id;
 

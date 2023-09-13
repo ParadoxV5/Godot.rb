@@ -30,6 +30,7 @@ static VALUE servers_unprotected(__attribute__((unused)) VALUE value) {
   godot_rb_require_relative(object);
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = rb_const_get_at(godot_rb_mGodot, rb_intern("Object"));
   godot_rb_init_Mixins();
+  godot_rb_init_Engine();
   // Skip NIL since it points to the same class as BOOL
   for(GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
     rb_gc_register_mark_object(godot_rb_cVariants[i]);

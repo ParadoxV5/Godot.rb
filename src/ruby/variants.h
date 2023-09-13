@@ -39,7 +39,7 @@ VALUE godot_rb_sym_from_string_name(GDExtensionConstStringNamePtr string_name);
 void godot_rb_init_Variant(void);
 void godot_rb_init_String(void);
 void godot_rb_init_StringName(void);
-void godot_rb_init_Object(void);
 void godot_rb_init_Mixins(void);
+void godot_rb_init_Engine(void);
 
 #endif
