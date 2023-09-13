@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module Godot
   # `Variant` is the atomic type in GDScript; correspondingly,
   # the `Godot::Variant` Ruby class wraps `Variant` data and provides universal APIs for it and its descendant classes.
