@@ -27,7 +27,8 @@ static VALUE servers_unprotected(__attribute__((unused)) VALUE value) {
   godot_rb_init_Variant();
   godot_rb_init_String();
   godot_rb_init_StringName();
-  godot_rb_init_Object();
+  godot_rb_require_relative(object);
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = rb_const_get_at(godot_rb_mGodot, rb_intern("Object"));
   godot_rb_init_Mixins();
   // Skip NIL since it points to the same class as BOOL
   for(GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)

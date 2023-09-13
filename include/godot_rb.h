@@ -9,7 +9,7 @@
 
 extern bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
 
-//extern GDExtensionInterfaceGetProcAddress godot_rb_get_proc;
+extern GDExtensionInterfaceGetProcAddress godot_rb_get_proc;
 extern GDExtensionClassLibraryPtr godot_rb_library;
 
 
