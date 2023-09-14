@@ -18,6 +18,8 @@ module Godot
     def []=: (variant_like key, variant_like value) -> variant
     def set: (variant_like key, variant_like value) -> variant?
     
+    def method_missing: (variant_like name, *variant_like args) -> variant
+    
     def to_godot: () -> self
     def nonzero?: () -> bool
   end

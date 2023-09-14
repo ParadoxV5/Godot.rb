@@ -23,6 +23,30 @@ module Godot
       warn "#{e.backtrace&.first}: #{e.detailed_message}"
     end
     
+    def method_missing(name, *args)
+    # Zeroth, Ruby suffixes are special
+      case name[-1]
+      when '='
+        #@type var args: [variant_like] # let the delegated raise “wrong number of arguments”
+        self.[]=(name[..-1], *args)
+      when '?'
+        godot_send("is_#{name[..-1]}", *args)
+      else # method or `attr_reader` (Note: Godot Engine expects the two have mutually exclusive names)
+        #@type var name: interned # let the delegated raise “not a symbol nor a string”
+    # First, check `attr_reader`s
+        if args.empty? # necessary condition for `attr_reader`
+          begin
+            self[name]
+          rescue KeyError
+    # Second, check methods
+            godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises 
+          end
+        else
+          godot_send(name, *args) # Same as in the `rescue KeyError` block, just without any `KeyError`s
+        end
+      end
+    end
+    
     def to_godot = self
   end
   
