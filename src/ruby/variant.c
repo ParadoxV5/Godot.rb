@@ -212,12 +212,21 @@ __attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv
 }
 
 
+GDExtensionInterfaceVariantHasMethod variant_has_method;
+__attribute__((used)) VALUE godot_rb_cVariant_i_has_method(VALUE self, VALUE name) {
+  GDExtensionStringName string_name = godot_rb_obj_to_string_name(name);
+  GDExtensionBool ret = variant_has_method(godot_rb_obj_get_variant(self), &string_name);
+  godot_rb_gdextension.string_name_destroy(&string_name);
+  return ret ? Qtrue : Qfalse;
+}
+
 __attribute__((used)) VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
 }
 
 
 void godot_rb_init_Variant() {
+  variant_has_method = (GDExtensionInterfaceVariantHasMethod)godot_rb_get_proc("variant_has_method");
   godot_rb_require_relative(variant);
   godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
   variant_to_bool   = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL  );
@@ -228,5 +237,6 @@ void godot_rb_init_Variant() {
   m([]        , _aref     ,  1)
   m([]=       , _aset     ,  2)
   m(godot_send, godot_send, -1)
+  m(has_method, has_method,  1)
   m(nonzero?  , nonzero_  ,  0)
 }
