@@ -28,7 +28,7 @@ static bool core(void) {
   return godot_rb_protect(Init_enc, NULL);
 }
 
-static VALUE servers_unprotected(__attribute__((unused)) VALUE value) {
+static VALUE scene_unprotected(__attribute__((unused)) VALUE value) {
   VALUE ret = godot_rb_require_relative(version);
   godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
   rb_gc_register_mark_object(godot_rb_mGodot);
@@ -37,21 +37,16 @@ static VALUE servers_unprotected(__attribute__((unused)) VALUE value) {
   godot_rb_init_StringName();
   godot_rb_require_relative(object);
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = rb_const_get_at(godot_rb_mGodot, rb_intern("Object"));
-  godot_rb_init_Mixins();
   godot_rb_init_Engine();
+  godot_rb_init_Mixins();
   // Skip NIL since it points to the same class as BOOL
   for(GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
     rb_gc_register_mark_object(godot_rb_cVariants[i]);
   return ret;
 }
-static bool servers(void) { return godot_rb_protect(servers_unprotected, NULL); }
+static bool scene(void) { return godot_rb_protect(scene_unprotected, NULL); }
 
-/*
-static bool scene(void) {
-}
-*/
-
-static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, servers/*, scene*/};
+static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, NULL, scene};
 void godot_rb_setup(__attribute__((unused)) void* userdata, GDExtensionInitializationLevel p_level) {
   bool (*func)(void) = godot_rb_setup_functions[p_level];
   if RB_LIKELY(func) {
