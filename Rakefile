@@ -48,9 +48,19 @@ i_arch_h_dir = "-I#{RbConfig::CONFIG['rubyarchhdrdir']}"
 l_libruby_dir = "-L#{LIBRUBY_DIR}"
 l_libruby_name = "-l:#{LIBRUBY_NAME}"
 
+rubyarchdir = RbConfig::CONFIG['rubyarchdir']
+# Assume `rubyarchdir` always starts with `prefix`
+directory out_archdir =
+  File.join(OUT, rubyarchdir[RbConfig::CONFIG['prefix'].size..] || '')
+out_enc_dir = File.join(out_archdir, 'enc')
+file_create out_enc_dir => out_archdir
+
 # symlinks of `libruby` & dependencies in the output directory and their originals
 # @return `{"bin/<architecture>/<platform>/<lib.so>" => "/<path>/<to>/<lib.so>", …}`
-LIBS = {File.join(OUT, LIBRUBY_NAME) => File.join(LIBRUBY_DIR, LIBRUBY_NAME)}
+LIBS = {
+  File.join(OUT, LIBRUBY_NAME) => File.join(LIBRUBY_DIR, LIBRUBY_NAME),
+  out_enc_dir => File.join(rubyarchdir, 'enc')
+}
 if RubyInstaller
   %w[libgmp-10.dll].each do|lib|
     LIBS[File.join(OUT, lib)] =

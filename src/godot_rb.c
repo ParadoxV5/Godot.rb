@@ -67,7 +67,7 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   return true;
 }
 
-bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value), VALUE* var_p) {
+bool godot_rb_protect(VALUE (* function)(VALUE var), VALUE* var_p) {
   int state;
   bool has_var_p = var_p ? true : false;
   if RB_LIKELY(has_var_p) // there’ll be more user calls than our internal calls
@@ -105,7 +105,7 @@ bool godot_rb_protect(VALUE (* function)(__attribute__((unused)) VALUE value), V
       }
     }
     // No backtrace info available if it reaches this point
-    print_error(message, message, __func__, "Godot.rb", __LINE__, has_var_p);
+    print_error(message, message, __func__, "Godot.rb", 0, has_var_p);
     return false;
   }
   return true;

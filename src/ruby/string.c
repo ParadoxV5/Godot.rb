@@ -12,7 +12,7 @@ GDExtensionString godot_rb_obj_to_string(VALUE self) {
     self = rb_str_encode(rb_str_to_str(self), encoding_UTF32, 0, Qnil);
     godot_rb_gdextension.string_new_with_utf32_chars_and_len(
       &string,
-      (char32_t*)StringValuePtr(self),
+      (char32_t*)RSTRING_PTR(self),
       RSTRING_LEN(self) / sizeof(char32_t) // UTF-32 has fixed bytes/char
     );
   }
