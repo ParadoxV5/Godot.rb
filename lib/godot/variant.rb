@@ -46,6 +46,29 @@ module Godot
         end
       end
     end
+    def respond_to_missing?(name, _ = false)
+    # Zeroth, Ruby suffixes are special
+      case name[-1]
+      when '='
+        begin
+          self[name[..-1]]
+          true
+        rescue KeyError
+          super
+        end
+      when '?'
+        has_method("is_#{name[..-1]}") or super
+      else # method or `attr_reader` (Note ditto)
+    # First, check `attr_reader`s
+        begin
+          self[name]
+          true
+        rescue KeyError
+    # Second, check methods
+          has_method(name) or super
+        end
+      end
+    end
     
     def to_godot = self
   end
