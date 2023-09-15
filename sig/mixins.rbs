@@ -11,5 +11,8 @@ module Godot
     
     module  String include _ToGodot[Godot::String] end
     class ::String include String end
+    
+    module  Symbol include _ToGodot[StringName] end
+    class ::Symbol include Symbol end
   end
 end

@@ -3,7 +3,8 @@ target :lib do
   signature 'sig'
   
   D = Steep::Diagnostic::Ruby
-  configure_code_diagnostics(D.strict) do|d|
+  configure_code_diagnostics(D.all_error) do|d|
+    d[D::MethodDefinitionMissing] = nil
     d[D::NoMethod] = nil
     d[D::UnknownConstant] = nil
   end

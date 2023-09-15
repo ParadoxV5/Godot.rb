@@ -19,8 +19,8 @@ module Godot
     def set: (variant_like key, variant_like value) -> variant?
     
     def has_method: (interned name) -> bool
-    def respond_to_missing?: (variant_like name, ?boolish include_all) -> bool
-    def method_missing: (variant_like name, *variant_like args) -> variant
+    def respond_to_missing?: (Symbol | ::String name, ?boolish include_all) -> bool
+    def method_missing: (Symbol | ::String name, *variant_like args) -> variant
     
     def to_godot: () -> self
     def nonzero?: () -> bool

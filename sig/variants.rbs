@@ -5,6 +5,9 @@ module Godot
     def to_s: () -> String
     def to_str: () -> String
   end
+
+  class StringName < Variant
+  end
   
   class Object < Variant
     VARIANT_TYPE: 24

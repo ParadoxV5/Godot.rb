@@ -26,14 +26,15 @@ module Godot
     def method_missing(name, *args)
     # Zeroth, Ruby suffixes are special
       case name[-1]
-      when '='
-        #@type var args: [variant_like] # let the delegated raise “wrong number of arguments”
-        self.[]=(name[..-1], *args)
+      when '=' 
+        __send__(:[]=, # https://github.com/soutaro/steep/issues/914
+          name[..-1], #: ::String
+          *args
+        )
       when '?'
         godot_send("is_#{name[..-1]}", *args)
-      else # method or `attr_reader` (Note: Godot Engine expects the two have mutually exclusive names)
-        #@type var name: interned # let the delegated raise “not a symbol nor a string”
-    # First, check `attr_reader`s
+      else
+    # First, check `attr_reader`s (Note: Godot Engine expects the two have mutually exclusive names)
         if args.empty? # necessary condition for `attr_reader`
           begin
             self[name]
@@ -42,16 +43,18 @@ module Godot
             godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises 
           end
         else
-          godot_send(name, *args) # Same as in the `rescue KeyError` block, just without any `KeyError`s
+          godot_send(name, *args) # Same as in the `rescue KeyError` block, just without any `KeyError` causes
         end
       end
     end
-    def respond_to_missing?(name, _ = false)
+    def respond_to_missing?(name, _include_all = false) # https://github.com/soutaro/steep/issues/913
     # Zeroth, Ruby suffixes are special
       case name[-1]
       when '='
         begin
-          self[name[..-1]]
+          self[
+            name[..-1] #: ::String
+          ]
           true
         rescue KeyError
           super
@@ -75,7 +78,7 @@ module Godot
   
   def self.const_missing(name)
     if Engine.has_singleton(name) # First, check Singletons
-      Engine.get_singleton(name)
+      Engine.get_singleton(name) #: Object
     elsif ClassDB.class_exists(name) # Second, check classes
       Class.new const_get(Godot::ClassDB.get_parent_class(name)) #: singleton(Object)
     #elsif false # Third, check Autoloads (FIXME: #help-wanted)

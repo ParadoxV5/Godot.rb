@@ -7,7 +7,7 @@ gem 'rake', '~> 13.0.0'
 # Development Apps
 group :development do
   group :type_check do
-    gem 'rbs', github: 'ruby/rbs', ref: '1b9c8a4', require: false
+    gem 'rbs', github: 'https://github.com/ruby/rbs/pull/1518', require: false
     gem 'steep', '~> 1.5.0', require: false
   end
   group :documentation do
