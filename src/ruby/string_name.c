@@ -10,17 +10,23 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self) {
   if RB_LIKELY(rb_obj_is_instance_of(self, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING_NAME]))
     godot_rb_gdextension.string_name_from_variant(&string_name, godot_rb_cVariant_get_variant(self));
   else {
-    // Specialized Strings come from regular Strings, so we convert to String rather than Symbol
-    VALUE self_string;
-    if RB_LIKELY(SYMBOL_P(self))
-      self_string = rb_sym2str(self);
+    GDExtensionString string;
+    // Second, optimize for {String}s
+    if RB_UNLIKELY(rb_obj_is_instance_of(self, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING]))
+      godot_rb_gdextension.string_name_from_variant(&string, godot_rb_cVariant_get_variant(self));
     else {
-      self_string = rb_check_string_type(self);
-      if RB_UNLIKELY(NIL_P(self_string))
-        rb_raise(rb_eTypeError, "%+"PRIsVALUE" is not a symbol nor a string", self);
+      VALUE self_string;
+      // Specialized Strings come from regular Strings, so we convert to String rather than Symbol
+      if RB_LIKELY(SYMBOL_P(self))
+        self_string = rb_sym2str(self);
+      else {
+        self_string = rb_check_string_type(self);
+        if RB_UNLIKELY(NIL_P(self_string))
+          rb_raise(rb_eTypeError, "%+"PRIsVALUE" is not a symbol nor a string", self);
+      }
+      string = godot_rb_obj_to_string(self_string);
     }
-    GDExtensionString string = godot_rb_obj_to_string(self_string);
-    godot_rb_gdextension.string_name_from_string(&string_name, (GDExtensionConstStringNamePtr[]){&string});
+    godot_rb_gdextension.string_name_from_string(&string_name, (GDExtensionConstStringNamePtr[]) {&string});
     godot_rb_gdextension.string_destroy(&string);
   }
   return string_name;

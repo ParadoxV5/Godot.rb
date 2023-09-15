@@ -17,6 +17,14 @@ __attribute__((used)) VALUE godot_rb_mString_i_to_godot(VALUE self) {
   return godot_rb_wrap_variant(godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING], self_variant);
 }
 
+__attribute__((used)) VALUE godot_rb_mSymbol_i_to_godot(VALUE self) {
+  GDExtensionStringName string = godot_rb_obj_to_string_name(self);
+  GDExtensionVariantPtr self_variant = godot_rb_variant_alloc();
+  godot_rb_gdextension.variant_from_string_name(self_variant, &string);
+  godot_rb_gdextension.string_name_destroy(&string);
+  return godot_rb_wrap_variant(godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING_NAME], self_variant);
+}
+
 void godot_rb_init_Mixins() {
   godot_rb_require_relative(mixins);
   const VALUE space = rb_const_get(godot_rb_mGodot, rb_intern("Mixins"));
@@ -49,4 +57,5 @@ void godot_rb_init_Mixins() {
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL] = godot_rb_cVariant;
   
   d(String)
+  d(Symbol)
 }

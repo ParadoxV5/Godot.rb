@@ -2,11 +2,15 @@ module Godot
   
   class String < Variant
     VARIANT_TYPE: 4
-    def to_s: () -> String
-    def to_str: () -> String
+    def to_s: () -> ::String
+    def to_str: () -> ::String
   end
 
   class StringName < Variant
+    VARIANT_TYPE: 21
+    def to_s: () -> ::String
+    def to_str: () -> ::String
+    def to_sym: () -> Symbol
   end
   
   class Object < Variant
