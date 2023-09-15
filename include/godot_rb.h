@@ -92,7 +92,7 @@ typedef void (* godot_rb_variant_call_function)(
   VALUE func,
   long argc,
   GDExtensionConstVariantPtr* argv,
-  uintmax_t var,
+  VALUE var,
   GDExtensionCallError* r_error
 );
 /**
@@ -103,7 +103,7 @@ typedef void (* godot_rb_variant_call_function)(
     an extra arg directly passed to the function for your various purposes
   @return if no {GDExtensionCallError error} raised, otherwise it {rb_raise go-tos instead of returning}
 */
-void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, uintmax_t var);
+void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, VALUE var);
 
 
 // General Helpers //

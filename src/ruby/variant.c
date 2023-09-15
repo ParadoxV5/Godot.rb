@@ -118,7 +118,7 @@ __attribute__((used)) VALUE godot_rb_cVariant_i__aset(VALUE self, VALUE key, VAL
   a(godot_rb_obj_get_variant(value), variant_set, value)
 
 
-void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, uintmax_t var) {
+void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, VALUE var) {
   
   GDExtensionVariantPtr self_variant = godot_rb_obj_get_variant(self);
   long argc = RARRAY_LEN(args);
@@ -175,15 +175,19 @@ static void godot_rb_cVariant_impl_initialize(
   GDExtensionConstVariantPtr* argv,
   VALUE self,
   GDExtensionCallError* r_error
-) { godot_rb_gdextension.variant_construct(
-  FIX2INT(rb_const_get_from(CLASS_OF(self), godot_rb_idVARIANT_TYPE)),
-  self_variant,
-  argv,
-  argc,
-  r_error
-); }
+) {
+  VALUE variant_type_value = rb_const_get_from(CLASS_OF(self), godot_rb_idVARIANT_TYPE);
+  unsigned int variant_type = FIX2INT(variant_type_value);
+  if RB_UNLIKELY(variant_type >= GDEXTENSION_VARIANT_TYPE_VARIANT_MAX)
+    rb_raise(rb_eRangeError,
+      "`VARIANT_TYPE' %"PRIsVALUE" outside of valid range: 0...%ud (one does not simply `initialize' a Variant)",
+      variant_type_value,
+      GDEXTENSION_VARIANT_TYPE_VARIANT_MAX
+    );
+  godot_rb_gdextension.variant_construct(variant_type, self_variant, argv, argc, r_error);
+}
 VALUE godot_rb_cVariant_i_initialize(VALUE self, VALUE args) {
-  godot_rb_variant_call((godot_rb_variant_call_function) godot_rb_cVariant_impl_initialize, self, rb_intern("initialize"), args, self);
+  godot_rb_variant_call(godot_rb_cVariant_impl_initialize, self, rb_intern("initialize"), args, self);
   return args;
 }
 
@@ -201,12 +205,13 @@ __attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv
   VALUE meth, args;
   rb_scan_args(argc, argv, "1*", &meth, &args);
   GDExtensionVariantPtr ret_variant = godot_rb_variant_alloc();
+  // {VALUE} ↔️ {void*} casts are exact
   godot_rb_variant_call(
     (godot_rb_variant_call_function)godot_rb_cVariant_impl_godot_send,
     self,
     meth,
     args,
-    (uintmax_t)ret_variant
+    (VALUE)ret_variant
   );
   return godot_rb_parse_variant(ret_variant);
 }

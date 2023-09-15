@@ -10,7 +10,7 @@ module Godot
   # two `Variant`s may be distinct Ruby instances even if they reference the same Godot-internal data.
   class Variant
     include Godot
-    VARIANT_TYPE = 0
+    VARIANT_TYPE = -1 # “one does not simply `initialize' a Variant”
     
     def get(...)
       self.[](...)
