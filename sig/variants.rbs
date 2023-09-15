@@ -13,6 +13,9 @@ module Godot
     def to_sym: () -> Symbol
   end
   
+  class PackedStringArray
+  end
+  
   class Object < Variant
     VARIANT_TYPE: 24
     alias call godot_send

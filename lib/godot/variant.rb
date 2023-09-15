@@ -27,7 +27,7 @@ module Godot
     # Zeroth, Ruby suffixes are special
       case name[-1]
       when '=' 
-        __send__(:[]=, # https://github.com/soutaro/steep/issues/914
+        public_send(:[]=, # https://github.com/soutaro/steep/issues/914
           name[..-1], #: ::String
           *args
         )
@@ -81,7 +81,6 @@ module Godot
       Engine.get_singleton(name) #: Object
     elsif ClassDB.class_exists(name) # Second, check classes
       Class.new const_get(Godot::ClassDB.get_parent_class(name)) #: singleton(Object)
-    #elsif false # Third, check Autoloads (FIXME: #help-wanted)
     else
       super # raise {NameError}
     end.tap { const_set name, _1 }
