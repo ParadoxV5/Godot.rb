@@ -19,4 +19,33 @@ module Godot
       include Enumerable[E]
     end
   end
+  
+  
+  class PackedByteArray < Variant::AbstractArray[Int]
+    VARIANT_TYPE: 29
+  end
+  class PackedInt32Array < Variant::AbstractArray[Int]
+    VARIANT_TYPE: 30
+  end
+  class PackedInt64Array < Variant::AbstractArray[Int]
+    VARIANT_TYPE: 31
+  end
+  class PackedFloat32Array < Variant::AbstractArray[Float]
+    VARIANT_TYPE: 32
+  end
+  class PackedFloat64Array < Variant::AbstractArray[Float]
+    VARIANT_TYPE: 33
+  end
+  class PackedStringArray < Variant::AbstractArray[String]
+    VARIANT_TYPE: 34
+  end
+  class PackedVector2Array < Variant::AbstractArray[Vector2]
+    VARIANT_TYPE: 35
+  end
+  class PackedVector3Array < Variant::AbstractArray[Vector3]
+    VARIANT_TYPE: 36
+  end
+  class PackedColorArray < Variant::AbstractArray[Color]
+    VARIANT_TYPE: 37
+  end
 end
