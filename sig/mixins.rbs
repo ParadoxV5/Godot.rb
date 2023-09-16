@@ -9,10 +9,16 @@ module Godot
     module  FalseClass include _ToGodot[Variant] end
     class ::FalseClass include FalseClass end
     
+    module  Integer include _ToGodot[Int] end
+    class ::Integer include Integer end
+    
     module  String include _ToGodot[Godot::String] end
     class ::String include String end
     
     module  Symbol include _ToGodot[StringName] end
     class ::Symbol include Symbol end
+    
+    module  Hash include _ToGodot[Dictionary] end
+    class ::Hash[unchecked out K, unchecked out V] include Hash end
   end
 end

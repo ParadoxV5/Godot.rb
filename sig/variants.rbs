@@ -1,4 +1,9 @@
 module Godot
+  class Int < Variant
+  end
+  
+  class Float < Variant
+  end
   
   class String < Variant
     VARIANT_TYPE: 4
@@ -13,7 +18,10 @@ module Godot
     def to_sym: () -> Symbol
   end
   
-  class PackedStringArray
+  class Dictionary < Variant
+  end
+  
+  class PackedStringArray < Variant
   end
   
   class Object < Variant

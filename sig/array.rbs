@@ -1,0 +1,22 @@
+module Godot
+  class Variant
+    #class AbstractArray[E < (Variant | bool)] < Variant
+      # https://github.com/ruby/rbs/issues/1471
+    class AbstractArray[unchecked out E < Variant] < Variant
+      
+      def self.from: [E < Variant] (_Each[E] enum, **bot kwargs) -> AbstractArray[E]
+      def self.[]: [E < Variant] (*E elems, **bot kwargs) -> AbstractArray[E]
+      
+      type index = _ToGodot[Int | Float]
+      def []: (index key) -> E
+      def get: (index key) -> E?
+      def []=: (index key, E value) -> E
+      def set: (index key, E value) -> E?
+      
+      include _Each[E]
+      def each: () -> Enumerator[E, self]
+              | ...
+      include Enumerable[E]
+    end
+  end
+end
