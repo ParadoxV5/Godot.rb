@@ -26,7 +26,7 @@ module Godot
     def method_missing(name, *args)
     # Zeroth, Ruby suffixes are special
       case name[-1]
-      when '=' 
+      when '='
         public_send(:[]=, # https://github.com/soutaro/steep/issues/914
           name[..-1], #: ::String
           *args
@@ -40,7 +40,7 @@ module Godot
             self[name]
           rescue KeyError
     # Second, check methods
-            godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises 
+            godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises
           end
         else
           godot_send(name, *args) # Same as in the `rescue KeyError` block, just without any `KeyError` causes

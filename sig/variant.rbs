@@ -1,8 +1,9 @@
 module Godot
   interface _ToGodot[out G < Variant] def to_godot: () -> G end
   
+  type type_like[out T < Variant] = Kernel & _ToGodot[T]
+  type variant_like = type_like[Variant]
   type variant = Variant | bool?
-  type variant_like = Kernel & _ToGodot[Variant]
   class Variant
     include Godot
     VARIANT_TYPE: Integer

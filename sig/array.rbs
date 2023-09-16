@@ -2,16 +2,15 @@ module Godot
   class Variant
     #class AbstractArray[E < (Variant | bool)] < Variant
       # https://github.com/ruby/rbs/issues/1471
-    class AbstractArray[unchecked out E < Variant] < Variant
-      
-      def self.from: [E < Variant] (_Each[E] enum, **bot kwargs) -> AbstractArray[E]
-      def self.[]: [E < Variant] (*E elems, **bot kwargs) -> AbstractArray[E]
+    class AbstractArray[unchecked out E < Variant] < Variant      
+      def self.from: [E < Variant] (_Each[type_like[E]] enum, **bot kwargs) -> instance
+      def self.[]: [E < Variant] (*type_like[E] elems, **bot kwargs) -> instance
       
       type index = _ToGodot[Int | Float]
       def []: (index key) -> E
       def get: (index key) -> E?
-      def []=: (index key, E value) -> E
-      def set: (index key, E value) -> E?
+      def []=: (index key, type_like[E] value) -> E
+      def set: (index key, type_like[E] value) -> E?
       
       include _Each[E]
       def each: () -> Enumerator[E, self]

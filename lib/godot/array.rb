@@ -21,7 +21,10 @@ module Godot
       def self.[](*elems, **kwargs)
         array = new(**kwargs)
         array.resize(elems.size)
-        elems.each_with_index {|elem, index| array[index] = elem }
+        elems.each_with_index do|elem, index|
+          #@type var elem: untyped
+          array[index] = elem
+        end
         array
       end
       

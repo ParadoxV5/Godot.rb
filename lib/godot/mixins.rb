@@ -1,5 +1,5 @@
 module Godot
-  module Mixins 
+  module Mixins
     %i[
       NilClass
       TrueClass

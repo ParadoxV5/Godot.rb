@@ -70,7 +70,7 @@ module Godot
     # bool _supports_documentation ( ) virtual const
     # void _thread_enter ( ) virtual
     # void _thread_exit ( ) virtual
-    # String _validate_path ( String path ) virtual const 
+    # String _validate_path ( String path ) virtual const
     # 
     # ?
     # void _finish ( ) virtual
