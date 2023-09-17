@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Godot
-  class RubyLanguage < ScriptLanguage
-    # unless this overrides {#initialize}
-    extend self
+  # Singleton
+  class << RubyLanguage = ScriptLanguageExtension.new
     
     # TODO: don’t generate a new {Variant} on every call
     
@@ -19,10 +18,6 @@ module Godot
     # Whether or not users get to name classes themselves – no for both GDScript and C#
     def _has_named_classes = false
     
-    module Autoloads
-      Godot.include self
-      public_class_method :remove_const
-    end
     # Same _as {add_named_global_constant}, but does not set if the value is falsy. This is because
     # [Godot Engine preloads `nil`s](https://github.com/godotengine/godot/blob/4.1.1-stable/main/main.cpp#L3009)
     # in _case the autoload fails to load.
@@ -30,8 +25,8 @@ module Godot
     def _add_global_constant(name, value)
       value and add_named_global_constant(name, value)
     end
-    def _add_named_global_constant(...) = Autoloads.const_set(...)
-    def _remove_named_global_constant(...) = Autoloads.remove_const(...)
+    def _add_named_global_constant(name, value) = Ruby::Autoloads.const_set(name, value) #XXX Steep
+    def _remove_named_global_constant(name) = Ruby::Autoloads.remove_const(name) #XXX Steep
     
     # LSP integration
     # String _auto_indent_code ( String code, int from_line, int to_line ) virtual const
@@ -84,5 +79,12 @@ module Godot
     # Script _make_template ( String template, String class_name, String base_class_name ) virtual const
     # Error _open_in_external_editor ( Script script, int line, int column ) virtual
     # bool _supports_builtin_mode ( ) virtual const
+  end
+  
+  class Ruby < ScriptExtension
+    module Autoloads
+      public_class_method :remove_const
+      Godot.include self
+    end
   end
 end

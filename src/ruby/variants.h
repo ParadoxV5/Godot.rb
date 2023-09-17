@@ -17,6 +17,12 @@ GDExtensionString godot_rb_obj_to_string(VALUE self);
   @return the StringName (don’t forget to {godot_rb_gdextension#string_name_destroy destroy} it when done with it!)
 */
 GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
+/**
+  Convert a C String into a {GDExtensionStringName Godot internal StringName}
+  @param chars C String (0-terminated Latin-1 `char`s)
+  @return the StringName (don’t forget to {godot_rb_gdextension#string_name_destroy destroy} it when done with it!)
+*/
+GDExtensionStringName godot_rb_chars_to_string_name(const char* chars);
 
 VALUE godot_rb_sym_from_string_name(GDExtensionConstStringNamePtr string_name);
 
@@ -41,5 +47,6 @@ void godot_rb_init_String(void);
 void godot_rb_init_StringName(void);
 void godot_rb_init_Mixins(void);
 void godot_rb_init_Engine(void);
+void godot_rb_init_RubyLanguage(void);
 
 #endif

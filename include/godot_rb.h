@@ -58,6 +58,7 @@ extern struct godot_rb_gdextension {
 
 extern VALUE godot_rb_mGodot;
 extern VALUE godot_rb_cVariant;
+extern VALUE godot_rb_cObject;
 extern VALUE godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
 
 #define godot_rb_idVARIANT_TYPE rb_intern("VARIANT_TYPE")

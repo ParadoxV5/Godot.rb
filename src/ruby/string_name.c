@@ -1,5 +1,15 @@
 #include "variants.h"
 
+GDExtensionInterfaceStringNewWithLatin1Chars gdext_string_new_with_latin1_chars;
+GDExtensionStringName godot_rb_chars_to_string_name(const char* chars) {
+  GDExtensionString string;
+  gdext_string_new_with_latin1_chars(&string, chars);
+  GDExtensionStringName string_name;
+  godot_rb_gdextension.string_name_from_string(&string_name, (GDExtensionConstStringNamePtr[]) {&string});
+  godot_rb_gdextension.string_destroy(&string);
+  return string_name;
+}
+
 /*TODO:
   How about caching converted StringNames (possibly permanently)
   so we don’t have to serialize a new Variant[StringName] every time?
@@ -57,6 +67,8 @@ VALUE godot_rb_cStringName_i_to_s(VALUE self) { return rb_sym_to_s(godot_rb_cStr
 VALUE godot_rb_cStringName_i_to_str(VALUE self) { return rb_sym2str(godot_rb_cStringName_i_to_sym(self)); }
 
 init(StringName, STRING_NAME)
+  gdext_string_new_with_latin1_chars =
+    (GDExtensionInterfaceStringNewWithLatin1Chars)godot_rb_get_proc("string_new_with_latin1_chars");
   rb_define_method(cStringName, "to_sym", godot_rb_cStringName_i_to_sym, 0);
   rb_define_method(cStringName, "to_s"  , godot_rb_cStringName_i_to_s  , 0);
   rb_define_method(cStringName, "to_str", godot_rb_cStringName_i_to_str, 0);

@@ -11,9 +11,6 @@ GDExtensionInterfaceGetGodotVersion get_godot_version;
 /* INTERFACE: Memory */
 GDExtensionInterfaceMemRealloc mem_realloc;
 
-/* INTERFACE: Godot Core */
-GDExtensionInterfacePrintScriptErrorWithMessage print_script_error_with_message;
-
 /* INTERFACE: Variant */
 GDExtensionInterfaceVariantCallStatic variant_call_static;
 GDExtensionInterfaceVariantEvaluate variant_evaluate;
@@ -23,7 +20,6 @@ GDExtensionInterfaceVariantIterGet variant_iter_get;
 GDExtensionInterfaceVariantHash variant_hash;
 GDExtensionInterfaceVariantRecursiveHash variant_recursive_hash;
 GDExtensionInterfaceVariantHashCompare variant_hash_compare;
-GDExtensionInterfaceVariantDuplicate variant_duplicate;
 GDExtensionInterfaceVariantStringify variant_stringify;
 GDExtensionInterfaceVariantHasMember variant_has_member;
 GDExtensionInterfaceVariantHasKey variant_has_key;
@@ -49,8 +45,6 @@ GDExtensionInterfaceScriptInstanceCreate script_instance_create;
 GDExtensionInterfaceClassdbConstructObject classdb_construct_object;
 
 /* INTERFACE: ClassDB Extension */
-GDExtensionInterfaceClassdbRegisterExtensionClass classdb_register_extension_class;
-GDExtensionInterfaceClassdbRegisterExtensionClassMethod classdb_register_extension_class_method;
 GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant classdb_register_extension_class_integer_constant;
 GDExtensionInterfaceClassdbRegisterExtensionClassProperty classdb_register_extension_class_property;
 GDExtensionInterfaceClassdbRegisterExtensionClassPropertyGroup classdb_register_extension_class_property_group;
