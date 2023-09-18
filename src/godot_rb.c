@@ -49,10 +49,10 @@ __attribute__((used)) GDExtensionBool godot_rb_main(
   // Load GDExtension API
   godot_rb_gdextension.variant_from_string      = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
   godot_rb_gdextension.variant_from_string_name = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME);
-  godot_rb_gdextension.variant_from_object      = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_OBJECT);
+  godot_rb_gdextension.variant_from_object_ptr  = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_OBJECT);
   godot_rb_gdextension.string_from_variant      = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
   godot_rb_gdextension.string_name_from_variant = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME);
-  godot_rb_gdextension.object_from_variant      = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_OBJECT);
+  godot_rb_gdextension.object_ptr_from_variant  = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_OBJECT);
   GDExtensionInterfaceVariantGetPtrConstructor variant_get_ptr_constructor =
     (GDExtensionInterfaceVariantGetPtrConstructor)godot_rb_get_proc("variant_get_ptr_constructor");
   godot_rb_gdextension.string_from_string_name = variant_get_ptr_constructor(GDEXTENSION_VARIANT_TYPE_STRING, 2);
@@ -94,7 +94,14 @@ bool godot_rb_protect(VALUE (* function)(VALUE var), VALUE* var_p) {
         VALUE func = rb_funcall(backtrace, rb_intern("label"), 0);
         VALUE file = rb_funcall(backtrace, rb_intern("path" ), 0);
         int32_t line;
-        rb_integer_pack(rb_funcall(backtrace, rb_intern("lineno"), 0), &line, 1, sizeof(int32_t), 0, INTEGER_PACK_2COMP);
+        rb_integer_pack(
+          rb_funcall(backtrace, rb_intern("lineno"), 0),
+          &line,
+          1,
+          sizeof(int32_t),
+          0,
+          INTEGER_PACK_2COMP | INTEGER_PACK_NATIVE_BYTE_ORDER
+        );
         print_error(
           message, message,
           StringValueCStr(func),

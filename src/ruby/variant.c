@@ -46,12 +46,12 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
       if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
         // “`godot_rb_parse_object`”
-        GDExtensionObject object;
-        godot_rb_gdextension.object_from_variant(&object, variant);
+        GDExtensionObjectPtr object;
+        godot_rb_gdextension.object_ptr_from_variant(&object, variant);
         GDExtensionStringName class_name_str;
-        godot_rb_gdextension.object_get_class_name(&object, godot_rb_library, &class_name_str);
-        godot_rb_gdextension.object_destroy(&object);
-        VALUE class_name = godot_rb_sym_from_string_name(class_name_str);
+        godot_rb_gdextension.object_get_class_name(object, godot_rb_library, &class_name_str);
+        godot_rb_gdextension.object_destroy(object);
+        VALUE class_name = godot_rb_sym_from_string_name(&class_name_str);
         godot_rb_gdextension.string_name_destroy(class_name_str);
         // “`godot_rb_wrap_object`”
         return TypedData_Wrap_Struct(
@@ -199,7 +199,9 @@ static void godot_rb_cVariant_impl_godot_send(
   GDExtensionVariantPtr r_return,
   GDExtensionCallError* r_error
 ) {
-  godot_rb_gdextension.variant_call(self_variant, godot_rb_obj_to_string_name(meth), argv, argc, r_return, r_error);
+  GDExtensionStringName meth_string_name = godot_rb_obj_to_string_name(meth);
+  godot_rb_gdextension.variant_call(self_variant, &meth_string_name, argv, argc, r_return, r_error);
+  godot_rb_gdextension.string_name_destroy(&meth_string_name);
 }
 __attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
   VALUE meth, args;

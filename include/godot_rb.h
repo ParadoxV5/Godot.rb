@@ -48,8 +48,8 @@ extern struct godot_rb_gdextension {
   GDExtensionVariantFromTypeConstructorFunc variant_from_string_name;
   GDExtensionPtrDestructor string_name_destroy;
   // Object APIs
-  GDExtensionTypeFromVariantConstructorFunc object_from_variant;
-  GDExtensionVariantFromTypeConstructorFunc variant_from_object;
+  GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant;
+  GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr;
   GDExtensionPtrDestructor object_destroy;
 } godot_rb_gdextension;
 
