@@ -25,8 +25,8 @@ module Godot
     def _add_global_constant(name, value)
       value and add_named_global_constant(name, value)
     end
-    def _add_named_global_constant(name, value) = Ruby::Autoloads.const_set(name, value) #XXX Steep
-    def _remove_named_global_constant(name) = Ruby::Autoloads.remove_const(name) #XXX Steep
+    def _add_named_global_constant(name, value) = Ruby::Autoloads.const_set(name, value)
+    def _remove_named_global_constant(name) = Ruby::Autoloads.remove_const(name)
     
     # LSP integration
     # String _auto_indent_code ( String code, int from_line, int to_line ) virtual const

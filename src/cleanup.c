@@ -6,7 +6,7 @@ static void core(void) {
 }
 
 static void (* const godot_rb_cleanup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core};
-void godot_rb_cleanup(__attribute__((unused)) void* userdata, GDExtensionInitializationLevel p_level) {
+void godot_rb_cleanup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel p_level) {
   void (*func)(void) = godot_rb_cleanup_functions[p_level];
   if RB_UNLIKELY(func) {
     printf("cleaning up Godot.rb init level %u...\n", p_level);

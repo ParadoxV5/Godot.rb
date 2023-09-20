@@ -10,7 +10,7 @@ VALUE godot_rb_Engine_impl_get_singleton(GDExtensionStringName name) {
   // Probably should not free an actually-returned pointer
   return godot_rb_wrap_variant(godot_rb_cObject, variant);
 }
-VALUE godot_rb_Engine_get_singleton(__attribute__((unused)) VALUE self, VALUE name) {
+VALUE godot_rb_Engine_get_singleton(RB_UNUSED_VAR(VALUE self), VALUE name) {
   return godot_rb_Engine_impl_get_singleton(godot_rb_obj_to_string_name(name));
 }
 

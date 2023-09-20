@@ -2,8 +2,8 @@
 #define GODOT_RB_VARIANTS_H
 #include <godot_rb.h>
 
-/** Stand-ins for Godot Engine internal types */
-typedef void* GDExtensionString, * GDExtensionStringName, * GDExtensionObject;
+/** Stand-ins for Godot Engine internal types (for stack-allocation) */
+typedef void* GDExtensionString, * GDExtensionStringName;
 
 /**
   Serialize a Ruby String into a {GDExtensionString Godot internal String}

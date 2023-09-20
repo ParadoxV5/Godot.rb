@@ -3,7 +3,7 @@ VALUE godot_rb_cVariant, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX
 
 /** Fetch size from `extension_api.json` */
 #define VARIANT_SIZE 40
-size_t godot_rb_cVariant_size(__attribute__((unused)) const void* data) { return VARIANT_SIZE; }
+size_t godot_rb_cVariant_size(RB_UNUSED_VAR(const void* data)) { return VARIANT_SIZE; }
 void godot_rb_cVariant_free(GDExtensionVariantPtr data) {
   godot_rb_gdextension.variant_destroy(data);
   godot_rb_gdextension.mem_free(data);
@@ -112,9 +112,9 @@ GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self) {
 > To avoid this, use the [Object.get()](https://docs.godotengine.org/en/stable/classes/class_object.html#id1)
 > and [Object.set()](https://docs.godotengine.org/en/stable/classes/class_object.html#id6) methods instead.
 ⸺ https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html#dictionary */
-__attribute__((used)) VALUE godot_rb_cVariant_i__aref(VALUE self, VALUE key)
+VALUE godot_rb_cVariant_i__aref(VALUE self, VALUE key)
   a(godot_rb_variant_alloc(), variant_get, godot_rb_parse_variant(value_variant))
-__attribute__((used)) VALUE godot_rb_cVariant_i__aset(VALUE self, VALUE key, VALUE value)
+VALUE godot_rb_cVariant_i__aset(VALUE self, VALUE key, VALUE value)
   a(godot_rb_obj_get_variant(value), variant_set, value)
 
 
@@ -170,7 +170,7 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
 
 static void godot_rb_cVariant_impl_initialize(
   GDExtensionVariantPtr self_variant,
-  __attribute__((unused)) VALUE func,
+  RB_UNUSED_VAR(VALUE func),
   long argc,
   GDExtensionConstVariantPtr* argv,
   VALUE self,
@@ -203,7 +203,7 @@ static void godot_rb_cVariant_impl_godot_send(
   godot_rb_gdextension.variant_call(self_variant, &meth_string_name, argv, argc, r_return, r_error);
   godot_rb_gdextension.string_name_destroy(&meth_string_name);
 }
-__attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
+VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
   VALUE meth, args;
   rb_scan_args(argc, argv, "1*", &meth, &args);
   GDExtensionVariantPtr ret_variant = godot_rb_variant_alloc();
@@ -220,14 +220,14 @@ __attribute__((used)) VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv
 
 
 GDExtensionInterfaceVariantHasMethod variant_has_method;
-__attribute__((used)) VALUE godot_rb_cVariant_i_has_method(VALUE self, VALUE name) {
+VALUE godot_rb_cVariant_i_has_method(VALUE self, VALUE name) {
   GDExtensionStringName string_name = godot_rb_obj_to_string_name(name);
   GDExtensionBool ret = variant_has_method(godot_rb_obj_get_variant(self), &string_name);
   godot_rb_gdextension.string_name_destroy(&string_name);
   return ret ? Qtrue : Qfalse;
 }
 
-__attribute__((used)) VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
+VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
 }
 
