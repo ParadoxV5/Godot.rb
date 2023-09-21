@@ -17,10 +17,7 @@ module Godot
   end
   RubyLanguage: ScriptLanguageExtension
   
-  # until we have RBS integration
-  class ScriptExtension < Object
-  end
-  class Ruby < ScriptExtension
+  class Ruby
     module Autoloads
       public def self.remove_const: (interned name) -> top
     end

@@ -1,0 +1,8 @@
+module Godot
+  # until we have RBS integration
+  class ScriptExtension < Object
+  end
+  
+  class Ruby < ScriptExtension
+  end
+end

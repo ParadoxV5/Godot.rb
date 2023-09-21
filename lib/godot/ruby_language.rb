@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module Godot
+  module Ruby::Autoloads
+    public_class_method :remove_const
+    Godot.include self
+  end
+  
   # Singleton
   class << RubyLanguage = ScriptLanguageExtension.new
     
@@ -79,12 +84,6 @@ module Godot
     # Script _make_template ( String template, String class_name, String base_class_name ) virtual const
     # Error _open_in_external_editor ( Script script, int line, int column ) virtual
     # bool _supports_builtin_mode ( ) virtual const
-  end
-  
-  class Ruby < ScriptExtension
-    module Autoloads
-      public_class_method :remove_const
-      Godot.include self
-    end
+    
   end
 end
