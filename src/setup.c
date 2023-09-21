@@ -2,10 +2,9 @@
 #include "ruby/variants.h"
 
 /** Load encodings – for some reason they are separate in `rubyarchhdrdir` */
-VALUE Init_enc(RB_UNUSED_VAR(VALUE var)) {
+void Init_enc(RB_UNUSED_VAR(va_list* args)) {
   rb_require("enc/encdb.so"),
   rb_require("enc/trans/transdb.so");
-  return var;
 }
 
 /**
@@ -25,10 +24,10 @@ static bool core(void) {
   }
   ruby_script(arg0);
   ruby_init_loadpath();
-  return godot_rb_protect(Init_enc, NULL);
+  return godot_rb_protect(Init_enc);
 }
 
-static VALUE scene_unprotected(RB_UNUSED_VAR(VALUE value)) {
+static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
   // Load {Godot}
   VALUE ret = godot_rb_require_relative(version);
   godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
@@ -48,9 +47,8 @@ static VALUE scene_unprotected(RB_UNUSED_VAR(VALUE value)) {
   godot_rb_init_Mixins();
   godot_rb_init_Engine();
   godot_rb_init_RubyLanguage();
-  return ret;
 }
-static bool scene(void) { return godot_rb_protect(scene_unprotected, NULL); }
+static bool scene(void) { return godot_rb_protect(scene_unprotected); }
 
 static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, NULL, scene};
 void godot_rb_setup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel p_level) {

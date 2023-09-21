@@ -117,22 +117,17 @@ extern rb_encoding* godot_rb_encoding_UTF32;
 #define godot_rb_error(message) \
   godot_rb_gdextension.print_error_with_message  (message, message, __func__, __FILE__, __LINE__, false)
 /** `begin`–`rescue`s the passed function.
-  If an exception occurs, log a Script Error or, for non-{rb_eStandardError}s, a generic Error.
+  If an exception occurs, log a Script Error or, for non-{rb_eStandardError}s, a generic Error;
+  also ping the Godot Engine Editor if exception backtrace is available
+  
   (assumes level `CORE` set up)
-  @param var the pointer to an extra arg
-  * if not {NULL}:
-    * The arg gets directly passed to the function for your various purposes.
-    * The memory will store the return of calling the function if successful or the exception if not.
-    * The Godot Engine Editor gets pinged if an exception raises
-  * if {NULL}:
-    * This function passes {Qnil} to the passed function and discards its return.
 */
-bool godot_rb_protect(VALUE (*function)(VALUE var), VALUE* p_var);
+bool godot_rb_protect(void (*function)(va_list* args), ...);
 
 /** Entry Function */
 __attribute__((used)) GDExtensionBool godot_rb_main(
-  GDExtensionInterfaceGetProcAddress p_get_proc_address,
-  GDExtensionClassLibraryPtr p_library,
+  GDExtensionInterfaceGetProcAddress get_proc_address,
+  GDExtensionClassLibraryPtr library,
   GDExtensionInitialization* r_initialization
 );
 

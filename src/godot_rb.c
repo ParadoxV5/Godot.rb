@@ -11,8 +11,8 @@ VALUE godot_rb_mGodot;
 VALUE godot_rb_cObject;
 
 GDExtensionBool godot_rb_main(
-  GDExtensionInterfaceGetProcAddress p_get_proc_address,
-  GDExtensionClassLibraryPtr p_library,
+  GDExtensionInterfaceGetProcAddress get_proc_address,
+  GDExtensionClassLibraryPtr library,
   GDExtensionInitialization* r_initialization
 ) {
   // Set up de/initialization functions
@@ -20,8 +20,8 @@ GDExtensionBool godot_rb_main(
   r_initialization->initialize = godot_rb_setup;
   r_initialization->deinitialize = godot_rb_cleanup;
   // Save GDExtension
-  godot_rb_get_proc = p_get_proc_address;
-  godot_rb_library = p_library;
+  godot_rb_get_proc = get_proc_address;
+  godot_rb_library = library;
   // Initialize API variables
   for(GDExtensionInitializationLevel i = 0; i < GDEXTENSION_MAX_INITIALIZATION_LEVEL; ++i)
     godot_rb_init_levels[i] = false;
@@ -68,25 +68,23 @@ GDExtensionBool godot_rb_main(
   return true;
 }
 
-bool godot_rb_protect(VALUE (* function)(VALUE var), VALUE* var_p) {
+bool godot_rb_protect(void (* function)(va_list* args), ...) {
+  va_list va;
+  va_start(va, function);
   int state;
-  bool has_var_p = var_p ? true : false;
-  if RB_LIKELY(has_var_p) // there’ll be more user calls than our internal calls
-    *var_p = rb_protect(function, *var_p, &state);
-  else
-    rb_protect(function, Qnil, &state);
+  // {VALUE} ↔️ {void*} casts are exact; return is `void`ed
+  rb_protect((VALUE (*)(VALUE))function, (VALUE)&va, &state);
+  va_end(va);
   if RB_UNLIKELY(state) { // Handle exception
     VALUE error = rb_errinfo();
     rb_set_errinfo(Qnil); // Clear exception
-    if RB_LIKELY(has_var_p) // ditto
-      *var_p = error;
     VALUE full_message = rb_funcall(error, rb_intern("full_message"), 0);
     char* message = StringValueCStr(full_message);
     GDExtensionInterfacePrintErrorWithMessage print_error =
       RB_LIKELY(rb_obj_is_kind_of(error, rb_eStandardError))
       ? godot_rb_gdextension.print_script_error_with_message
       : godot_rb_gdextension.print_error_with_message;
-    // So manu {Qnil} checks ugh
+    // So many {Qnil} checks ugh
     VALUE backtrace = rb_funcall(error, rb_intern("backtrace_locations"), 0);
     if RB_LIKELY(!NIL_P(backtrace)) {
       backtrace = rb_ary_entry(backtrace, 0);
@@ -107,13 +105,13 @@ bool godot_rb_protect(VALUE (* function)(VALUE var), VALUE* var_p) {
           StringValueCStr(func),
           RB_UNLIKELY(NIL_P(file)) ? "Godot.rb" : StringValueCStr(file), // may be {Qnil} too
           line,
-          has_var_p
+          true
         );
         return false;
       }
     }
     // No backtrace info available if it reaches this point
-    print_error(message, message, __func__, "Godot.rb", 0, has_var_p);
+    print_error(message, message, __func__, "Godot.rb", 0, false);
     return false;
   }
   return true;
