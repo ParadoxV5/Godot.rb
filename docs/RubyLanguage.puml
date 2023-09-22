@@ -1,0 +1,105 @@
+@startuml
+autoactivate on
+header Overview of the ""RubyLanguage"" Family’s Call Sequence on a High Level
+footer page %page% of %lastpage%
+
+title Load ""RubyLanguage"" and ""script.rb""
+participant godot [
+  //Godot Engine//
+  //& GDExtension//
+]
+participant lang [
+  ""Godot::""
+  ""RubyLanguage""
+  singleton
+]
+participant ruby [
+  ""Godot::Ruby""
+  instance
+]
+participant class [
+  ""Godot::Object""
+  class
+]
+activate godot
+godot -> godot: ""godot_rb_setup""
+  create lang
+  godot -> lang: ""register_""\n""script_language""
+  return
+return
+godot -> lang: ""create_script""
+  create ruby
+  lang -> ruby: ""initialize""
+    ruby -> godot: ""super""
+      godot -> ruby: ""create_instance_func""
+      return Godot internal ""Object""
+    return
+  return ""self""
+return ""Godot::Ruby""
+godot -> ruby: ""load""
+  create class
+  ruby -> class: ""eval""
+  return ""self""
+return
+
+newpage Instantiate ""MyScript""
+participant instance [
+  ""GDExtension""
+  ""ScriptInstancePtr""
+]
+participant object [
+  ""Godot::Object""
+  instance
+]
+godot -> ruby: ""instance_create""
+  ruby -> class: ""new""
+    create object
+    class -> object: ""initialize""
+    return ""self""
+  return ""Godot::Object""\ninstance
+  ruby -> object: Protect from GC
+  return
+  create instance
+  ruby -> instance: ""script_instance_create""
+  return ""self""
+return ""GDExtensionScriptInstancePtr""
+
+newpage: Check and Call (existent) ""MyScript#member"" (attribute or method)
+godot -> ruby: list members
+  ruby -> class: ""#instance_methods""
+  return ""Array[Symbol]""
+return processed array
+godot -> instance: call ""member""
+  instance -> object: ""::member""
+    object -> class: ""#member"" (instance method)
+      note left: There’d probably seldom be an eigenclass.
+      opt GDScript Interop
+        class -> godot: GDScript function
+        return ""ret.to_godot""
+      end
+    return ""ret""
+  return ""ret""
+return ""ret.to_godot""
+
+newpage Cleanup
+note across:\
+For Ruby objects, the destruction ❌ means queued for GC mark-and-sweep. \
+GDExtension counterparts may be immediately ""free""d.
+godot -> instance: ""free""
+  instance ->> object: Unlock GC
+  return
+  destroy object
+return
+destroy instance
+godot -> ruby: ""free_instance_func""
+  ruby ->> class: Unlock GC
+  return
+  destroy class
+return
+destroy ruby
+godot -> godot: ""godot_rb_cleanup""
+  godot -> lang!!: ""unregister_""\n""script_language""
+return
+destroy godot
+
+@enduml
