@@ -1,12 +1,12 @@
 module Godot
   module Mixins
-    module  NilClass include _ToGodot[Variant] end
+    module  NilClass include _ToGodot[Variant] def nonzero?: () -> false end
     class ::NilClass include NilClass end
     
-    module  TrueClass include _ToGodot[Variant] end
+    module  TrueClass include _ToGodot[Variant] def nonzero?: () -> true end
     class ::TrueClass include TrueClass end
     
-    module  FalseClass include _ToGodot[Variant] end
+    module  FalseClass include _ToGodot[Variant] def nonzero?: () -> false end
     class ::FalseClass include FalseClass end
     
     module  Integer include _ToGodot[Int] end

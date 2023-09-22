@@ -1,71 +1,62 @@
 # frozen_string_literal: true
-
 module Godot
   class Ruby < ScriptExtension
     
-    # bool _can_instantiate ( ) virtual const
+    # The Godot Editor pass entire source code( references)s around to enable IDE capabilities independent of the disk
+    attr_accessor :source_code
+    def _get_source_code = source_code || String.new
+    alias _set_source_code source_code=
+    def _has_source_code = source_code.nonzero?
+    
+    # The parsed class, which may be de-sync with {#source_code} until {#_reload}ed
+    attr_reader :klass
+    
+    def _get_language = Godot::RubyLanguage
+    # TODO: LSP integration
+    def _is_tool = true
+    
+    def _get_global_name
+      name = klass&.name #: ::String?
+      name ? StringName.new(name) : StringName.new
+    end
+    def _is_valid = !!klass
+    # *Cannot* instantiate if the script is non-existent (it shouldn’t);
+    # *shouldn’t* instantiate if it’s invalid (fails static checks)
+    alias _can_instantiate _is_valid
+    def _instance_has(obj) = klass ? obj.instance_of?(klass) : false
+    
+    # !
+    # Error _reload ( bool keep_state ) virtual
+    # void _update_exports ( ) virtual
     # 
-    # bool _editor_can_reload_from_file ( ) virtual
-    # 
-    # Script _get_base_script ( ) virtual const
-    # 
+    # ! Standard Reflection
     # Dictionary _get_constants ( ) virtual const
-    # 
-    # Dictionary[] _get_documentation ( ) virtual const
-    # 
-    # StringName _get_global_name ( ) virtual const
-    # 
     # StringName _get_instance_base_type ( ) virtual const
-    # 
-    # ScriptLanguage _get_language ( ) virtual const
-    # 
-    # int _get_member_line ( StringName member ) virtual const
-    # 
     # StringName[] _get_members ( ) virtual const
-    # 
     # Dictionary _get_method_info ( StringName method ) virtual const
-    # 
     # Variant _get_property_default_value ( StringName property ) virtual const
-    # 
-    # Variant _get_rpc_config ( ) virtual const
-    # 
     # Dictionary[] _get_script_method_list ( ) virtual const
-    # 
     # Dictionary[] _get_script_property_list ( ) virtual const
-    # 
     # Dictionary[] _get_script_signal_list ( ) virtual const
-    # 
-    # String _get_source_code ( ) virtual const
-    # 
     # bool _has_method ( StringName method ) virtual const
-    # 
     # bool _has_property_default_value ( StringName property ) virtual const
-    # 
     # bool _has_script_signal ( StringName signal ) virtual const
-    # 
-    # bool _has_source_code ( ) virtual const
-    # 
     # bool _inherits_script ( Script script ) virtual const
     # 
-    # void* _instance_create ( Object for_object ) virtual const
+    # GDExtension
+    # GDExtensionScriptInstancePtr _instance_create ( Object for_object ) virtual const
     # 
-    # bool _instance_has ( Object object ) virtual const
+    # LSP integration
+    # Dictionary[] _get_documentation ( ) virtual const
+    # int _get_member_line ( StringName member ) virtual const
     # 
+    # TODO: Ask the Godot community for a description on placeholders and fallbacks
     # bool _is_placeholder_fallback_enabled ( ) virtual const
-    # 
-    # bool _is_tool ( ) virtual const
-    # 
-    # bool _is_valid ( ) virtual const
-    # 
     # void _placeholder_erased ( void* placeholder ) virtual
+    # GDExtensionScriptInstancePtr _placeholder_instance_create ( Object for_object ) virtual const
     # 
-    # void* _placeholder_instance_create ( Object for_object ) virtual const
-    # 
-    # Error _reload ( bool keep_state ) virtual
-    # 
-    # void _set_source_code ( String code ) virtual
-    # 
-    # void _update_exports ( ) virtual
-    
+    # ?
+    # def _get_base_script: () -> Script # and also, what’s its purpose if every reflection includes inheritance?
+    # def _get_rpc_config: () -> Variant
   end
 end

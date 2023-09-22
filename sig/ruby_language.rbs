@@ -17,7 +17,7 @@ module Godot
   end
   RubyLanguage: ScriptLanguageExtension
   
-  class Ruby
+  class Ruby[C < singleton(Object)]
     module Autoloads
       public def self.remove_const: (interned name) -> top
     end

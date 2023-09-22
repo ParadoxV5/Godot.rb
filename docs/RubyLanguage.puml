@@ -36,9 +36,9 @@ godot -> lang: ""create_script""
     return
   return ""self""
 return ""Godot::Ruby""
-godot -> ruby: ""load""
+godot -> ruby: load
   create class
-  ruby -> class: ""eval""
+  ruby -> class: ""module_eval""
   return ""self""
 return
 
