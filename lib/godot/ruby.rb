@@ -43,7 +43,7 @@ module Godot
     # bool _has_script_signal ( StringName signal ) virtual const
     # bool _inherits_script ( Script script ) virtual const
     # 
-    # GDExtension
+    # ! GDExtension
     # GDExtensionScriptInstancePtr _instance_create ( Object for_object ) virtual const
     # 
     # LSP integration
