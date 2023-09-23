@@ -24,7 +24,8 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
 */
 GDExtensionStringName godot_rb_chars_to_string_name(const char* chars);
 
-VALUE godot_rb_sym_from_string_name(GDExtensionConstStringNamePtr string_name);
+/** @param suffix not included if it’s `'\0'` */
+ID godot_rb_id_from_string_name(GDExtensionConstStringNamePtr string_name, char suffix);
 
 #define string2str_utf8 \
   /*
@@ -33,7 +34,7 @@ VALUE godot_rb_sym_from_string_name(GDExtensionConstStringNamePtr string_name);
   * UTF-8 is up to 4bytes/char.
   */ \
   GDExtensionInt length = godot_rb_gdextension.string_to_utf32_chars(&string, NULL, 0) * 4; \
-  char str[length]; \
+  char str[length + 1]; \
   length = godot_rb_gdextension.string_to_utf8_chars(&string, str, length); \
   godot_rb_gdextension.string_destroy(&string);
 

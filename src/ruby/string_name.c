@@ -42,19 +42,21 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self) {
   return string_name;
 }
 
-VALUE godot_rb_sym_from_string_name(GDExtensionConstStringNamePtr string_name) {
+ID godot_rb_id_from_string_name(GDExtensionConstStringNamePtr string_name, char suffix) {
   GDExtensionString string;
   godot_rb_gdextension.string_from_string_name(&string, &string_name);
-  // Because symbols of different encodings are still considered distinct, we must also serialize to UTF-8.
+  // Because symbols of different encodings are still considered distinct, we must explicitly serialize to UTF-8.
   string2str_utf8
-  return ID2SYM(rb_intern3(str, (long)length, rb_utf8_encoding()));
+  if RB_UNLIKELY(suffix)
+    str[length++] = suffix;
+  return rb_intern3(str, (long)length, rb_utf8_encoding());
 }
 //FIXME: possible multiplication and casting overflows (though one should use buffers instead if they need 2GiB strings)
 VALUE godot_rb_cStringName_i_to_sym(VALUE self) {
   GDExtensionStringName string_name = godot_rb_obj_to_string_name(self);
-  VALUE symbol = godot_rb_sym_from_string_name(&string_name);
+  ID id = godot_rb_id_from_string_name(&string_name, 0);
   godot_rb_gdextension.string_name_destroy(&string_name);
-  return symbol;
+  return ID2SYM(id);
 }
 
 /** @return `self.`{#to_sym to_sym}`.`{Symbol#to_s to_s} (the return is not frozen)

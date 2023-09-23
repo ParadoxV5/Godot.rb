@@ -51,11 +51,11 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
         GDExtensionStringName class_name_str;
         godot_rb_gdextension.object_get_class_name(object, godot_rb_library, &class_name_str);
         godot_rb_gdextension.object_destroy(object);
-        VALUE class_name = godot_rb_sym_from_string_name(&class_name_str);
+        ID class_id = godot_rb_id_from_string_name(&class_name_str, 0);
         godot_rb_gdextension.string_name_destroy(class_name_str);
         // “`godot_rb_wrap_object`”
         return TypedData_Wrap_Struct(
-          rb_const_get_at(godot_rb_mGodot, SYM2ID(class_name)), // calls {Godot#const_missing} as needed
+          rb_const_get_at(godot_rb_mGodot, class_id), // calls {Godot#const_missing} as needed
           &godot_rb_cVariant_type,
           variant
         );

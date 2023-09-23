@@ -1,8 +1,7 @@
 module Godot
   interface _ToGodot[out G < Variant] def to_godot: () -> G end
   
-  type type_like[out T < Variant] = Kernel & _ToGodot[T]
-  type variant_like = type_like[Variant]
+  type variant_like = _ToGodot[Variant]
   type variant = Variant | bool?
   class Variant
     include Godot
@@ -23,7 +22,8 @@ module Godot
     def respond_to_missing?: (Symbol | ::String name, ?boolish include_all) -> bool
     def method_missing: (Symbol | ::String name, *variant_like args) -> variant
     
-    def to_godot: () -> self
+    #include _ToGodot[self]
+    def to_godot: () -> self # https://github.com/soutaro/steep/issues/916
     def nonzero?: () -> bool
   end
 end
