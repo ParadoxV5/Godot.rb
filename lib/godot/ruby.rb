@@ -1,15 +1,22 @@
 # frozen_string_literal: true
 module Godot
   class Ruby < ScriptExtension
+    # The parsed class, which may be de-sync with {#source_code} until {#_reload}ed
+    attr_reader :klass
+    def initialize(klass = nil)
+      #TODO check type of `klass`
+      @klass = klass
+      #FIXME save script reference in `klass` singleton, which `klass` attaches on `#initialize`
+    end
+    
+    # The script for the 5head self-implementation
+    Ruby = new(self)
     
     # The Godot Editor pass entire source code( references)s around to enable IDE capabilities independent of the disk
     attr_accessor :source_code
     def _get_source_code = source_code || String.new
     alias _set_source_code source_code=
     def _has_source_code = source_code.nonzero?
-    
-    # The parsed class, which may be de-sync with {#source_code} until {#_reload}ed
-    attr_reader :klass
     
     def _get_language = Godot::RubyLanguage
     # TODO: LSP integration
@@ -60,6 +67,6 @@ module Godot
     # def _get_base_script: () -> Script # and also, what’s its purpose if every reflection includes inheritance?
     # def _get_rpc_config: () -> Variant
     
-    def new(...) = klass.new(...) #TODO: Or should it be `#allocate`?
+    def new(...) = klass.new(...)
   end
 end

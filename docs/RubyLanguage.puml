@@ -1,9 +1,8 @@
 @startuml
 autoactivate on
-header Overview of the ""RubyLanguage"" Family’s Call Sequence on a High Level
+header Overview of the ""RubyLanguage"" Family’s Call Sequence
 footer page %page% of %lastpage%
 
-title Load ""RubyLanguage"" and ""script.rb""
 participant godot [
   //Godot Engine//
   //& GDExtension//
@@ -13,36 +12,15 @@ participant lang [
   ""RubyLanguage""
   singleton
 ]
-participant ruby [
-  ""Godot::Ruby""
-  instance
+participant script [
+  Script
+  (""Godot::Ruby""
+  instance)
 ]
 participant class [
   ""Godot::Object""
   class
 ]
-activate godot
-godot -> godot: ""godot_rb_setup""
-  create lang
-  godot -> lang: ""register_""\n""script_language""
-  return
-return
-godot -> lang: ""create_script""
-  create ruby
-  lang -> ruby: ""initialize""
-    ruby -> godot: ""super""
-      godot -> ruby: ""create_instance_func""
-      return Godot internal ""Object""
-    return
-  return ""self""
-return ""Godot::Ruby""
-godot -> ruby: load
-  create class
-  ruby -> class: ""module_eval""
-  return ""self""
-return
-
-newpage Instantiate ""MyScript""
 participant instance [
   ""GDExtension""
   ""ScriptInstancePtr""
@@ -51,30 +29,73 @@ participant object [
   ""Godot::Object""
   instance
 ]
-godot -> ruby: ""instance_create""
-  ruby -> class: ""new""
+
+title Load ""RubyLanguage""
+activate godot
+create lang
+godot -> lang: ""godot_rb_setup""
+  create script
+  lang -> script: ""set_script""
+    create instance
+    script -> instance: ""instance_create""
+    return ""ScriptInstancePtr(RubyLanguage)""
+  return ""Ruby(RubyLanguage)""
+return ""register_""\n""script_language""
+
+newpage Load ""script.rb""
+godot -> lang: ""create_script""
+  create script
+  lang -> script: ""initialize""
+    script -> godot: ""super""
+    return Godot internal ""Object""
+      script -> script: ""set_script""
+        create instance
+        script -> instance: ""instance_create""
+        return ""ScriptInstancePtr(Ruby)""
+      return ""Ruby(Ruby)""
+
+  return ""self""
+return ""Godot::Ruby""
+
+
+godot -> script: load
+  create class
+  script -> class: ""module_eval""
+  return ""self""
+return
+
+newpage Instantiate ""MyScript""
+godot -> script: ""new""
+  script -> class: ""new""
     create object
     class -> object: ""initialize""
+      object -> godot: ""super""
+      return Blank-slate, script-less ""Godot::Object""
+      object -> godot: ""set_script""
+        godot -> instance: ""ScriptInstancePtr(Ruby).instance_create""
+          instance -> script: ""instance_create""
+            script -> object: Protect from GC
+            return
+            script -> instance: ""script_instance_create""
+            return ""self""
+          return ""ScriptInstancePtr(Object)""
+        return ""ScriptInstancePtr(Object)""
+      return
     return ""self""
   return ""Godot::Object""\ninstance
-  ruby -> object: Protect from GC
-  return
-  create instance
-  ruby -> instance: ""script_instance_create""
-  return ""self""
-return ""GDExtensionScriptInstancePtr""
+  return ""Godot::Object"" instance
 
 newpage: Check and Call (existent) ""MyScript#member"" (attribute or method)
-godot -> ruby: list members
-  ruby -> class: ""#instance_methods""
+godot -> script: ""get_members""
+  script -> class: ""#instance_methods""
   return ""Array[Symbol]""
-return processed array
+return ""Godot::Array[StringName]""
 godot -> instance: call ""member""
   instance -> object: ""::member""
     object -> class: ""#member"" (instance method)
       note left: There’d probably seldom be an eigenclass.
       opt GDScript Interop
-        class -> godot: GDScript function
+        class -> godot: Call GDScript (Godot Engine) method from Ruby
         return ""ret.to_godot""
       end
     return ""ret""
@@ -91,12 +112,12 @@ godot -> instance: ""free""
   destroy object
 return
 destroy instance
-godot -> ruby: ""free_instance_func""
-  ruby ->> class: Unlock GC
+godot -> script: ""free_instance_func""
+  script ->> class: Unlock GC
   return
   destroy class
 return
-destroy ruby
+destroy script
 godot -> godot: ""godot_rb_cleanup""
   godot -> lang!!: ""unregister_""\n""script_language""
 return

@@ -130,54 +130,49 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
 };
 
 GDExtensionInterfaceScriptInstanceCreate script_instance_create;
-/** `GDExtensionScriptInstancePtr _instance_create(Object for_object)` */
-VALUE gocot_rb_cRuby_i_instance_create(
-  VALUE self,
-  RB_UNUSED_VAR(VALUE for_object) //TODO: Check superclass
-) {
-  VALUE instance = rb_funcallv_public(
-    self,
-    rb_intern("new"),
-    0, (VALUE[]){}
-  );
-  rb_gc_register_mark_object(instance); // Let Godot Engine lock GC
+/** @return {GDExtensionScriptInstancePtr} in {Variant} form */
+VALUE gocot_rb_cRuby_i_instance_create(VALUE self, VALUE for_object) {
+  //TODO: Check superclass
+  rb_gc_register_mark_object(for_object); // Let Godot Engine lock GC
   GDExtensionVariantPtr script_instance = godot_rb_variant_alloc();
   godot_rb_gdextension.variant_from_object_ptr(
     script_instance,
-    script_instance_create(&godot_rb_script_instance_info, (GDExtensionScriptInstanceDataPtr)instance)
+    script_instance_create(&godot_rb_script_instance_info, (GDExtensionScriptInstanceDataPtr)for_object)
   );
   return godot_rb_wrap_variant(godot_rb_cObject, script_instance);
 }
 
 
-VALUE cRuby, RubyLanguage, RubyLanguage_script;
+VALUE cRuby_script, cRuby, RubyLanguage_script, RubyLanguage;
 
 void godot_rb_init_RubyLanguage(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
   script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
+  ID idRuby = rb_intern("Ruby"), idRubyLanguage = rb_intern("RubyLanguage");
   
   godot_rb_require_relative(ruby);
-  cRuby = godot_rb_get_module(Ruby);
+  cRuby = rb_const_get_at(godot_rb_mGodot, idRuby);
   rb_define_method(cRuby, "_instance_create", gocot_rb_cRuby_i_instance_create, 1);
-  ID idRubyLanguage = rb_intern("RubyLanguage");
   godot_rb_require_relative(ruby_language);
   RubyLanguage = rb_const_get_at(godot_rb_mGodot, idRubyLanguage);
   godot_rb_gdextension.object_ptr_from_variant(
     &godot_rb_RubyLanguage_object,
     godot_rb_cVariant_get_variant(RubyLanguage)
   );
-  RubyLanguage_script = rb_const_get_at(cRuby, idRubyLanguage);
   
+  cRuby_script = rb_const_get_at(cRuby, idRuby);
+  RubyLanguage_script = rb_const_get_at(cRuby, idRubyLanguage);
   // Lock these from the GC – too important to be accidentally GC-ed
+  rb_gc_register_mark_object(cRuby_script);
   rb_gc_register_mark_object(cRuby);
-  rb_gc_register_mark_object(RubyLanguage);
   rb_gc_register_mark_object(RubyLanguage_script);
+  rb_gc_register_mark_object(RubyLanguage);
 }
 
 void godot_rb_destroy_RubyLanguage(void) {
   //TODO: https://docs.godotengine.org/en/stable/classes/class_engine.html#class-engine-method-unregister-script-language
   rb_gc_unregister_address(&RubyLanguage);
   rb_gc_unregister_address(&RubyLanguage_script);
-  //TODO: Unregister extension class {Godot::Ruby}
   rb_gc_unregister_address(&cRuby);
+  rb_gc_unregister_address(&cRuby_script);
 }
