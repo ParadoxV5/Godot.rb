@@ -33,6 +33,7 @@ module Godot
   
   class Object < Variant
     VARIANT_TYPE: 24
+    RUBY_SCRIPT: RubyScript[Object]? # https://github.com/soutaro/steep/issues/916
     alias call godot_send
   end
   

@@ -6,6 +6,7 @@ module Godot
     def initialize(klass = nil)
       #TODO check type of `klass`
       @klass = klass
+      super()
       #FIXME save script reference in `klass` singleton, which `klass` attaches on `#initialize`
     end
     

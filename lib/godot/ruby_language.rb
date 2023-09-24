@@ -89,7 +89,7 @@ module Godot
     
     class << RubyScript::RubyLanguage = RubyScript.new(self)
       def _can_instantiate = false
-      def new = klass.attached_object
+      def new(...) = klass.attached_object(...)
     end
     def get_script = RubyScript::RubyLanguage
     # Recreate {#initialize} #TODO: `__send__(:initialize)`
