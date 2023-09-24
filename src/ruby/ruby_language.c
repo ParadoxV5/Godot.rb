@@ -128,10 +128,32 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
   i(free)
 };
 
+GDExtensionInterfaceScriptInstanceCreate script_instance_create;
+/** `GDExtensionScriptInstancePtr _instance_create(Object for_object)` */
+VALUE gocot_rb_cRuby_i_instance_create(VALUE self, VALUE for_object) {
+  //TODO: Check superclass
+  VALUE instance = rb_funcallv_public(
+    self,
+    rb_intern("new"),
+    0, (VALUE[]){}
+  );
+  rb_gc_register_mark_object(instance); // Let Godot Engine lock GC
+  GDExtensionVariantPtr script_instance = godot_rb_variant_alloc();
+  godot_rb_gdextension.variant_from_object_ptr(
+    script_instance,
+    script_instance_create(&godot_rb_script_instance_info, (GDExtensionScriptInstanceDataPtr)instance)
+  );
+  return godot_rb_wrap_variant(godot_rb_cObject, script_instance);
+}
+
 
 void godot_rb_init_RubyLanguage(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
+  script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
+  
   godot_rb_require_relative(ruby);
+  VALUE cRuby = godot_rb_get_module(Ruby);
+  rb_define_method(cRuby, "_instance_create", gocot_rb_cRuby_i_instance_create, 1);
   godot_rb_require_relative(ruby_language);
   godot_rb_gdextension.object_ptr_from_variant(
     &godot_rb_RubyLanguage_object,

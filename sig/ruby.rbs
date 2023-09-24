@@ -3,13 +3,14 @@ module Godot
   class ScriptExtension < Object
   end
   
-  class Ruby[C < singleton(Object)] < ScriptExtension
+  class Ruby[C < Object] < ScriptExtension
     attr_accessor source_code: String?
     def _get_source_code: () -> String
     alias _set_source_code source_code=
     def _has_source_code: () -> bool
     
-    attr_reader klass: C?
+    attr_reader klass: singleton(Object)? # https://github.com/ruby/rbs/issues/1542
+    def new: (*variant_like args) -> C
     
     def _get_language: () -> ScriptLanguageExtension
     def _is_tool: () -> bool
@@ -18,5 +19,7 @@ module Godot
     def _is_valid: () -> bool
     alias _can_instantiate _is_valid
     def _instance_has: (bot object) -> bool
+    
+    def _instance_create: (C for_object) -> Object
   end
 end

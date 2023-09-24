@@ -34,17 +34,18 @@ module Godot
     # StringName _get_instance_base_type ( ) virtual const
     # StringName[] _get_members ( ) virtual const
     # Dictionary _get_method_info ( StringName method ) virtual const
-    # Variant _get_property_default_value ( StringName property ) virtual const
     # Dictionary[] _get_script_method_list ( ) virtual const
-    # Dictionary[] _get_script_property_list ( ) virtual const
-    # Dictionary[] _get_script_signal_list ( ) virtual const
     # bool _has_method ( StringName method ) virtual const
-    # bool _has_property_default_value ( StringName property ) virtual const
-    # bool _has_script_signal ( StringName signal ) virtual const
     # bool _inherits_script ( Script script ) virtual const
     # 
-    # ! GDExtension
-    # GDExtensionScriptInstancePtr _instance_create ( Object for_object ) virtual const
+    # ! Extended Reflection
+    # Dictionary[] _get_script_property_list ( ) virtual const
+    # bool _has_property_default_value ( StringName property ) virtual const
+    # Variant _get_property_default_value ( StringName property ) virtual const
+    # 
+    # Extended Reflection
+    # Dictionary[] _get_script_signal_list ( ) virtual const
+    # bool _has_script_signal ( StringName signal ) virtual const
     # 
     # LSP integration
     # Dictionary[] _get_documentation ( ) virtual const
@@ -58,5 +59,7 @@ module Godot
     # ?
     # def _get_base_script: () -> Script # and also, what’s its purpose if every reflection includes inheritance?
     # def _get_rpc_config: () -> Variant
+    
+    def new(...) = klass.new(...) #TODO: Or should it be `#allocate`?
   end
 end

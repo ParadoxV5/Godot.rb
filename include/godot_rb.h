@@ -110,6 +110,8 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
 // General Helpers //
 
 #define godot_rb_require_relative(name) rb_require_string(rb_str_new_lit("./addons/Godot.rb/lib/godot/"#name".rb"))
+#define godot_rb_get_module(name) rb_const_get_at(godot_rb_mGodot, rb_intern(#name))
+
 #include <ruby/encoding.h>
 /** (initialized at level `SERVERS`) */
 extern rb_encoding* godot_rb_encoding_UTF32;

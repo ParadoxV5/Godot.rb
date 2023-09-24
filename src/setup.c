@@ -37,7 +37,7 @@ static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
   godot_rb_init_String();
   godot_rb_init_StringName();
   godot_rb_require_relative(object);
-  godot_rb_cObject = rb_const_get_at(godot_rb_mGodot, rb_intern("Object"));
+  godot_rb_cObject = godot_rb_get_module(Object);
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = godot_rb_cObject;
   godot_rb_require_relative(array);
   // Skip NIL since it points to the same class as BOOL

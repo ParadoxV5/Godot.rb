@@ -33,6 +33,10 @@ module Godot
     def _add_named_global_constant(name, value) = Ruby::Autoloads.const_set(name, value)
     def _remove_named_global_constant(name) = Ruby::Autoloads.remove_const(name)
     
+    def _create_script = Ruby.new
+    # !
+    # Dictionary _get_global_class_name ( String path ) virtual const
+    # 
     # LSP integration
     # String _auto_indent_code ( String code, int from_line, int to_line ) virtual const
     # Dictionary _complete_code ( String code, String path, Object owner ) virtual const
@@ -63,8 +67,6 @@ module Godot
     # void _profiling_stop ( ) virtual
     # 
     # !
-    # ScriptExtension _create_script ( ) virtual const
-    # Dictionary _get_global_class_name ( String path ) virtual const
     # void _reload_all_scripts ( ) virtual
     # void _reload_tool_script ( Script script, bool soft_reload ) virtual
     # bool _supports_documentation ( ) virtual const

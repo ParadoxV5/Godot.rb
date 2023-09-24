@@ -27,7 +27,7 @@ VALUE godot_rb_mSymbol_i_to_godot(VALUE self) {
 
 void godot_rb_init_Mixins() {
   godot_rb_require_relative(mixins);
-  const VALUE space = rb_const_get(godot_rb_mGodot, rb_intern("Mixins"));
+  const VALUE space = godot_rb_get_module(Mixins);
   
   #define d(module) \
     mod = rb_const_get(space, rb_intern(#module)); \

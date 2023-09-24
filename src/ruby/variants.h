@@ -24,6 +24,14 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
 */
 GDExtensionStringName godot_rb_chars_to_string_name(const char* chars);
 
+
+/**
+  FIXME: check script first
+  @param object_ptr pointer to a non-`null` object
+  @return Corresponding Ruby class – {Godot::Object} or a subclass
+*/
+VALUE godot_rb_object_ptr_class(GDExtensionObjectPtr object_ptr);
+
 /** @param suffix not included if it’s `'\0'` */
 ID godot_rb_id_from_string_name(GDExtensionConstStringNamePtr string_name, char suffix);
 

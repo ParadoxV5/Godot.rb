@@ -38,6 +38,14 @@ VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
   return other;
 }
 
+VALUE godot_rb_object_ptr_class(GDExtensionObjectPtr object_ptr) {
+  GDExtensionStringName class_name_str;
+  godot_rb_gdextension.object_get_class_name(object_ptr, godot_rb_library, &class_name_str);
+  VALUE klass = rb_const_get_at(godot_rb_mGodot, godot_rb_id_from_string_name(&class_name_str, 0));
+    // calls {Godot#const_missing} as needed
+  godot_rb_gdextension.string_name_destroy(class_name_str);
+  return klass;
+}
 
 GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
 VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
@@ -46,19 +54,11 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
       if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
         // “`godot_rb_parse_object`”
-        GDExtensionObjectPtr object;
-        godot_rb_gdextension.object_ptr_from_variant(&object, variant);
-        GDExtensionStringName class_name_str;
-        godot_rb_gdextension.object_get_class_name(object, godot_rb_library, &class_name_str);
-        godot_rb_gdextension.object_destroy(object);
-        ID class_id = godot_rb_id_from_string_name(&class_name_str, 0);
-        godot_rb_gdextension.string_name_destroy(class_name_str);
-        // “`godot_rb_wrap_object`”
-        return TypedData_Wrap_Struct(
-          rb_const_get_at(godot_rb_mGodot, class_id), // calls {Godot#const_missing} as needed
-          &godot_rb_cVariant_type,
-          variant
-        );
+        GDExtensionObjectPtr object_ptr;
+        godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
+        VALUE obj = godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
+        godot_rb_gdextension.object_destroy(object_ptr);
+        return obj;
       }
       
       //fall-through
@@ -75,6 +75,7 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   }
   return godot_rb_wrap_variant(godot_rb_cVariants[variant_type], variant);
 }
+
 
 GDExtensionVariantPtr godot_rb_cVariant_get_variant(VALUE self) {
   return rb_check_typeddata(self, &godot_rb_cVariant_type);
@@ -235,7 +236,7 @@ VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
 void godot_rb_init_Variant() {
   variant_has_method = (GDExtensionInterfaceVariantHasMethod)godot_rb_get_proc("variant_has_method");
   godot_rb_require_relative(variant);
-  godot_rb_cVariant = rb_const_get(godot_rb_mGodot, rb_intern("Variant"));
+  godot_rb_cVariant = godot_rb_get_module(Variant);
   variant_to_bool   = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL  );
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_m_allocate);
   rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -2);
