@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Godot
-  module Ruby::Autoloads
+  module RubyScript::Autoloads
     public_class_method :remove_const
     Godot.include self
   end
@@ -12,8 +12,8 @@ module Godot
     # TODO: don’t generate a new {Variant} on every call
     
     def _get_name = 'Ruby'
-    #TODO: can this be `'Godot::Ruby'`?
-    def _get_type = 'Ruby'
+    #TODO: can this be `'Godot::RubyScript'`?
+    def _get_type = 'RubyScript'
     def _get_extension = 'rb'
     def _get_recognized_extensions = PackedStringArray.from %w[rb rbw gemspec]
     def _get_comment_delimiters = PackedStringArray['#'] # What `=begin`-`=end`?
@@ -30,10 +30,10 @@ module Godot
     def _add_global_constant(name, value)
       value and add_named_global_constant(name, value)
     end
-    def _add_named_global_constant(name, value) = Ruby::Autoloads.const_set(name, value)
-    def _remove_named_global_constant(name) = Ruby::Autoloads.remove_const(name)
+    def _add_named_global_constant(name, value) = RubyScript::Autoloads.const_set(name, value)
+    def _remove_named_global_constant(name) = RubyScript::Autoloads.remove_const(name)
     
-    def _create_script = Ruby.new
+    def _create_script = RubyScript.new
     # !
     # Dictionary _get_global_class_name ( String path ) virtual const
     # 
@@ -87,13 +87,13 @@ module Godot
     # Error _open_in_external_editor ( ScriptExtension script, int line, int column ) virtual
     # bool _supports_builtin_mode ( ) virtual const
     
-    class << Ruby::RubyLanguage = Ruby.new(self)
+    class << RubyScript::RubyLanguage = RubyScript.new(self)
       def _can_instantiate = false
       def new = klass.attached_object
     end
-    def get_script = Ruby::RubyLanguage
+    def get_script = RubyScript::RubyLanguage
     # Recreate {#initialize} #TODO: `__send__(:initialize)`
-    attached_object.set_script Ruby::RubyLanguage
+    attached_object.set_script RubyScript::RubyLanguage
   end
   
   Engine.register_script_language(RubyLanguage) # TODO: raise Error Enum

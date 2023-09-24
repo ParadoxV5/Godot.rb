@@ -14,7 +14,7 @@ participant lang [
 ]
 participant script [
   Script
-  (""Godot::Ruby""
+  (""Godot::RubyScript""
   instance)
 ]
 participant class [
@@ -39,7 +39,7 @@ godot -> lang: ""godot_rb_setup""
     create instance
     script -> instance: ""instance_create""
     return ""ScriptInstancePtr(RubyLanguage)""
-  return ""Ruby(RubyLanguage)""
+  return ""RubyScript(RubyLanguage)""
 return ""register_""\n""script_language""
 
 newpage Load ""script.rb""
@@ -51,11 +51,11 @@ godot -> lang: ""create_script""
       script -> script: ""set_script""
         create instance
         script -> instance: ""instance_create""
-        return ""ScriptInstancePtr(Ruby)""
-      return ""Ruby(Ruby)""
+        return ""ScriptInstancePtr(RubyScript)""
+      return ""RubyScript(RubyScript)""
 
   return ""self""
-return ""Godot::Ruby""
+return ""Godot::RubyScript""
 
 
 godot -> script: load
@@ -72,7 +72,7 @@ godot -> script: ""new""
       object -> godot: ""super""
       return Blank-slate, script-less ""Godot::Object""
       object -> godot: ""set_script""
-        godot -> instance: ""ScriptInstancePtr(Ruby).instance_create""
+        godot -> instance: ""ScriptInstancePtr(RubyScript).instance_create""
           instance -> script: ""instance_create""
             script -> object: Protect from GC
             return

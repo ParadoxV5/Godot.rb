@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Godot
-  class Ruby < ScriptExtension
+  class RubyScript < ScriptExtension
     # The parsed class, which may be de-sync with {#source_code} until {#_reload}ed
     attr_reader :klass
     def initialize(klass = nil)
@@ -10,7 +10,7 @@ module Godot
     end
     
     # The script for the 5head self-implementation
-    Ruby = new(self)
+    RubyScript = new(self)
     
     # The Godot Editor pass entire source code( references)s around to enable IDE capabilities independent of the disk
     attr_accessor :source_code

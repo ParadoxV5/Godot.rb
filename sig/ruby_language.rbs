@@ -15,15 +15,15 @@ module Godot
     def self._add_named_global_constant: (interned name, variant_like value) -> variant_like
     def self._remove_named_global_constant: (interned name) -> top
     
-    def _create_script: () -> Ruby[Object]
+    def _create_script: () -> RubyScript[Object]
   end
   RubyLanguage: ScriptLanguageExtension
   
-  class Ruby[C < Object]
+  class RubyScript[C < Object]
     module Autoloads
       public def self.remove_const: (interned name) -> top
     end
-    RubyLanguage: Ruby[ScriptLanguageExtension]
+    RubyLanguage: RubyScript[ScriptLanguageExtension]
   end
-  include Ruby::Autoloads
+  include RubyScript::Autoloads
 end
