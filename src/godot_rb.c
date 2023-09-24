@@ -8,7 +8,6 @@ GDExtensionClassLibraryPtr godot_rb_library = NULL;
 
 struct godot_rb_gdextension godot_rb_gdextension;
 VALUE godot_rb_mGodot;
-VALUE godot_rb_cObject;
 
 GDExtensionBool godot_rb_main(
   GDExtensionInterfaceGetProcAddress get_proc_address,
