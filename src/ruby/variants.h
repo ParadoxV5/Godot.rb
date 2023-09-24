@@ -57,5 +57,6 @@ void godot_rb_init_StringName(void);
 void godot_rb_init_Mixins(void);
 void godot_rb_init_Engine(void);
 void godot_rb_init_RubyLanguage(void);
+void godot_rb_destroy_RubyLanguage(void);
 
 #endif

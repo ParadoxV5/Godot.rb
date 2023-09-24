@@ -1,7 +1,6 @@
 module Godot
   # until we have RBS integration
-  class ScriptExtension < Object
-  end
+  class ScriptExtension < Object end
   
   class Ruby[C < Object] < ScriptExtension
     attr_accessor source_code: String?

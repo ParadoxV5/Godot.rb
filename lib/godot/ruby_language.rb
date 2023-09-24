@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 module Godot
-  module Ruby::Autoloads
-    public_class_method :remove_const
-    Godot.include self
-  end
-  
   # Singleton
   class << RubyLanguage = ScriptLanguageExtension.new
     
@@ -87,5 +82,19 @@ module Godot
     # Error _open_in_external_editor ( ScriptExtension script, int line, int column ) virtual
     # bool _supports_builtin_mode ( ) virtual const
     
+    def get_script = Ruby::RubyLanguage
   end
+  
+  class Ruby
+    module Autoloads
+      public_class_method :remove_const
+      Godot.include self
+    end
+    
+    RubyLanguage = new
+    def RubyLanguage._can_instantiate = false
+    RubyLanguage.instance_variable_set(:@klass, self)
+    Godot::RubyLanguage.set_script(RubyLanguage)
+  end
+  Engine.register_script_language(RubyLanguage) # TODO: raise Error Enum
 end
