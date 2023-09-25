@@ -33,13 +33,27 @@ module Godot
     alias _can_instantiate _is_valid
     def _instance_has(obj) = klass ? obj.instance_of?(klass) : false
     
+    # TODO: what are its other purpose – besides convenience – if every reflection includes inheritance?
+    def _get_base_script
+      klass.superclass.const_get :RUBY_SCRIPT if klass
+    end
+    def _get_instance_base_type
+      return StringName.new unless klass
+      super_klass = klass.superclass
+      super_script = super_klass.const_get :RUBY_SCRIPT
+      if super_script
+        super_script._get_instance_base_type
+      else # (Probably?) a Godot native type
+        StringName.new super_klass.name
+      end
+    end
+    
     # !
     # Error _reload ( bool keep_state ) virtual
     # void _update_exports ( ) virtual
     # 
     # ! Standard Reflection
     # Dictionary _get_constants ( ) virtual const
-    # StringName _get_instance_base_type ( ) virtual const
     # StringName[] _get_members ( ) virtual const
     # Dictionary _get_method_info ( StringName method ) virtual const
     # Dictionary[] _get_script_method_list ( ) virtual const
@@ -65,7 +79,6 @@ module Godot
     # GDExtensionScriptInstancePtr _placeholder_instance_create ( Object for_object ) virtual const
     # 
     # ?
-    # def _get_base_script: () -> Script # and also, what’s its purpose if every reflection includes inheritance?
     # def _get_rpc_config: () -> Variant
     
     def new(...) = klass.new(...)

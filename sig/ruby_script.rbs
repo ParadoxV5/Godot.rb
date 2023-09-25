@@ -21,6 +21,9 @@ module Godot
     alias _can_instantiate _is_valid
     def _instance_has: (bot object) -> bool
     
+    def _get_instance_base_type: () -> StringName
+    def _get_base_script: () -> RubyScript?
+    
     def new: (*variant_like args) -> C
     def _instance_create: (C for_object) -> Object
   end
