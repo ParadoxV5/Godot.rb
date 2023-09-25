@@ -6,8 +6,8 @@ module Godot
     Godot.include self
   end
   
-  # Singleton
-  class << RubyLanguage = ScriptLanguageExtension.new
+  # Singleton pattern (singleton {INSTANCE} alone conflicts with {RubyScript} design)
+  class RubyLanguage < ScriptLanguageExtension
     
     # TODO: don’t generate a new {Variant} on every call
     
@@ -87,14 +87,10 @@ module Godot
     # Error _open_in_external_editor ( ScriptExtension script, int line, int column ) virtual
     # bool _supports_builtin_mode ( ) virtual const
     
-    class << RubyScript::RubyLanguage = RubyScript.new(self)
-      def _can_instantiate = false
-      def new(...) = klass.attached_object(...)
-    end
-    def get_script = RubyScript::RubyLanguage
-    # Recreate {#initialize} #TODO: `__send__(:initialize)`
-    attached_object.set_script RubyScript::RubyLanguage
+    RubyScript.new(self)
+    def get_script = RUBY_SCRIPT
+    
+    INSTANCE = new
+    Engine.register_script_language(INSTANCE) # TODO: raise Error Enum
   end
-  
-  Engine.register_script_language(RubyLanguage) # TODO: raise Error Enum
 end

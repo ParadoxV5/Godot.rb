@@ -60,7 +60,7 @@ return ""Godot::RubyScript""
 
 godot -> script: load
   create class
-  script -> class: ""module_eval""
+  script -> class: ""eval""
   return ""self""
 return
 

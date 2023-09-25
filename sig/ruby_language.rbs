@@ -1,5 +1,7 @@
 module Godot
-  class ScriptLanguageExtension < Object
+  # until we have RBS integration
+  class ScriptLanguageExtension < Object end
+  class RubyLanguage < ScriptLanguageExtension
     def self._get_name: () -> ::String
     def self._get_type: () -> ::String
     def self._get_extension: () -> ::String
@@ -16,14 +18,13 @@ module Godot
     def self._remove_named_global_constant: (interned name) -> top
     
     def _create_script: () -> RubyScript[Object]
+    INSTANCE: RubyLanguage
   end
-  RubyLanguage: ScriptLanguageExtension
   
   class RubyScript[C < Object]
     module Autoloads
       public def self.remove_const: (interned name) -> top
     end
-    RubyLanguage: RubyScript[ScriptLanguageExtension]
   end
   include RubyScript::Autoloads
 end

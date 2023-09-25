@@ -2,25 +2,25 @@
 
 VALUE godot_rb_cObject;
 ID idRUBY_SCRIPT;
+
 GDExtensionInterfaceClassdbConstructObject gdext_classdb_construct_object;
 
 VALUE godot_rb_cObject_i_initialize(int argc, VALUE* argv, VALUE self) {
-  //FIXME object_set_instance
-  //TODO how are constructor args passed exactly?
+  rb_call_super_kw(argc, argv, RB_PASS_CALLED_KEYWORDS); //TODO how are constructor args passed exactly?
   VALUE ruby_script = rb_const_get_from(CLASS_OF(self), idRUBY_SCRIPT);
   GDExtensionStringName class_name = godot_rb_obj_to_string_name(
     RB_UNLIKELY(NIL_P(ruby_script))
     // Godot native type
-    ? rb_class_name(self)
+    ? rb_class_name(self) //FIXME: delete `Godot::`
     // Godot.rb {RubyScript} class
     : rb_funcallv_public(ruby_script, rb_intern("_get_instance_base_type"), 0, (VALUE[]){})
   );
-  rb_call_super_kw(argc, argv, RB_PASS_CALLED_KEYWORDS);
+  GDExtensionObjectPtr self_object_ptr = gdext_classdb_construct_object(&class_name);
   godot_rb_gdextension.variant_from_object_ptr(
     godot_rb_cVariant_get_variant(self),
-    gdext_classdb_construct_object(&class_name)
+    &self_object_ptr
   );
-  godot_rb_gdextension.string_name_destroy(class_name);
+  godot_rb_gdextension.string_name_destroy(&class_name);
   if RB_LIKELY(!NIL_P(ruby_script)) // Godot.rb {RubyScript} class
     rb_funcall(self, rb_intern("set_script"), 1, ruby_script);
   return self;

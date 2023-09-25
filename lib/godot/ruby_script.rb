@@ -5,13 +5,10 @@ module Godot
     attr_reader :klass
     def initialize(klass = nil)
       #TODO check type of `klass`
+      klass&.const_set :RUBY_SCRIPT, self
       @klass = klass
       super()
-      #FIXME save script reference in `klass` singleton, which `klass` attaches on `#initialize`
     end
-    
-    # The script for the 5head self-implementation
-    RubyScript = new(self)
     
     # The Godot Editor pass entire source code( references)s around to enable IDE capabilities independent of the disk
     attr_accessor :source_code
@@ -19,7 +16,7 @@ module Godot
     alias _set_source_code source_code=
     def _has_source_code = source_code.nonzero?
     
-    def _get_language = Godot::RubyLanguage
+    def _get_language = Godot::RubyLanguage::INSTANCE
     # TODO: LSP integration
     def _is_tool = true
     
@@ -44,7 +41,7 @@ module Godot
       if super_script
         super_script._get_instance_base_type
       else # (Probably?) a Godot native type
-        StringName.new super_klass.name
+        StringName.new super_klass.name.delete_prefix('Godot::')
       end
     end
     
@@ -82,5 +79,10 @@ module Godot
     # def _get_rpc_config: () -> Variant
     
     def new(...) = klass.new(...)
+    
+    # The script for the 5head self-implementation
+    new(self)
+    def get_script = RUBY_SCRIPT
+    # note to maintainers: instantiate at the very end so the class is fully prepared (except {Class#name} ig) before so
   end
 end

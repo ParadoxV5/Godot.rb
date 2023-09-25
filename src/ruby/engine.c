@@ -1,7 +1,7 @@
 #include "variants.h"
 
 GDExtensionInterfaceGlobalGetSingleton gdext_global_get_singleton;
-/** code around the general method call API so the singleton subclasses from Object rather than the singleton class */
+/** Also destroys the passed StringName */
 VALUE godot_rb_Engine_impl_get_singleton(GDExtensionStringName name) {
   GDExtensionObjectPtr object_ptr = gdext_global_get_singleton(&name);
   godot_rb_gdextension.string_name_destroy(&name);
@@ -10,6 +10,7 @@ VALUE godot_rb_Engine_impl_get_singleton(GDExtensionStringName name) {
   // Probably should not free an actually-returned pointer
   return godot_rb_wrap_variant(godot_rb_cObject, variant);
 }
+/** code around the general method call API so the singleton subclasses from Object rather than the singleton class */
 VALUE godot_rb_Engine_get_singleton(RB_UNUSED_VAR(VALUE self), VALUE name) {
   return godot_rb_Engine_impl_get_singleton(godot_rb_obj_to_string_name(name));
 }

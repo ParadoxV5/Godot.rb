@@ -97,8 +97,8 @@ GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self) {
   if RB_LIKELY(success) \
     return ret; \
   VALUE kwargs = rb_hash_new_capa(2); \
-  rb_hash_aset(kwargs, rb_intern("receiver"), self); \
-  rb_hash_aset(kwargs, rb_intern("key"), key); \
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("receiver")), self); \
+  rb_hash_aset(kwargs, ID2SYM(rb_intern("key")), key); \
   rb_exc_raise(rb_class_new_instance_kw( \
     2, \
     (VALUE[]){rb_sprintf("key not found: %+"PRIsVALUE, key), kwargs}, \
@@ -151,7 +151,7 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
     
     case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
       VALUE kwargs = rb_hash_new_capa(1);
-      rb_hash_aset(kwargs, rb_intern("receiver"), self);
+      rb_hash_aset(kwargs, ID2SYM(rb_intern("receiver")), self);
       rb_exc_raise(rb_class_new_instance_kw( 4, (VALUE[]){
         rb_sprintf("undefined method `%"PRIsVALUE"', or cannot call it with %+"PRIsVALUE, func, args),
         func,

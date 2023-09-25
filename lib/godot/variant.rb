@@ -76,17 +76,13 @@ module Godot
     def to_godot = self
   end
   
-  def self.const_missing(name)
-    File.open('out.txt', 'a') { _1.puts name }
-    const_set(
-      name,
-      if Engine.has_singleton(name) # First, check Singletons
-        Engine.get_singleton(name) #: Object
-      elsif ClassDB.class_exists(name) # Second, check classes
-        Class.new const_get(ClassDB.get_parent_class(name)) #: singleton(Object)
-      else
-        super # raise {NameError}
-      end
-    )
-  end
+  def self.const_missing(name) = const_set(name,
+    if Engine.has_singleton(name) # First, check Singletons
+      Engine.get_singleton(name) #: Object
+    elsif ClassDB.class_exists(name) # Second, check classes
+      Class.new const_get(ClassDB.get_parent_class(name)) #: singleton(Object)
+    else
+      super # raise {NameError}
+    end
+  )
 end
