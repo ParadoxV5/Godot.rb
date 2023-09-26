@@ -44,7 +44,7 @@ static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
   // Load Ruby Integration
   godot_rb_init_Mixins();
   godot_rb_init_Engine();
-  godot_rb_init_RubyLanguage();
+  godot_rb_init_RubyScript();
 }
 static bool scene(void) { return godot_rb_protect(scene_unprotected); }
 

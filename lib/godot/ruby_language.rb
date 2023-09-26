@@ -7,6 +7,7 @@ module Godot
   end
   
   # Singleton pattern (singleton {INSTANCE} alone conflicts with {RubyScript} design)
+  #TODO what does it take to make it a singleton instance?
   class RubyLanguage < ScriptLanguageExtension
     
     # TODO: don’t generate a new {Variant} on every call
@@ -90,6 +91,7 @@ module Godot
     RubyScript.new(self)
     def get_script = RUBY_SCRIPT
     
+    private :new
     INSTANCE = new
     Engine.register_script_language(INSTANCE) # TODO: raise Error Enum
   end
