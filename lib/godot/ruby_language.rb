@@ -91,7 +91,7 @@ module Godot
     RubyScript.new(self)
     def get_script = RUBY_SCRIPT
     
-    private :new
+    private_class_method :new
     INSTANCE = new
     Engine.register_script_language(INSTANCE) # TODO: raise Error Enum
   end

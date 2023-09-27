@@ -7,37 +7,68 @@
 * C does not specify evaluation order of sibling args (which is important for {va_arg})
 */
 
+
 GDExtensionInterfaceVariantNewCopy gdext_variant_new_copy;
 
-
-static void set_unprotected(va_list* args) {
+/** ```c
+  GDExtensionScriptInstanceDataPtr self,
+  GDExtensionConstStringNamePtr name,
+  int suffix, // auto-promoted from `char`
+  int argc, // not `GDExtensionInt`!
+  const GDExtensionConstVariantPtr* argv, 
+  GDExtensionUninitializedVariantPtr r_ret
+``` */
+static void call_impl(va_list* args) {
   VALUE self = va_arg(*args, VALUE);
-  ID name = godot_rb_id_from_string_name(va_arg(*args, GDExtensionConstStringNamePtr), '=');
-  GDExtensionVariantPtr value = godot_rb_variant_alloc();
-  gdext_variant_new_copy(value, va_arg(*args, GDExtensionConstVariantPtr));
-  rb_funcallv_public(self, name, 1, (VALUE[]){godot_rb_parse_variant(value)});
+  GDExtensionConstStringNamePtr string_name = va_arg(*args, GDExtensionConstStringNamePtr);
+  ID name = godot_rb_id_from_string_name(string_name, va_arg(*args, int));
+  int argc = va_arg(*args, int);
+  const GDExtensionConstVariantPtr* argv = va_arg(*args, const GDExtensionConstVariantPtr*);
+  VALUE method_args[argc];
+  for(GDExtensionInt i = 0; i < argc; ++i) {
+    // Godot Engine would manage `argv` entries, so we make reference copies that the Ruby GC manages separately.
+    GDExtensionVariantPtr arg;
+    gdext_variant_new_copy(arg, argv[i]);
+    method_args[i] = godot_rb_parse_variant(arg);
+  }
+  self = rb_funcallv_public(self, name, argc, method_args); // variable reüse
+  GDExtensionUninitializedVariantPtr r_ret = va_arg(*args, GDExtensionUninitializedVariantPtr);
+  if(r_ret)
+    // Godot Engine too would manage the `r_ret` reference.
+    gdext_variant_new_copy(r_ret, godot_rb_obj_get_variant(self));
 }
+
+
 GDExtensionBool godot_rb_script_instance_set(
   GDExtensionScriptInstanceDataPtr self, GDExtensionConstStringNamePtr name, GDExtensionConstVariantPtr value
-) { return godot_rb_protect(set_unprotected, self, name, value); }
+) { return godot_rb_protect(call_impl, self, name, '=', 1, (GDExtensionConstVariantPtr[]){value}, NULL); }
 
-static void get_unprotected(va_list* args) {
-  VALUE self = va_arg(*args, VALUE);
-  ID name = godot_rb_id_from_string_name(va_arg(*args, GDExtensionConstStringNamePtr), 0);
-  gdext_variant_new_copy(
-    va_arg(*args, GDExtensionUninitializedVariantPtr),
-    godot_rb_obj_get_variant(rb_funcallv_public(self, name, 0, (VALUE[]){}))
-  );
-}
 GDExtensionBool godot_rb_script_instance_get(
   GDExtensionScriptInstanceDataPtr self, GDExtensionConstStringNamePtr name, GDExtensionVariantPtr r_value
-) { return godot_rb_protect(get_unprotected, self, name, r_value); }
+) { return godot_rb_protect(call_impl, self, name, 0, 0, (GDExtensionConstVariantPtr[]){}, r_value); }
 
 /** @return the {GDExtensionObjectPtr} represented by this {Variant} */
 GDExtensionObjectPtr godot_rb_script_instance_get_owner(GDExtensionScriptInstanceDataPtr self) {
   GDExtensionObjectPtr object;
   godot_rb_gdextension.object_ptr_from_variant(&object, godot_rb_cVariant_get_variant((VALUE)self));
   return object;
+}
+
+void godot_rb_script_instance_call(GDExtensionScriptInstanceDataPtr self,
+  GDExtensionConstStringNamePtr name,
+  const GDExtensionConstVariantPtr* argv, GDExtensionInt argc,
+  GDExtensionVariantPtr r_ret,
+  GDExtensionCallError* r_error
+) {
+  /*
+    Only `TOO_MANY_ARGUMENTS/`TOO_FEW_ARGUMENTS`
+    (“ArgumentError: wrong number of arguments (given `argument`, expected `expected`))
+    make sense goïng from Ruby land to GDExtension world.
+    For consistency and laziness, they too will join the `INVALID_METHOD` umbrella.
+  */
+  r_error->error = RB_LIKELY(
+    godot_rb_protect(call_impl, self, name, 0, argc, argv, r_ret)
+  ) ? GDEXTENSION_CALL_OK : GDEXTENSION_CALL_ERROR_INVALID_METHOD;
 }
 
 void to_string_unprotected(va_list* args) {
@@ -72,12 +103,6 @@ void godot_rb_script_instance_free(GDExtensionScriptInstanceDataPtr self) {
 const GDExtensionMethodInfo* get_method_list(GDExtensionScriptInstanceDataPtr p_instance, uint32_t* r_count);
 void free_method_list(GDExtensionScriptInstanceDataPtr p_instance, const GDExtensionMethodInfo* p_list);
 GDExtensionBool has_method(GDExtensionScriptInstanceDataPtr p_instance, GDExtensionConstStringNamePtr p_name);
-void call(GDExtensionScriptInstanceDataPtr p_self,
-  GDExtensionConstStringNamePtr p_method,
-  const GDExtensionConstVariantPtr* p_args, GDExtensionInt p_argument_count,
-  GDExtensionVariantPtr r_return,
-  GDExtensionCallError* r_error
-);
 
 ! Extended Reflection
 const GDExtensionPropertyInfo get_property_list(GDExtensionScriptInstanceDataPtr self, uint32_t* r_count);
@@ -120,7 +145,7 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
   //i(free_method_list),
   //i(get_property_type),
   //i(has_method),
-  //i(call),
+  i(call),
   //i(notification),
   i(to_string),
   i(refcount_decremented),
