@@ -40,7 +40,7 @@ module Godot
       super_script = super_klass.const_get :RUBY_SCRIPT
       if super_script
         super_script._get_instance_base_type
-      else # (Probably?) a Godot native type
+      else # Godot native type
         StringName.new super_klass.name.delete_prefix('Godot::')
       end
     end

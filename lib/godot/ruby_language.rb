@@ -13,7 +13,6 @@ module Godot
     # TODO: don’t generate a new {Variant} on every call
     
     def _get_name = 'Ruby'
-    #TODO: can this be `'Godot::RubyScript'`?
     def _get_type = 'RubyScript'
     def _get_extension = 'rb'
     def _get_recognized_extensions = PackedStringArray.from %w[rb rbw gemspec]
