@@ -38,7 +38,7 @@ VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
   return other;
 }
 
-VALUE godot_rb_object_ptr_class(GDExtensionObjectPtr object_ptr) {
+VALUE godot_rb_object_ptr_class(GDExtensionConstObjectPtr object_ptr) {
   GDExtensionStringName class_name_str;
   godot_rb_gdextension.object_get_class_name(object_ptr, godot_rb_library, &class_name_str);
   VALUE klass = rb_const_get_at(godot_rb_mGodot, godot_rb_id_from_string_name(&class_name_str, 0));
@@ -54,7 +54,7 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
       if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
         // “`godot_rb_parse_object`”
-        GDExtensionObjectPtr object_ptr;
+        GDExtensionConstObjectPtr object_ptr;
         godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
         return godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
       }

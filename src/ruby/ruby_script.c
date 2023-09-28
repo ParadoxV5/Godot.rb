@@ -1,6 +1,7 @@
 /** {RubyLanguage} & co. */
 
 #include "variants.h"
+#include "../SelfImplScriptExtension/SelfImplScriptExtension.h"
 
 /* General notes for developers:
 * {VALUE} ↔️ {GDExtensionScriptInstanceDataPtr} casts are exact
@@ -156,27 +157,42 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
 
 GDExtensionInterfaceScriptInstanceCreate script_instance_create;
 /** @return {GDExtensionScriptInstancePtr} in {Variant} form */
-VALUE godot_rb_cRubyScript_i_instance_create(
-  RB_UNUSED_VAR(VALUE self), //FIXME: Check superclass
-  VALUE for_object
+GDExtensionScriptInstancePtr godot_rb_cRubyScript_instance_create(
+  RB_UNUSED_VAR(GDExtensionConstObjectPtr self), //FIXME: Check superclass
+  GDExtensionConstObjectPtr for_object
 ) {
-  rb_gc_register_mark_object(for_object); // Let Godot Engine lock GC
-  GDExtensionVariantPtr script_instance = godot_rb_variant_alloc();
-  godot_rb_gdextension.variant_from_object_ptr(
-    script_instance,
-    script_instance_create(&godot_rb_script_instance_info, (GDExtensionScriptInstanceDataPtr)for_object)
-  );
-  return godot_rb_wrap_variant(godot_rb_cObject, script_instance);
+  GDExtensionVariantPtr for_object_variant;
+  godot_rb_gdextension.variant_from_object_ptr(&for_object_variant, &for_object);
+  VALUE for_object_ruby = godot_rb_wrap_variant(godot_rb_object_ptr_class(for_object), for_object_variant);
+  rb_gc_register_mark_object(for_object_ruby); // Let Godot Engine lock GC
+  return script_instance_create(&godot_rb_script_instance_info, (GDExtensionScriptInstanceDataPtr)for_object_ruby);
+    // typedef GDExtensionScriptInstanceDataPtr VALUE
 }
 
+
+struct SISEClassData* SISEClassData;
 
 void godot_rb_init_RubyScript(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
   script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   
-  godot_rb_require_relative(ruby_script);
-  VALUE cRubyScript = godot_rb_get_module(RubyScript);
-  rb_define_method(cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
+  SISEClassData = init_SelfImplScriptExtension("RubyScript",
+    godot_rb_cRubyScript_instance_create,
+    godot_rb_gdextension.mem_alloc,
+    (GDExtensionInterfaceObjectMethodBindPtrcall)godot_rb_get_proc("object_method_bind_ptrcall"),
+    (GDExtensionInterfaceObjectSetInstance)godot_rb_get_proc("object_set_instance"),
+    (GDExtensionInterfaceClassdbConstructObject)godot_rb_get_proc("classdb_construct_object"),
+    (GDExtensionInterfaceClassdbGetMethodBind)godot_rb_get_proc("classdb_get_method_bind"),
+    (GDExtensionInterfaceClassdbRegisterExtensionClass)godot_rb_get_proc("classdb_register_extension_class"),
+    (GDExtensionInterfaceClassdbRegisterExtensionClassMethod)
+      godot_rb_get_proc("classdb_register_extension_class_method"),
+    godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL),
+    godot_rb_gdextension.variant_from_object_ptr,
+    godot_rb_gdextension.object_ptr_from_variant,
+    godot_rb_chars_to_string_name,
+    godot_rb_gdextension.string_name_destroy,
+    godot_rb_library
+  );
   
   godot_rb_require_relative(ruby_language);
   VALUE cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));
@@ -190,5 +206,11 @@ void godot_rb_init_RubyScript(void) {
 void godot_rb_destroy_RubyLanguage(void) {
   //FIXME: Leaked instance: ScriptExtension
   // https://docs.godotengine.org/en/stable/classes/class_engine.html#class-engine-method-unregister-script-language
-  // classdb_unregister_extension_class
+  destroy_SelfImplScriptExtension(
+    SISEClassData,
+    godot_rb_gdextension.mem_free,
+    (GDExtensionInterfaceClassdbUnregisterExtensionClass)godot_rb_get_proc("classdb_unregister_extension_class"),
+    godot_rb_gdextension.string_name_destroy,
+    godot_rb_library
+  );
 }
