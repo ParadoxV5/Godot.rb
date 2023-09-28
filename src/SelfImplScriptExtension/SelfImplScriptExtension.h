@@ -39,7 +39,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   GDExtensionVariantFromTypeConstructorFunc variant_from_bool,
   GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr,
   GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant,
-  GDExtensionStringName (* string_name_from_latin1)(const char* latin1),
+  GDExtensionStringName (* string_name_from_ascii)(const char* ascii),
   GDExtensionPtrDestructor string_name_destroy,
   GDExtensionClassLibraryPtr p_library
 );

@@ -89,13 +89,13 @@ struct SISEClassData* init_SelfImplScriptExtension(
   GDExtensionVariantFromTypeConstructorFunc variant_from_bool,
   GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr,
   GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant,
-  GDExtensionStringName (* string_name_from_latin1)(const char* latin1),
+  GDExtensionStringName (* string_name_from_ascii)(const char* ascii),
   GDExtensionPtrDestructor string_name_destroy,
   GDExtensionClassLibraryPtr p_library
 ) {
   struct SISEClassData* class_userdata = mem_alloc(sizeof(struct SISEClassData));
-  class_userdata->script_name = string_name_from_latin1(script_name);
-  class_userdata->parent_class_name = string_name_from_latin1("ScriptExtension");
+  class_userdata->script_name = string_name_from_ascii(script_name);
+  class_userdata->parent_class_name = string_name_from_ascii("ScriptExtension");
   
   classdb_register_extension_class(p_library,
     &class_userdata->script_name,
@@ -109,7 +109,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
     }
   );
   
-  GDExtensionStringName name = string_name_from_latin1("set_script");
+  GDExtensionStringName name = string_name_from_ascii("set_script");
   class_userdata->set_script = classdb_get_method_bind(script_name, &name,
     1114965689 // https://github.com/ParadoxV5/godot-headers/blob/godot-4.1.1-stable/extension_api.json#L147371
   );
@@ -121,7 +121,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   class_userdata->instance_create_data.variant_from_object_ptr = variant_from_object_ptr;
   class_userdata->instance_create_data.object_ptr_from_variant = object_ptr_from_variant;
   
-  name = string_name_from_latin1("_can_instantiate");
+  name = string_name_from_ascii("_can_instantiate");
   classdb_register_extension_class_method(p_library, &script_name, &(GDExtensionClassMethodInfo){
     .name = &name,
     .method_userdata = variant_from_bool, // typedef void GDExtensionVariantFromTypeConstructorFunc
@@ -135,7 +135,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   });
   string_name_destroy(&name);
   
-  name = string_name_from_latin1("_instance_create");
+  name = string_name_from_ascii("_instance_create");
   classdb_register_extension_class_method(p_library, &script_name, &(GDExtensionClassMethodInfo){
     .name = &name,
     .method_userdata = &class_userdata->instance_create_data, // typedef void SISEICData

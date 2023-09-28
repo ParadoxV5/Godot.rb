@@ -23,6 +23,5 @@ module Godot
     def _get_base_script: () -> RubyScript[Object]?
     
     def new: (*variant_like args) -> C
-    def _instance_create: (C for_object) -> Object
   end
 end

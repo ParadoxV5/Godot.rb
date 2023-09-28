@@ -38,15 +38,6 @@ VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
   return other;
 }
 
-VALUE godot_rb_object_ptr_class(GDExtensionConstObjectPtr object_ptr) {
-  GDExtensionStringName class_name_str;
-  godot_rb_gdextension.object_get_class_name(object_ptr, godot_rb_library, &class_name_str);
-  VALUE klass = rb_const_get_at(godot_rb_mGodot, godot_rb_id_from_string_name(&class_name_str, 0));
-    // calls {Godot#const_missing} as needed
-  godot_rb_gdextension.string_name_destroy(class_name_str);
-  return klass;
-}
-
 GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
 VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
