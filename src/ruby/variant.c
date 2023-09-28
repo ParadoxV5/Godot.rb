@@ -56,9 +56,7 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
         // “`godot_rb_parse_object`”
         GDExtensionObjectPtr object_ptr;
         godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
-        VALUE obj = godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
-        godot_rb_gdextension.object_destroy(object_ptr);
-        return obj;
+        return godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
       }
       
       //fall-through

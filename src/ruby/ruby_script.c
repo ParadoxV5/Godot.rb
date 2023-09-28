@@ -156,7 +156,7 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
 
 GDExtensionInterfaceScriptInstanceCreate script_instance_create;
 /** @return {GDExtensionScriptInstancePtr} in {Variant} form */
-VALUE gocot_rb_cRubyScript_i_instance_create(
+VALUE godot_rb_cRubyScript_i_instance_create(
   RB_UNUSED_VAR(VALUE self), //FIXME: Check superclass
   VALUE for_object
 ) {
@@ -176,7 +176,7 @@ void godot_rb_init_RubyScript(void) {
   
   godot_rb_require_relative(ruby_script);
   VALUE cRubyScript = godot_rb_get_module(RubyScript);
-  rb_define_method(cRubyScript, "_instance_create", gocot_rb_cRubyScript_i_instance_create, 1);
+  rb_define_method(cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
   
   godot_rb_require_relative(ruby_language);
   VALUE cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));

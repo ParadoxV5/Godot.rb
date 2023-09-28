@@ -61,7 +61,6 @@ GDExtensionBool godot_rb_main(
     (GDExtensionInterfaceVariantGetPtrDestructor)godot_rb_get_proc("variant_get_ptr_destructor");
   godot_rb_gdextension.string_destroy      = variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_STRING     );
   godot_rb_gdextension.string_name_destroy = variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_STRING_NAME);
-  godot_rb_gdextension.object_destroy      = variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_OBJECT     );
   
   // Success
   return true;
