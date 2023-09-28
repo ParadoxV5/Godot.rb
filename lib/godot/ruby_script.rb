@@ -79,10 +79,5 @@ module Godot
     # def _get_rpc_config: () -> Variant
     
     def new(...) = klass.new(...)
-    
-    # The script for the 5head self-implementation
-    new(self)
-    def get_script = RUBY_SCRIPT
-    # note to maintainers: instantiate at the very end so the class is fully prepared (except {Class#name} ig) before so
   end
 end
