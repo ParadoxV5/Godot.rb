@@ -8,11 +8,9 @@ struct SISEClassData {
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall;
   GDExtensionInterfaceObjectSetInstance object_set_instance;
   GDExtensionInterfaceClassdbConstructObject classdb_construct_object;
-  struct SISEICData {
-    GDExtensionInstanceCreate instance_create_impl;
-    GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr;
-    GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant;
-  } instance_create_data;
+  GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr;
+  GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant;
+  GDExtensionInstanceCreate instance_create_impl;
 };
 
 
@@ -20,7 +18,13 @@ static GDExtensionObjectPtr create_instance(void* class_userdata) {
   struct SISEClassData* d = (struct SISEClassData*)class_userdata;
   GDExtensionObjectPtr object = d->classdb_construct_object(&d->parent_class_name);
   d->object_set_instance(object, &d->script_name, object); // typedef GDExtensionClassInstancePtr GDExtensionObjectPtr
-  d->object_method_bind_ptrcall(d->set_script, object, (GDExtensionConstTypePtr[]){object}, NULL);
+  char variant[40];
+  d->variant_from_object_ptr(&variant, &object);
+  d->object_method_bind_ptrcall(
+    d->set_script, object, (GDExtensionConstTypePtr[]){variant}, &class_userdata /* NULL */
+  );
+  //FIXME: leaked variant `object_variant`
+  //TODO: switch to GDExtensionClassInstancePtr = Variant
   return object;
 }
 
@@ -51,7 +55,7 @@ static void instance_create_ptrcall(
   GDExtensionTypePtr r_ret
 ) {
   *(GDExtensionUninitializedObjectPtr*)r_ret =
-    ((struct SISEICData*)instance_create_data)->instance_create_impl(self, *for_object_ptr);
+    ((struct SISEClassData*)instance_create_data)->instance_create_impl(self, *for_object_ptr);
 }
 static void instance_create(
   void* instance_create_data,
@@ -60,9 +64,9 @@ static void instance_create(
   GDExtensionUninitializedVariantPtr r_ret, GDExtensionCallError* r_error
 ) {
   if /* likely */(argc == 1) {
-    struct SISEICData* d = (struct SISEICData*)instance_create_data;
+    struct SISEClassData* d = (struct SISEClassData*)instance_create_data;
     GDExtensionObjectPtr object;
-    d->object_ptr_from_variant(&object, (GDExtensionVariantPtr)argv);
+    d->object_ptr_from_variant(&object, (GDExtensionVariantPtr)*argv);
     instance_create_ptrcall(d->instance_create_impl, self, (GDExtensionConstObjectPtr*)&object, &object);
     d->variant_from_object_ptr(r_ret, &object);
     // `GDExtensionObjectPtr` does not need destruction
@@ -127,9 +131,9 @@ struct SISEClassData* init_SelfImplScriptExtension(
   class_userdata->object_method_bind_ptrcall = object_method_bind_ptrcall;
   class_userdata->object_set_instance = object_set_instance;
   class_userdata->classdb_construct_object = classdb_construct_object;
-  class_userdata->instance_create_data.instance_create_impl = instance_create_impl;
-  class_userdata->instance_create_data.variant_from_object_ptr = variant_from_object_ptr;
-  class_userdata->instance_create_data.object_ptr_from_variant = object_ptr_from_variant;
+  class_userdata->variant_from_object_ptr = variant_from_object_ptr;
+  class_userdata->object_ptr_from_variant = object_ptr_from_variant;
+  class_userdata->instance_create_impl = instance_create_impl;
   GDExtensionStringName name_object;
   string_name_new_with_latin1_chars(&name_object, "Object");
   GDExtensionString hint;
@@ -157,7 +161,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   string_name_new_with_latin1_chars(&name, "_instance_create");
   classdb_register_extension_class_method(p_library, &class_userdata->script_name, &(GDExtensionClassMethodInfo){
     .name = &name,
-    .method_userdata = &class_userdata->instance_create_data, // typedef void SISEICData
+    .method_userdata = &class_userdata, // typedef void SISEClassData
     .call_func = instance_create,
     .ptrcall_func = instance_create_ptrcall,
     .method_flags = GDEXTENSION_METHOD_FLAG_CONST,
