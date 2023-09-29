@@ -19,7 +19,7 @@ VALUE godot_rb_cObject_i_initialize(int argc, VALUE* argv, VALUE self) {
   GDExtensionStringName class_name = godot_rb_obj_to_string_name(
     RB_UNLIKELY(NIL_P(ruby_script))
     // Godot native type
-    ? rb_class_name(self) //FIXME: delete `Godot::`
+    ? rb_funcallv_public(CLASS_OF(self), rb_intern("demodulized_name"), 0, (VALUE[]){})
     // Godot.rb {RubyScript} class
     : rb_funcallv_public(ruby_script, rb_intern("_get_instance_base_type"), 0, (VALUE[]){})
   );
