@@ -35,6 +35,7 @@ module Godot
     VARIANT_TYPE: 24
     RUBY_SCRIPT: RubyScript[Object]? # https://github.com/soutaro/steep/issues/916
     alias call godot_send
+    private def __get_class: () -> singleton(Object)
   end
   
 end

@@ -43,12 +43,12 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
-      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
-        // “`godot_rb_parse_object`”
-        GDExtensionConstObjectPtr object_ptr;
-        godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
-        return godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
-      }
+      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) // Non-null check
+        return godot_rb_wrap_variant( rb_funcall(
+          godot_rb_wrap_variant(godot_rb_cObject, variant),
+          rb_intern("__get_class"),
+          0
+        ), variant );
       
       //fall-through
     case GDEXTENSION_VARIANT_TYPE_NIL:
