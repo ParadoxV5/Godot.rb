@@ -3,9 +3,6 @@
 #include <stdbool.h>
 #include <godot/gdextension_interface.h>
 
-/** Stand-in type for de-referencing a `GDExtensionStringNamePtr` (good for stack allocations) */
-typedef void* GDExtensionStringName;
-
 /** Backbone implementation function type for `#_instance_create`
   @see init_SelfImplScriptExtension
 */
@@ -30,6 +27,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   char* script_name,
   GDExtensionInstanceCreate instance_create_impl,
   GDExtensionInterfaceMemAlloc mem_alloc,
+  GDExtensionInterfaceStringNewWithLatin1Chars string_new_with_latin1_chars,
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall,
   GDExtensionInterfaceObjectSetInstance object_set_instance,
   GDExtensionInterfaceClassdbConstructObject classdb_construct_object,
@@ -39,7 +37,8 @@ struct SISEClassData* init_SelfImplScriptExtension(
   GDExtensionVariantFromTypeConstructorFunc variant_from_bool,
   GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr,
   GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant,
-  GDExtensionStringName (* string_name_from_ascii)(const char* ascii),
+  GDExtensionPtrConstructor string_name_from_string,
+  GDExtensionPtrDestructor string_destroy,
   GDExtensionPtrDestructor string_name_destroy,
   GDExtensionClassLibraryPtr p_library
 );

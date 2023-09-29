@@ -178,17 +178,19 @@ GDExtensionScriptInstancePtr godot_rb_cRubyScript_instance_create(
 
 
 struct SISEClassData* SISEClassData;
+VALUE cRubyLanguage_INSTANCE;
 
 void godot_rb_init_RubyScript(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
   script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   
-  godot_rb_require_relative(ruby_language);
+  godot_rb_require_relative(ruby_script);
   godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
   rb_gc_register_mark_object(godot_rb_cRubyScript);
   SISEClassData = init_SelfImplScriptExtension("RubyScript",
     godot_rb_cRubyScript_instance_create,
     godot_rb_gdextension.mem_alloc,
+    (GDExtensionInterfaceStringNewWithLatin1Chars)godot_rb_get_proc("string_new_with_latin1_chars"),
     (GDExtensionInterfaceObjectMethodBindPtrcall)godot_rb_get_proc("object_method_bind_ptrcall"),
     (GDExtensionInterfaceObjectSetInstance)godot_rb_get_proc("object_set_instance"),
     (GDExtensionInterfaceClassdbConstructObject)godot_rb_get_proc("classdb_construct_object"),
@@ -199,13 +201,14 @@ void godot_rb_init_RubyScript(void) {
     godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL),
     godot_rb_gdextension.variant_from_object_ptr,
     godot_rb_gdextension.object_ptr_from_variant,
-    godot_rb_chars_to_string_name,
+    godot_rb_gdextension.string_name_from_string,
+    godot_rb_gdextension.string_destroy,
     godot_rb_gdextension.string_name_destroy,
     godot_rb_library
   );
   
   godot_rb_require_relative(ruby_language);
-  VALUE cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));
+  cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));
   rb_gc_register_mark_object(cRubyLanguage_INSTANCE);
   godot_rb_gdextension.object_ptr_from_variant(
     &godot_rb_RubyLanguage_object,
@@ -214,8 +217,11 @@ void godot_rb_init_RubyScript(void) {
 }
 
 void godot_rb_destroy_RubyLanguage(void) {
-  //FIXME: Leaked instance: ScriptExtension
-  // https://docs.godotengine.org/en/stable/classes/class_engine.html#class-engine-method-unregister-script-language
+  godot_rb_RubyLanguage_object = NULL;
+  rb_funcallv_public(godot_rb_get_module(Engine),
+    rb_intern("unregister_script_language"),
+    1, (VALUE[]){cRubyLanguage_INSTANCE}
+  );
   destroy_SelfImplScriptExtension(
     SISEClassData,
     godot_rb_gdextension.mem_free,

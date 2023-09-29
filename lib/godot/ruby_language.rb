@@ -88,8 +88,6 @@ module Godot
     # bool _supports_builtin_mode ( ) virtual const
     
     RubyScript.new(self)
-    def get_script = RUBY_SCRIPT
-    
     private_class_method :new
     INSTANCE = new
     Engine.register_script_language(INSTANCE) # TODO: raise Error Enum

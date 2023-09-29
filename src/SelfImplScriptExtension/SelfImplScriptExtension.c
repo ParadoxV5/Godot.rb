@@ -1,5 +1,6 @@
 #include "SelfImplScriptExtension.h"
 
+typedef void* GDExtensionString, * GDExtensionStringName;
 struct SISEClassData {
   GDExtensionStringName script_name;
   GDExtensionStringName parent_class_name;
@@ -80,6 +81,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   char* script_name,
   GDExtensionInstanceCreate instance_create_impl,
   GDExtensionInterfaceMemAlloc mem_alloc,
+  GDExtensionInterfaceStringNewWithLatin1Chars string_new_with_latin1_chars,
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall,
   GDExtensionInterfaceObjectSetInstance object_set_instance,
   GDExtensionInterfaceClassdbConstructObject classdb_construct_object,
@@ -89,17 +91,24 @@ struct SISEClassData* init_SelfImplScriptExtension(
   GDExtensionVariantFromTypeConstructorFunc variant_from_bool,
   GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr,
   GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant,
-  GDExtensionStringName (* string_name_from_ascii)(const char* ascii),
+  GDExtensionPtrConstructor string_name_from_string,
+  GDExtensionPtrDestructor string_destroy,
   GDExtensionPtrDestructor string_name_destroy,
   GDExtensionClassLibraryPtr p_library
 ) {
+  GDExtensionString string_name_string;
+  #define string_name_new_with_latin1_chars(string_name, utf8) \
+    string_new_with_latin1_chars(&string_name_string, utf8); \
+    string_name_from_string(string_name, (GDExtensionConstTypePtr[]){&string_name_string}); \
+    string_destroy(&string_name_string)
+  
   struct SISEClassData* class_userdata = mem_alloc(sizeof(struct SISEClassData));
-  class_userdata->script_name = string_name_from_ascii(script_name);
-  class_userdata->parent_class_name = string_name_from_ascii("ScriptExtension");
+  string_name_new_with_latin1_chars(&class_userdata->script_name, script_name);
+  string_name_new_with_latin1_chars(&class_userdata->parent_class_name, "ScriptExtension");
   
   classdb_register_extension_class(p_library,
     &class_userdata->script_name,
-    class_userdata->parent_class_name,
+    &class_userdata->parent_class_name,
     &(GDExtensionClassCreationInfo){
       .class_userdata = class_userdata,
       .is_virtual = false,
@@ -109,8 +118,9 @@ struct SISEClassData* init_SelfImplScriptExtension(
     }
   );
   
-  GDExtensionStringName name = string_name_from_ascii("set_script");
-  class_userdata->set_script = classdb_get_method_bind(script_name, &name,
+  GDExtensionStringName name;
+  string_name_new_with_latin1_chars(&name, "set_script");
+  class_userdata->set_script = classdb_get_method_bind(&class_userdata->script_name, &name,
     1114965689 // https://github.com/ParadoxV5/godot-headers/blob/godot-4.1.1-stable/extension_api.json#L147371
   );
   string_name_destroy(&name);
@@ -120,36 +130,60 @@ struct SISEClassData* init_SelfImplScriptExtension(
   class_userdata->instance_create_data.instance_create_impl = instance_create_impl;
   class_userdata->instance_create_data.variant_from_object_ptr = variant_from_object_ptr;
   class_userdata->instance_create_data.object_ptr_from_variant = object_ptr_from_variant;
+  GDExtensionStringName name_object;
+  string_name_new_with_latin1_chars(&name_object, "Object");
+  GDExtensionString hint;
+  string_new_with_latin1_chars(&hint, "");
   
-  name = string_name_from_ascii("_can_instantiate");
-  classdb_register_extension_class_method(p_library, &script_name, &(GDExtensionClassMethodInfo){
+  string_name_new_with_latin1_chars(&name, "_can_instantiate");
+  classdb_register_extension_class_method(p_library, &class_userdata->script_name, &(GDExtensionClassMethodInfo){
     .name = &name,
     .method_userdata = variant_from_bool, // typedef void GDExtensionVariantFromTypeConstructorFunc
     .call_func = can_instantiate,
     .ptrcall_func = can_instantiate_ptrcall,
     .method_flags = GDEXTENSION_METHOD_FLAG_CONST,
     .has_return_value = true,
-    .return_value_info = &(GDExtensionPropertyInfo){.type = GDEXTENSION_VARIANT_TYPE_BOOL},
+    .return_value_info = &(GDExtensionPropertyInfo){
+      .type = GDEXTENSION_VARIANT_TYPE_BOOL,
+      .name = &name,
+      .class_name = &name_object,
+      .hint_string = &hint
+    },
     .argument_count = 0,
     .default_argument_count = 0
   });
   string_name_destroy(&name);
   
-  name = string_name_from_ascii("_instance_create");
-  classdb_register_extension_class_method(p_library, &script_name, &(GDExtensionClassMethodInfo){
+  string_name_new_with_latin1_chars(&name, "_instance_create");
+  classdb_register_extension_class_method(p_library, &class_userdata->script_name, &(GDExtensionClassMethodInfo){
     .name = &name,
     .method_userdata = &class_userdata->instance_create_data, // typedef void SISEICData
     .call_func = instance_create,
     .ptrcall_func = instance_create_ptrcall,
     .method_flags = GDEXTENSION_METHOD_FLAG_CONST,
     .has_return_value = true,
-    .return_value_info = &(GDExtensionPropertyInfo){.type = GDEXTENSION_VARIANT_TYPE_OBJECT}, // `void*`
+    .return_value_info = &(GDExtensionPropertyInfo){
+      .type = GDEXTENSION_VARIANT_TYPE_OBJECT, // `void*`
+      .name = &name,
+      .class_name = &name_object,
+      .hint_string = &hint
+    },
     .argument_count = 1,
-    .arguments_info = &(GDExtensionPropertyInfo){.type = GDEXTENSION_VARIANT_TYPE_OBJECT},
+    .arguments_info = (GDExtensionPropertyInfo[]){ (GDExtensionPropertyInfo){
+      .type = GDEXTENSION_VARIANT_TYPE_OBJECT,
+      .name = &name_object,
+      .class_name = &name_object,
+      .hint_string = &hint
+    } },
+    .arguments_metadata = (GDExtensionClassMethodArgumentMetadata[]){GDEXTENSION_METHOD_ARGUMENT_METADATA_NONE},
       // Accept any class once self-implemented; only accept instances without the self-implementation script.
     .default_argument_count = 0
   });
   string_name_destroy(&name);
+  
+  string_destroy(&hint);
+  string_name_destroy(&name_object);
+  return class_userdata;
 }
 
 void destroy_SelfImplScriptExtension(struct SISEClassData* class_userdata,

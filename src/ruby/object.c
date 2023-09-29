@@ -27,7 +27,7 @@ VALUE godot_rb_cObject_i_initialize(int argc, VALUE* argv, VALUE self) {
 }
 
 void godot_rb_init_Object(void) {
-  godot_rb_require_relative(variant);
+  godot_rb_require_relative(object);
   godot_rb_cObject = godot_rb_get_module(Object);
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = godot_rb_cObject;
   idRUBY_SCRIPT = rb_intern("RUBY_SCRIPT");
