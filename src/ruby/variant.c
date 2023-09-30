@@ -135,7 +135,12 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
         case GDEXTENSION_VARIANT_TYPE_NIL   : expectation = " (expected nil)"; break;
         default: expectation = " (expected %"PRIsVALUE")";
       }
-      rb_raise(rb_eTypeError, "wrong argument type %"PRIsVALUE"%s", CLASS_OF(self), expectation, godot_rb_cVariants[error.expected]);
+      rb_raise(rb_eTypeError,
+        "wrong argument type %"PRIsVALUE"%s",
+        godot_rb_cVariants[error.argument],
+        expectation,
+        godot_rb_cVariants[error.expected]
+      );
     }
     
     case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
@@ -209,6 +214,16 @@ VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
 }
 
 
+GDExtensionInterfaceVariantHasKey variant_has_key;
+VALUE godot_rb_cVariant_i_has_key(VALUE self, VALUE key) {
+  GDExtensionBool
+    valid_key,
+    has_key = variant_has_key(godot_rb_obj_get_variant(self), godot_rb_obj_get_variant(key), &valid_key);
+  if RB_LIKELY(valid_key)
+    return has_key ? Qtrue : Qfalse;
+  rb_raise(rb_eTypeError, "wrong argument type %"PRIsVALUE, CLASS_OF(key));
+}
+
 GDExtensionInterfaceVariantHasMethod variant_has_method;
 VALUE godot_rb_cVariant_i_has_method(VALUE self, VALUE name) {
   GDExtensionStringName string_name = godot_rb_obj_to_string_name(name);
@@ -234,6 +249,7 @@ void godot_rb_init_Variant() {
   m([]        , _aref     ,  1)
   m([]=       , _aset     ,  2)
   m(godot_send, godot_send, -1)
+  m(has_key   , has_key   ,  1)
   m(has_method, has_method,  1)
   m(nonzero?  , nonzero_  ,  0)
 }

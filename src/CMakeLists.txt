@@ -12,4 +12,4 @@ include_directories(../include ${Ruby_INCLUDE_DIRS})
 link_libraries(${Ruby_LIBRARY})
 
 file(GLOB_RECURSE SOURCES *.c)
-add_library(Godot_rb SHARED ${SOURCES})
+add_library("Godot.rb" SHARED ${SOURCES})
