@@ -155,6 +155,10 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
   i(free)
 };
 
+/**
+  Don’t save in `RubyScript::RUBY_SCRIPT` –
+  `SelfImplScriptExtension` already covers `RubyScript#initialize`’s attach script step.
+*/
 VALUE godot_rb_cRubyScript_RubyScript;
 GDExtensionInterfaceScriptInstanceCreate script_instance_create;
 /** @return {GDExtensionScriptInstancePtr} in {Variant} form */
@@ -185,8 +189,7 @@ void godot_rb_init_RubyScript(void) {
   godot_rb_require_relative(ruby_script);
   VALUE cRubyScript = godot_rb_get_module(RubyScript);
   rb_define_method(cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
-  godot_rb_cRubyScript_RubyScript =
-    rb_obj_alloc(cRubyScript); // need only the methods, don’t initialize (which is guaranteed to fail)
+  godot_rb_cRubyScript_RubyScript = rb_obj_alloc(cRubyScript); // don’t `#initialize` yet (which is guaranteed to fail)
   rb_gc_register_mark_object(godot_rb_cRubyScript_RubyScript);
   
   SISEClassData = init_SelfImplScriptExtension(
@@ -207,6 +210,7 @@ void godot_rb_init_RubyScript(void) {
     godot_rb_chars_to_string_name,
     godot_rb_library
   );
+  rb_funcall(godot_rb_cRubyScript_RubyScript, rb_intern("initialize"), 0); // can `#initialize` now
   
   godot_rb_require_relative(ruby_language);
   cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));
