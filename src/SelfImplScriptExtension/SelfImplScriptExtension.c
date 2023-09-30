@@ -2,7 +2,8 @@
 
 struct SISEClassData {
   GDExtensionStringName script_name, parent_class_name, _can_instantiate, _instance_create;
-  GDExtensionScriptInstancePtr script_script;
+  GDExtensionVariantPtr script_script;
+  GDExtensionScriptInstancePtr script_script_instance;
   GDExtensionMethodBindPtr set_script;
   GDExtensionInterfaceVariantDestroy variant_destroy;
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall;
@@ -15,24 +16,21 @@ struct SISEClassData {
 static GDExtensionObjectPtr create_instance(void* class_userdata) {
   struct SISEClassData* d = (struct SISEClassData*)class_userdata;
   GDExtensionObjectPtr object = d->classdb_construct_object(&d->parent_class_name);
-  d->object_set_instance(object, &d->script_name, d->script_script);
+  d->object_set_instance(object, &d->script_name, d->script_script_instance);
     // typedef GDExtensionScriptInstancePtr GDExtensionClassInstancePtr
-  /** GDExtensionVariant */char variant[40];
-  d->variant_from_object_ptr(&variant, &object);
   d->object_method_bind_ptrcall(
-    d->set_script, object, (GDExtensionConstTypePtr[]){variant}, /* NULL */ &class_userdata
+    d->set_script, object, (GDExtensionConstTypePtr[]){d->script_script}, /* NULL */ &class_userdata
   );
-  d->variant_destroy(&variant);
   return object;
 }
 
 /** No-op. Confusing GDExtension API: {create_instance} returns an Object, but this receives a custom pointer. */
-static void free_instance(void* _class_userdata, GDExtensionClassInstancePtr _self) {}
+static void free_instance(void* _class_userdata, GDExtensionScriptInstancePtr _self) {}
 
 
 /** `bool _can_instantiate()` – return `true` like a YES man */
 static void can_instantiate(
-  GDExtensionClassInstancePtr _self, const GDExtensionConstTypePtr* _args, GDExtensionTypePtr r_ret)
+  GDExtensionScriptInstancePtr _self, const GDExtensionConstTypePtr* _args, GDExtensionTypePtr r_ret)
 { *(GDExtensionBool*)r_ret = true; }
 /**
   `GDExtensionScriptInstancePtr _instance_create(Object for_object)`
@@ -56,7 +54,8 @@ GDExtensionClassCallVirtual get_virtual(void* class_userdata, GDExtensionConstSt
 
 struct SISEClassData* init_SelfImplScriptExtension(
   char* script_name,
-  GDExtensionScriptInstancePtr script_script,
+  GDExtensionVariantPtr script_script,
+  GDExtensionScriptInstancePtr script_script_instance,
   GDExtensionInterfaceMemAlloc mem_alloc,
   GDExtensionInterfaceVariantDestroy variant_destroy,
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall,
@@ -75,6 +74,7 @@ struct SISEClassData* init_SelfImplScriptExtension(
   class_userdata->_can_instantiate = string_name_from_ascii_chars("_can_instantiate");
   class_userdata->_instance_create = string_name_from_ascii_chars("_instance_create");
   class_userdata->script_script = script_script;
+  class_userdata->script_script_instance = script_script_instance;
   class_userdata->variant_destroy = variant_destroy;
   class_userdata->object_method_bind_ptrcall = object_method_bind_ptrcall;
   class_userdata->object_set_instance = object_set_instance;

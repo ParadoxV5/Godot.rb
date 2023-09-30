@@ -155,18 +155,16 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
   i(free)
 };
 
-/**
-  Don’t save in `RubyScript::RUBY_SCRIPT` –
-  `SelfImplScriptExtension` already covers `RubyScript#initialize`’s attach script step.
-*/
-VALUE godot_rb_cRubyScript_RubyScript;
 GDExtensionInterfaceScriptInstanceCreate script_instance_create;
 /** @return {GDExtensionScriptInstancePtr} in {Variant} form */
 VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
   //FIXME: Check superclass
-  for_object = godot_rb_wrap_variant(
-    rb_funcall(self, rb_intern("klass"), 0),
-    godot_rb_cVariant_get_variant(for_object)
+  for_object = rb_class_new_instance(
+    0, (VALUE[]){}, // TODO: pass constructor vars… somehow
+    godot_rb_wrap_variant(
+      rb_funcall(self, rb_intern("klass"), 0),
+      godot_rb_cVariant_get_variant(for_object)
+    )
   );
   rb_gc_register_mark_object(for_object); // Let Godot Engine lock GC
   return godot_rb_wrap_variant(
@@ -180,6 +178,11 @@ VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
 
 
 struct SISEClassData* SISEClassData;
+/**
+  Don’t save in `RubyScript::RUBY_SCRIPT` –
+  `SelfImplScriptExtension` already covers `RubyScript#initialize`’s attach script step.
+*/
+VALUE godot_rb_cRubyScript_RubyScript;
 VALUE cRubyLanguage_INSTANCE;
 
 void godot_rb_init_RubyScript(void) {
@@ -194,6 +197,7 @@ void godot_rb_init_RubyScript(void) {
   
   SISEClassData = init_SelfImplScriptExtension(
     "RubyScript",
+    godot_rb_cVariant_get_variant(godot_rb_cRubyScript_RubyScript),
     script_instance_create(
       &godot_rb_script_instance_info,
       (GDExtensionScriptInstanceDataPtr)godot_rb_cRubyScript_RubyScript // see {#_instance_create}

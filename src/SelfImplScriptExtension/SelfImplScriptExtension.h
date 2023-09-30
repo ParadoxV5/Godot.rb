@@ -12,8 +12,11 @@ typedef void* GDExtensionStringName;
   @param script_name
     the common name of the scripts (really only used for the extension class’s name – it’s just good to be consistent)
   @param script_script
-    This is the `ScriptInstance` for the scripts’ script.
+    This is the script for the scripts.
     You must keep it valid until {destroy_SelfImplScriptExtension}, after which YOU free it whenëver convenient.
+  @param script_script_instance
+    This is the `ScriptInstance` for `script_script`.
+    Like `script_script`, you must keep it valid and free it after {destroy_SelfImplScriptExtension}.
   @return
     an opaque pointer for {destroy_SelfImplScriptExtension}
     (Assuming expectations, this can cast to a `GDExtensionConstStringNamePtr` of the `script_name` arg.)
@@ -27,7 +30,8 @@ typedef void* GDExtensionStringName;
 */
 struct SISEClassData* init_SelfImplScriptExtension(
   char* script_name,
-  GDExtensionScriptInstancePtr script_script,
+  GDExtensionVariantPtr script_script,
+  GDExtensionScriptInstancePtr script_script_instance,
   GDExtensionInterfaceMemAlloc mem_alloc,
   GDExtensionInterfaceVariantDestroy variant_destroy,
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall,
