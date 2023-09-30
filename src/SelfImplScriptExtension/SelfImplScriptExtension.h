@@ -3,43 +3,41 @@
 #include <stdbool.h>
 #include <godot/gdextension_interface.h>
 
-/** Backbone implementation function type for `#_instance_create`
-  @see init_SelfImplScriptExtension
-*/
-typedef GDExtensionScriptInstancePtr (* GDExtensionInstanceCreate)(GDExtensionConstObjectPtr self, GDExtensionConstObjectPtr for_object);
+/** Stand-in type for de-referencing a `GDExtensionStringNamePtr` (good for stack allocations) */
+typedef void* GDExtensionStringName;
 
 /**
   Register a `ScriptExtension` extension class whose instances attach
   to one the class’s own script instances for self-implementation.
-  @param instance_create
-    the backbone implementation for `#_instance_create` (Make sure it can instantiate its own script!)
+  @param script_name
+    the common name of the scripts (really only used for the extension class’s name – it’s just good to be consistent)
+  @param script_script
+    This is the `ScriptInstance` for the scripts’ script.
+    You must keep it valid until {destroy_SelfImplScriptExtension}, after which YOU free it whenëver convenient.
   @return
     an opaque pointer for {destroy_SelfImplScriptExtension}
     (Assuming expectations, this can cast to a `GDExtensionConstStringNamePtr` of the `script_name` arg.)
   @note
-    Mandatory methods `#_can_instantiate` and `#_instance_create` drive script instantiations;
+    Mandatory virtual methods `#_can_instantiate` and `#_instance_create` drive script instantiations;
     therefore, a script requires them defined in order attach even if minimally implemented.
-    * The extension class always return `true` for `#_can_instantiate` to allow instances to attach one of their own
-      (done by the constructor). Therefore, your self-implementation should still override it according to your states.
-    * The extension class implements `#_instance_create` as merely a delegate to the provided `instance_create` arg. 
+    The template extension class supply implementations for the two methods, but only with self-attaching in mind.
+    Your self-implementation should still override both of them according to your states and logic.
+  @see
+    destroy_SelfImplScriptExtension
 */
 struct SISEClassData* init_SelfImplScriptExtension(
   char* script_name,
-  GDExtensionInstanceCreate instance_create_impl,
+  GDExtensionScriptInstancePtr script_script,
   GDExtensionInterfaceMemAlloc mem_alloc,
-  GDExtensionInterfaceStringNewWithLatin1Chars string_new_with_latin1_chars,
+  GDExtensionInterfaceVariantDestroy variant_destroy,
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall,
   GDExtensionInterfaceObjectSetInstance object_set_instance,
   GDExtensionInterfaceClassdbConstructObject classdb_construct_object,
   GDExtensionInterfaceClassdbGetMethodBind classdb_get_method_bind,
   GDExtensionInterfaceClassdbRegisterExtensionClass classdb_register_extension_class,
-  GDExtensionInterfaceClassdbRegisterExtensionClassMethod classdb_register_extension_class_method,
-  GDExtensionVariantFromTypeConstructorFunc variant_from_bool,
   GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr,
-  GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant,
-  GDExtensionPtrConstructor string_name_from_string,
-  GDExtensionPtrDestructor string_destroy,
   GDExtensionPtrDestructor string_name_destroy,
+  GDExtensionStringName (* string_name_from_ascii_chars)(const char* ascii),
   GDExtensionClassLibraryPtr p_library
 );
 
