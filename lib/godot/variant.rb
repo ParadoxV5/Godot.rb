@@ -35,45 +35,37 @@ module Godot
       when '?'
         godot_send("is_#{name[..-1]}", *args)
       else
-    # First, check `attr_reader`s (Note: Godot Engine expects the two have mutually exclusive names)
-        if args.empty? # necessary condition for `attr_reader`
-          begin
-            self[name]
-          rescue KeyError
-    # Second, check methods
-            godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises
+    # First, check methods (if checking `attr_reader`s first, #[] can return a {Callable})
+        begin
+          godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises
+        rescue NoMethodError => no_method_error
+          # Second, check `attr_reader`s
+          attr_reader_error = nil
+          if args.empty? # necessary condition for `attr_reader`
+            begin
+              return self[name]
+            rescue StandardError => attr_reader_error
+              # fall-through
+            end
           end
-        else
-          godot_send(name, *args) # Same as in the `rescue KeyError` block, just without any `KeyError` causes
+          raise no_method_error, cause: attr_reader_error # `attr_reader`s doesn’t work: re-raise
         end
       end
     end
     def respond_to_missing?(name, _include_all = false) # https://github.com/soutaro/steep/issues/913
-    # Zeroth, Ruby suffixes are special
-      case name[-1]
-      when '='
-        begin
-          self[
-            name[..-1] #: ::String
-          ]
-          true
-        rescue KeyError
-          super
-        end
-      when '?'
-        has_method("is_#{name[..-1]}") or super
-      else # method or `attr_reader` (Note ditto)
-    # First, check `attr_reader`s
-        begin
-          self[name]
-          true
-        rescue KeyError
-    # Second, check methods
-          has_method(name) or super
-        end
-      end
+      case name[-1] # again, Ruby suffixes are special
+        when '=' then key? name[..-1]
+        when '?' then has_method "is_#{name[..-1]}"
+        else has_method name or key? name
+      end or super
     end
     
+    # Same as {#has_key}, but returns `false` instead of raising {TypeError}
+    def key?(key)
+      has_key(key)
+    rescue TypeError
+      false
+    end
     def to_godot = self
   end
   
