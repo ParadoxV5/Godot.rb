@@ -28,7 +28,7 @@ static void call_impl(va_list* args) {
   VALUE method_args[argc];
   for(GDExtensionInt i = 0; i < argc; ++i) {
     // Godot Engine would manage `argv` entries, so we make reference copies that the Ruby GC manages separately.
-    GDExtensionVariantPtr arg;
+    GDExtensionVariantPtr arg = godot_rb_variant_alloc();
     gdext_variant_new_copy(arg, argv[i]);
     method_args[i] = godot_rb_parse_variant(arg);
   }
@@ -155,24 +155,22 @@ const GDExtensionScriptInstanceInfo godot_rb_script_instance_info = {
   i(free)
 };
 
-VALUE godot_rb_cRubyScript;
+VALUE godot_rb_cRubyScript_RubyScript;
 GDExtensionInterfaceScriptInstanceCreate script_instance_create;
 /** @return {GDExtensionScriptInstancePtr} in {Variant} form */
-GDExtensionScriptInstancePtr godot_rb_cRubyScript_instance_create(
-  GDExtensionConstObjectPtr self, GDExtensionConstObjectPtr for_object
-) {
+VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
   //FIXME: Check superclass
-  GDExtensionVariantPtr variant = godot_rb_variant_alloc();
-  godot_rb_gdextension.variant_from_object_ptr(variant, &self);
-  VALUE value = godot_rb_wrap_variant(godot_rb_cRubyScript, variant); // self
-  variant = godot_rb_variant_alloc();
-  godot_rb_gdextension.variant_from_object_ptr(variant, &for_object);
-  value = godot_rb_wrap_variant(
-    rb_funcall(value /* self */, rb_intern("klass"), 0), variant /* for_object */);
-  rb_gc_register_mark_object(value /* for_object */); // Let Godot Engine lock GC
-  return script_instance_create(
-    &godot_rb_script_instance_info,
-    (GDExtensionScriptInstanceDataPtr)value /* for_object */ // typedef GDExtensionScriptInstanceDataPtr VALUE
+  for_object = godot_rb_wrap_variant(
+    rb_funcall(self, rb_intern("klass"), 0),
+    godot_rb_cVariant_get_variant(for_object)
+  );
+  rb_gc_register_mark_object(for_object); // Let Godot Engine lock GC
+  return godot_rb_wrap_variant(
+    godot_rb_cObject, // GDExtension API implementation uses GDExtensionObjectPtr
+    script_instance_create(
+      &godot_rb_script_instance_info,
+      (GDExtensionScriptInstanceDataPtr)for_object // typedef GDExtensionScriptInstanceDataPtr VALUE
+    )
   );
 }
 
@@ -185,25 +183,28 @@ void godot_rb_init_RubyScript(void) {
   script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   
   godot_rb_require_relative(ruby_script);
-  godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
-  rb_gc_register_mark_object(godot_rb_cRubyScript);
-  SISEClassData = init_SelfImplScriptExtension("RubyScript",
-    godot_rb_cRubyScript_instance_create,
+  VALUE cRubyScript = godot_rb_get_module(RubyScript);
+  rb_define_method(cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
+  godot_rb_cRubyScript_RubyScript =
+    rb_obj_alloc(cRubyScript); // need only the methods, don’t initialize (which is guaranteed to fail)
+  rb_gc_register_mark_object(godot_rb_cRubyScript_RubyScript);
+  
+  SISEClassData = init_SelfImplScriptExtension(
+    "RubyScript",
+    script_instance_create(
+      &godot_rb_script_instance_info,
+      (GDExtensionScriptInstanceDataPtr)godot_rb_cRubyScript_RubyScript // see {#_instance_create}
+    ),
     godot_rb_gdextension.mem_alloc,
-    (GDExtensionInterfaceStringNewWithLatin1Chars)godot_rb_get_proc("string_new_with_latin1_chars"),
+    godot_rb_gdextension.variant_destroy,
     (GDExtensionInterfaceObjectMethodBindPtrcall)godot_rb_get_proc("object_method_bind_ptrcall"),
     (GDExtensionInterfaceObjectSetInstance)godot_rb_get_proc("object_set_instance"),
     (GDExtensionInterfaceClassdbConstructObject)godot_rb_get_proc("classdb_construct_object"),
     (GDExtensionInterfaceClassdbGetMethodBind)godot_rb_get_proc("classdb_get_method_bind"),
     (GDExtensionInterfaceClassdbRegisterExtensionClass)godot_rb_get_proc("classdb_register_extension_class"),
-    (GDExtensionInterfaceClassdbRegisterExtensionClassMethod)
-      godot_rb_get_proc("classdb_register_extension_class_method"),
-    godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL),
     godot_rb_gdextension.variant_from_object_ptr,
-    godot_rb_gdextension.object_ptr_from_variant,
-    godot_rb_gdextension.string_name_from_string,
-    godot_rb_gdextension.string_destroy,
     godot_rb_gdextension.string_name_destroy,
+    godot_rb_chars_to_string_name,
     godot_rb_library
   );
   
