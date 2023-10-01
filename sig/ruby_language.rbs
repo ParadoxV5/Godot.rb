@@ -18,6 +18,8 @@ module Godot
     def self._remove_named_global_constant: (interned name) -> top
     
     def _create_script: () -> RubyScript[Object]
+    def _frame: () -> void
+    
     INSTANCE: RubyLanguage
   end
   
