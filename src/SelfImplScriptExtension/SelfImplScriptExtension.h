@@ -11,12 +11,13 @@ typedef void* GDExtensionStringName;
   to one the class’s own script instances for self-implementation.
   @param script_name
     the common name of the scripts (really only used for the extension class’s name – it’s just good to be consistent)
-  @param script_script
-    This is the script for the scripts.
-    You must keep it valid until {destroy_SelfImplScriptExtension}, after which YOU free it whenëver convenient.
-  @param script_script_instance
-    This is the `ScriptInstance` for `script_script`.
-    Like `script_script`, you must keep it valid and free it after {destroy_SelfImplScriptExtension}.
+  @param variant_from_object_ptr
+    need this thanks to https://github.com/godotengine/godot/issues/81734
+  @param script_script_instance_from_object
+    Given the scripts’ script’s script-less object pointer, return its {GDExtensionScriptInstancePtr}. I.e., your
+    `#instance_create` implementation, but only used to set the scripts’ script up. Like `#instance_create`, you must
+    promise that the returned instance remain valid until Godot Engine calls the {GDExtensionScriptInstanceInfo}’s
+    `free_func`, in which you can free the custom {GDExtensionScriptInstanceDataPtr} or do it whenëver convenient later.
   @return
     an opaque pointer for {destroy_SelfImplScriptExtension}
     (Assuming expectations, this can cast to a `GDExtensionConstStringNamePtr` of the `script_name` arg.)
@@ -30,10 +31,7 @@ typedef void* GDExtensionStringName;
 */
 struct SISEClassData* init_SelfImplScriptExtension(
   char* script_name,
-  GDExtensionVariantPtr script_script,
-  GDExtensionScriptInstancePtr script_script_instance,
   GDExtensionInterfaceMemAlloc mem_alloc,
-  GDExtensionInterfaceVariantDestroy variant_destroy,
   GDExtensionInterfaceObjectMethodBindPtrcall object_method_bind_ptrcall,
   GDExtensionInterfaceObjectSetInstance object_set_instance,
   GDExtensionInterfaceClassdbConstructObject classdb_construct_object,
@@ -42,14 +40,19 @@ struct SISEClassData* init_SelfImplScriptExtension(
   GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr,
   GDExtensionPtrDestructor string_name_destroy,
   GDExtensionStringName (* string_name_from_ascii_chars)(const char* ascii),
+  GDExtensionScriptInstancePtr (* script_script_instance_from_object)(GDExtensionConstObjectPtr script_script_object),
   GDExtensionClassLibraryPtr p_library
 );
 
 /** Unregister the extension class and free up `class_userdata`
+  @param variant_destroy
+    corresponds to {init_SelfImplScriptExtension}’s `variant_from_object_ptr` arg:
+    https://github.com/godotengine/godot/issues/81734
   @see init_SelfImplScriptExtension
 */
 void destroy_SelfImplScriptExtension(struct SISEClassData* class_userdata,
   GDExtensionInterfaceMemFree mem_free,
+  GDExtensionInterfaceVariantDestroy variant_destroy,
   GDExtensionInterfaceClassdbUnregisterExtensionClass classdb_unregister_extension_class,
   GDExtensionPtrDestructor string_name_destroy,
   GDExtensionClassLibraryPtr p_library
