@@ -35,20 +35,23 @@ module Godot
       when '?'
         godot_send("is_#{name[..-1]}", *args)
       else
+        no_method_error = NoMethodError #: _Exception # https://github.com/soutaro/steep/issues/919
     # First, check methods (if checking `attr_reader`s first, #[] can return a {Callable})
         begin
-          godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises
+          return godot_send(name, *args) # `rescue` attaches `KeyError` cause if this raises
         rescue NoMethodError => no_method_error
-          # Second, check `attr_reader`s
-          attr_reader_error = nil
-          if args.empty? # necessary condition for `attr_reader`
-            begin
-              return self[name]
-            rescue StandardError => attr_reader_error
-              # fall-through
-            end
+          # fall-through, clear {$!} to prevent circular causes
+        end
+        # @ t ype var no_method_error NoMethodError[self]
+        # Second, check `attr_reader`s
+        if args.empty? # necessary condition for `attr_reader`
+          begin
+            return self[name]
+          rescue => e # `attr_reader`s doesn’t work either: re-raise
+            raise no_method_error, cause: e
           end
-          raise no_method_error, cause: attr_reader_error # `attr_reader`s doesn’t work: re-raise
+        else
+          raise no_method_error
         end
       end
     end

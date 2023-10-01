@@ -34,6 +34,9 @@ module Godot
     def _remove_named_global_constant(name) = RubyScript::Autoloads.remove_const(name)
     
     def _create_script = RubyScript.new
+    
+    # ??
+    def _frame = nil
     # !
     # Dictionary _get_global_class_name ( String path ) virtual const
     # 

@@ -11,7 +11,7 @@ module Godot
     private def __get_class
       script = get_script #: RubyScript[Object]?
       # TODO: could also be scripts from other languages…
-      script&.klass or Godot.const_get get_class, false
+      script&.klass or Godot.const_get get_class.to_sym, false
     end
   end
 end

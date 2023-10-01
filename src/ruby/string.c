@@ -44,6 +44,9 @@ VALUE godot_rb_cString_i_to_str(VALUE self) {
 }
 //FIXME: possible multiplication and casting overflows (though one should use buffers instead if they need 2GiB strings)
 
+/** Serialize into a UTF-8 Symbol */
+VALUE godot_rb_cString_i_to_sym(VALUE self) { return rb_str_intern(godot_rb_cString_i_to_s(self)); }
+
 init(String, STRING)
   // Endian test for UTF-32 -> `char[]`
   volatile char32_t sample = 1;
@@ -51,4 +54,5 @@ init(String, STRING)
   rb_gc_register_mark_object(encoding_UTF32 = rb_enc_from_encoding(godot_rb_encoding_UTF32));
   rb_define_method(cString, "to_s"  , godot_rb_cString_i_to_s  , 0);
   rb_define_method(cString, "to_str", godot_rb_cString_i_to_str, 0);
+  rb_define_method(cString, "to_sym", godot_rb_cString_i_to_sym, 0);
 }
