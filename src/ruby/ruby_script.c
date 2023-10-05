@@ -1,12 +1,15 @@
 /** {RubyLanguage} & co. */
 
 #include "variants.h"
+#include "ruby_script.h"
 
 /* General notes for developers:
 * `typedef VALUE GDExtensionClassInstancePtr, GDExtensionScriptInstanceDataPtr`
   * {VALUE} ↔️ pointer casts are exact
 * C does not specify evaluation order of sibling args (which is important for {va_arg})
 */
+
+VALUE godot_rb_cRubyScript;
 
 
 GDExtensionInterfaceVariantNewCopy gdext_variant_new_copy;
@@ -94,8 +97,14 @@ GDExtensionScriptLanguagePtr godot_rb_RubyScript_inst_get_language(
   RB_UNUSED_VAR(GDExtensionScriptInstanceDataPtr self)
 ) { return godot_rb_RubyLanguage_object; }
 
-GDExtensionObjectPtr godot_rb_RubyScript_inst_create_instance(void *p_userdata) {
-  //TODO
+GDExtensionStringName string_name_RubyScript;
+GDExtensionInterfaceObjectSetInstance gdext_object_set_instance;
+GDExtensionObjectPtr godot_rb_RubyScript_inst_create_instance(RB_UNUSED_VAR(void* class_userdata)) {
+  VALUE instance = rb_class_new_instance(0, (VALUE[]){}, godot_rb_cRubyScript); //TODO: Let Godot Engine pass `#initialize` args
+  GDExtensionObjectPtr object_ptr;
+  godot_rb_gdextension.object_ptr_from_variant(&object_ptr, godot_rb_cVariant_get_variant(instance));
+  gdext_object_set_instance(object_ptr, &string_name_RubyScript, (GDExtensionClassInstancePtr)instance);
+  return object_ptr;
 }
 
 /** Release GC protection, allowing the GC to reap the {VALUE} whenever (when no Ruby-land references either). */
@@ -180,11 +189,11 @@ VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
   );
 }
 
-VALUE godot_rb_cRubyScript, godot_rb_cRubyLanguage_INSTANCE;
-GDExtensionStringName string_name_RubyScript;
+VALUE godot_rb_cRubyLanguage_INSTANCE;
 
 void godot_rb_init_RubyScript(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
+  gdext_object_set_instance = (GDExtensionInterfaceObjectSetInstance)godot_rb_get_proc("object_set_instance");
   gdext_script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   
   godot_rb_require_relative(ruby_script);
@@ -211,7 +220,7 @@ void godot_rb_init_RubyScript(void) {
       i(to_string),
       i(create_instance),
       i(free_instance),
-      i(get_virtual),
+      .get_virtual_func = godot_rb_init_RubyScript_inst_get_virtual(),
       //i(get_rid), // ?
     }
   );
