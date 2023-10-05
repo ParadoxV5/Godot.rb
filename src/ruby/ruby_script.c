@@ -100,7 +100,7 @@ GDExtensionScriptLanguagePtr godot_rb_RubyScript_inst_get_language(
 GDExtensionStringName string_name_RubyScript;
 GDExtensionInterfaceObjectSetInstance gdext_object_set_instance;
 GDExtensionObjectPtr godot_rb_RubyScript_inst_create_instance(RB_UNUSED_VAR(void* class_userdata)) {
-  VALUE instance = rb_class_new_instance(0, (VALUE[]){}, godot_rb_cRubyScript); //TODO: Let Godot Engine pass `#initialize` args
+  VALUE instance = rb_obj_alloc(godot_rb_cRubyScript);
   GDExtensionObjectPtr object_ptr;
   godot_rb_gdextension.object_ptr_from_variant(&object_ptr, godot_rb_cVariant_get_variant(instance));
   gdext_object_set_instance(object_ptr, &string_name_RubyScript, (GDExtensionClassInstancePtr)instance);

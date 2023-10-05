@@ -13,26 +13,28 @@ VALUE godot_rb_object_ptr_class(GDExtensionConstObjectPtr object_ptr) {
   return klass;
 }
 
-VALUE godot_rb_cObject_i_initialize(int argc, VALUE* argv, VALUE self) {
-  rb_call_super_kw(argc, argv, RB_PASS_CALLED_KEYWORDS); //TODO how are constructor args passed exactly?
-  VALUE ruby_script = rb_const_get_from(CLASS_OF(self), idRUBY_SCRIPT);
+VALUE godot_rb_cObject_m_allocate(VALUE self) {
+  VALUE ruby_script = rb_const_get_from(self, idRUBY_SCRIPT);
   GDExtensionStringName class_name = godot_rb_obj_to_string_name(
     RB_UNLIKELY(NIL_P(ruby_script))
     // Godot native type
-    ? rb_funcallv_public(CLASS_OF(self), rb_intern("demodulized_name"), 0, (VALUE[]){})
+    ? rb_funcallv_public(self, rb_intern("demodulized_name"), 0, (VALUE[]){})
     // Godot.rb {RubyScript} class
     : rb_funcallv_public(ruby_script, rb_intern("_get_instance_base_type"), 0, (VALUE[]){})
   );
-  GDExtensionObjectPtr self_object_ptr = gdext_classdb_construct_object(&class_name);
-  godot_rb_gdextension.variant_from_object_ptr(
-    godot_rb_cVariant_get_variant(self),
-    &self_object_ptr
-  );
+  GDExtensionObjectPtr object_ptr = gdext_classdb_construct_object(&class_name);
+  GDExtensionVariantPtr variant = godot_rb_variant_alloc();
+  godot_rb_gdextension.variant_from_object_ptr(variant, &object_ptr);
   godot_rb_gdextension.string_name_destroy(&class_name);
+  /*FIXME: this calls {#initialize}
   if RB_LIKELY(!NIL_P(ruby_script)) // Godot.rb {RubyScript} class
-    rb_funcall(self, rb_intern("set_script"), 1, ruby_script);
-  return self;
+    rb_funcall(instance, rb_intern("set_script"), 1, ruby_script);
+  */
+  return godot_rb_wrap_variant(self, variant);
 }
+/** Stop `initialize(…)` from becoming `Object(…)` (rather than `Object.new(…)`, which calls {#_init}) */
+VALUE godot_rb_cObject_i_initialize(RB_UNUSED_VAR(VALUE self)) {}
+//TODO: translate `super` in {#initialize} as {#_init} … except how do I call `super` from Ruby to Godot anyways ??
 
 init(Object, OBJECT)
   godot_rb_cObject = cObject;
@@ -42,5 +44,6 @@ init(Object, OBJECT)
   rb_alias(cObject, rb_intern("call"), rb_intern("godot_send"));
   gdext_classdb_construct_object =
     (GDExtensionInterfaceClassdbConstructObject)godot_rb_get_proc("classdb_construct_object");
-  rb_define_method(cObject, "initialize", godot_rb_cObject_i_initialize, -1);
+  rb_define_alloc_func(cObject, godot_rb_cObject_m_allocate);
+  rb_define_method(cObject, "initialize", godot_rb_cObject_i_initialize, 0);
 }

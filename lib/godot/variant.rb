@@ -17,6 +17,8 @@ module Godot
       demodulized ? StringName.new(demodulized) : StringName.new
     end
     
+    alias _init initialize
+    
     def get(...)
       self.[](...)
     rescue KeyError => e

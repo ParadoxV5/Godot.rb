@@ -13,6 +13,7 @@ module Godot
     private def initialize_copy: (instance other) -> void
     
     def initialize: (*variant_like args) -> void
+    alias _init initialize
     def godot_send: (interned meth, *variant_like args) -> variant
     
     def [] : (variant_like key) -> variant

@@ -7,7 +7,6 @@ module Godot
       #TODO check type of `klass`
       klass&.const_set :RUBY_SCRIPT, self
       @klass = klass
-      super()
     end
     
     # The Godot Editor pass entire source code( references)s around to enable IDE capabilities independent of the disk
