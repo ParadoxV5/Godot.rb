@@ -41,7 +41,7 @@ module Godot
       if super_script
         super_script._get_instance_base_type
       else # Godot native type
-        StringName.new super_klass.demodulized_name
+        super_klass.demodulized_name
       end
     end
     

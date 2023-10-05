@@ -11,7 +11,7 @@ module Godot
   class Variant
     include Godot
     VARIANT_TYPE = -1 # “one does not simply `initialize' a Variant”
-    def self.demodulized_name = name&.[](7..) # `Godot::` has 7 chars
+    def self.demodulized_name = StringName.new(*name&.[](7..)) # `Godot::` has 7 chars
     
     def get(...)
       self.[](...)

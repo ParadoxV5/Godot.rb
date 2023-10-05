@@ -47,7 +47,7 @@ GDExtensionBool godot_rb_script_instance_get(
   GDExtensionScriptInstanceDataPtr self, GDExtensionConstStringNamePtr name, GDExtensionVariantPtr r_value
 ) { return godot_rb_protect(call_impl, self, name, 0, 0, (GDExtensionConstVariantPtr[]){}, r_value); }
 
-/** @return the {GDExtensionObjectPtr} represented by this {Variant} */
+/** @return the {GDExtensionObjectPtr} attached by this {GDExtensionScriptInstancePtr} */
 GDExtensionObjectPtr godot_rb_script_instance_get_owner(GDExtensionScriptInstanceDataPtr self) {
   GDExtensionObjectPtr object;
   godot_rb_gdextension.object_ptr_from_variant(&object, godot_rb_cVariant_get_variant((VALUE)self));
@@ -200,5 +200,5 @@ void godot_rb_destroy_RubyLanguage(void) {
     1, (VALUE[]){godot_rb_cRubyLanguage_INSTANCE}
   );
   rb_gc_unregister_address(&godot_rb_cRubyLanguage_INSTANCE);
-   rb_gc_unregister_address(&godot_rb_cRubyScript);
+  rb_gc_unregister_address(&godot_rb_cRubyScript);
 }
