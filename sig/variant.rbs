@@ -26,6 +26,10 @@ module Godot
     def respond_to_missing?: (Symbol | ::String name, ?boolish include_all) -> bool
     def method_missing: (Symbol | ::String name, *variant_like args) -> variant
     
+    def hash: ...
+    #def eql?: ...
+    alias == eql?
+    
     #include _ToGodot[self]
     def to_godot: () -> self # https://github.com/soutaro/steep/issues/916
     def nonzero?: () -> bool

@@ -232,6 +232,11 @@ VALUE godot_rb_cVariant_i_has_method(VALUE self, VALUE name) {
   return ret ? Qtrue : Qfalse;
 }
 
+GDExtensionInterfaceVariantHash variant_hash;
+VALUE godot_rb_cVariant_i_hash(VALUE self) {
+  return RB_LL2NUM(variant_hash(godot_rb_cVariant_get_variant(self)));
+}
+
 VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
   return godot_rb_gdextension.variant_booleanize(godot_rb_cVariant_get_variant(self)) ? Qtrue : Qfalse;
 }
@@ -239,6 +244,7 @@ VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
 
 void godot_rb_init_Variant() {
   variant_has_method = (GDExtensionInterfaceVariantHasMethod)godot_rb_get_proc("variant_has_method");
+  variant_hash = (GDExtensionInterfaceVariantHash)godot_rb_get_proc("variant_hash");
   godot_rb_require_relative(variant);
   godot_rb_cVariant = godot_rb_get_module(Variant);
   variant_to_bool   = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL  );
@@ -251,5 +257,6 @@ void godot_rb_init_Variant() {
   m(godot_send, godot_send, -1)
   m(has_key   , has_key   ,  1)
   m(has_method, has_method,  1)
+  m(hash      , hash,        0)
   m(nonzero?  , nonzero_  ,  0)
 }

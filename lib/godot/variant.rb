@@ -11,7 +11,11 @@ module Godot
   class Variant
     include Godot
     VARIANT_TYPE = -1 # “one does not simply `initialize' a Variant”
-    def self.demodulized_name = StringName.new(*name&.[](7..)) # `Godot::` has 7 chars
+    def self.demodulized_name
+      #StringName.new(*name&.[](7..)) # https://github.com/soutaro/steep/issues/926
+      demodulized = name&.[](7..) # `Godot::` has 7 chars
+      demodulized ? StringName.new(demodulized) : StringName.new
+    end
     
     def get(...)
       self.[](...)
@@ -24,6 +28,19 @@ module Godot
       warn "#{e.backtrace&.first}: #{e.detailed_message}"
     end
     
+    # Same as {#has_key}, but returns `false` instead of raising {TypeError}
+    def key?(key)
+      has_key(key)
+    rescue TypeError
+      false
+    end
+    def respond_to_missing?(name, _include_all = false) # https://github.com/soutaro/steep/issues/913
+      case name[-1] # again, Ruby suffixes are special
+      when '=' then key? name[..-1]
+      when '?' then has_method "is_#{name[..-1]}"
+      else has_method name or key? name
+      end or super
+    end
     def method_missing(name, *args)
     # Zeroth, Ruby suffixes are special
       case name[-1]
@@ -55,20 +72,8 @@ module Godot
         end
       end
     end
-    def respond_to_missing?(name, _include_all = false) # https://github.com/soutaro/steep/issues/913
-      case name[-1] # again, Ruby suffixes are special
-        when '=' then key? name[..-1]
-        when '?' then has_method "is_#{name[..-1]}"
-        else has_method name or key? name
-      end or super
-    end
     
-    # Same as {#has_key}, but returns `false` instead of raising {TypeError}
-    def key?(key)
-      has_key(key)
-    rescue TypeError
-      false
-    end
+    alias == eql?
     def to_godot = self
   end
   
