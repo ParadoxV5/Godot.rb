@@ -97,6 +97,9 @@ GDExtensionScriptLanguagePtr godot_rb_script_instance_get_language(
 void godot_rb_script_instance_free(GDExtensionScriptInstanceDataPtr self) {
   rb_gc_unregister_address((VALUE*)&self);
 }
+void godot_rb_script_instance_free_instance(RB_UNUSED_VAR(void* class_userdata), GDExtensionClassInstancePtr self) {
+  godot_rb_script_instance_free(self);
+}
 
 /*
 ! Standard Reflection
@@ -172,8 +175,12 @@ VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
   );
 }
 
+GDExtensionObjectPtr godot_rb_script_instance_create_instance(void *p_userdata) {
+  //TODO
+}
 
 VALUE godot_rb_cRubyScript, godot_rb_cRubyLanguage_INSTANCE;
+GDExtensionStringName string_name_RubyScript;
 
 void godot_rb_init_RubyScript(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
@@ -182,7 +189,32 @@ void godot_rb_init_RubyScript(void) {
   godot_rb_require_relative(ruby_script);
   godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
   rb_gc_register_mark_object(godot_rb_cRubyScript);
-  rb_define_method(godot_rb_cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
+  
+  string_name_RubyScript = godot_rb_obj_to_string_name(
+    rb_funcallv_public(godot_rb_cRubyScript, rb_intern("demodulized_name"), 0, (VALUE[]){})
+  );
+  GDExtensionStringName string_name_ScriptExtension = godot_rb_obj_to_string_name(
+    rb_funcallv_public(rb_class_superclass(godot_rb_cRubyScript), rb_intern("demodulized_name"), 0, (VALUE[]){})
+  );
+  ((GDExtensionInterfaceClassdbRegisterExtensionClass)godot_rb_get_proc("classdb_register_extension_class"))(
+    godot_rb_library, &string_name_RubyScript, &string_name_ScriptExtension, &(GDExtensionClassCreationInfo){
+      .is_virtual = false,
+      .is_abstract = false,
+      i(set),
+      i(get),
+      //i(get_property_list),
+      //i(free_property_list),
+      //i(property_can_revert),
+      //i(property_get_revert),
+      //i(notification),
+      i(to_string),
+      i(create_instance),
+      i(free_instance),
+      i(get_virtual),
+      //i(get_rid), // ?
+    }
+  );
+  godot_rb_gdextension.string_name_destroy(&string_name_ScriptExtension);
   
   godot_rb_require_relative(ruby_language);
   godot_rb_cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));
@@ -199,6 +231,10 @@ void godot_rb_destroy_RubyLanguage(void) {
     rb_intern("unregister_script_language"),
     1, (VALUE[]){godot_rb_cRubyLanguage_INSTANCE}
   );
+  ((GDExtensionInterfaceClassdbUnregisterExtensionClass)godot_rb_get_proc("classdb_unregister_extension_class"))(
+    godot_rb_library, string_name_RubyScript
+  );
+  godot_rb_gdextension.string_name_destroy(&string_name_RubyScript);
   rb_gc_unregister_address(&godot_rb_cRubyLanguage_INSTANCE);
   rb_gc_unregister_address(&godot_rb_cRubyScript);
 }
