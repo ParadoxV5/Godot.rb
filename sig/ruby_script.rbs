@@ -11,7 +11,7 @@ module Godot
     alias _set_source_code source_code=
     def _has_source_code: () -> bool
     
-    def _get_language: () -> ScriptLanguageExtension
+    def _get_language: () -> RubyLanguage
     def _is_tool: () -> bool
     
     def _get_global_name: () -> StringName
@@ -19,8 +19,8 @@ module Godot
     alias _can_instantiate _is_valid
     def _instance_has: (bot object) -> bool
     
-    def _get_instance_base_type: () -> StringName
     def _get_base_script: () -> RubyScript[Object]?
+    def _get_instance_base_type: () -> StringName
     
     def new: (*variant_like args) -> C
     def _instance_create: (C for_object) -> Object
