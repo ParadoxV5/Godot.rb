@@ -189,6 +189,7 @@ VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
   );
 }
 
+
 VALUE godot_rb_cRubyLanguage_INSTANCE;
 
 void godot_rb_init_RubyScript(void) {
@@ -199,6 +200,7 @@ void godot_rb_init_RubyScript(void) {
   godot_rb_require_relative(ruby_script);
   godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
   rb_gc_register_mark_object(godot_rb_cRubyScript);
+  rb_define_method(godot_rb_cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
   
   string_name_RubyScript = godot_rb_obj_to_string_name(
     rb_funcallv_public(godot_rb_cRubyScript, rb_intern("demodulized_name"), 0, (VALUE[]){})
@@ -245,6 +247,7 @@ void godot_rb_destroy_RubyLanguage(void) {
     godot_rb_library, string_name_RubyScript
   );
   godot_rb_gdextension.string_name_destroy(&string_name_RubyScript);
+  godot_rb_destroy_RubyScript_inst_get_virtual();
   rb_gc_unregister_address(&godot_rb_cRubyLanguage_INSTANCE);
   rb_gc_unregister_address(&godot_rb_cRubyScript);
 }

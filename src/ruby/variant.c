@@ -234,7 +234,7 @@ VALUE godot_rb_cVariant_i_has_method(VALUE self, VALUE name) {
 
 GDExtensionInterfaceVariantHash variant_hash;
 VALUE godot_rb_cVariant_i_hash(VALUE self) {
-  return RB_LL2NUM(variant_hash(godot_rb_cVariant_get_variant(self)));
+  return RB_ULL2NUM(variant_hash(godot_rb_cVariant_get_variant(self)));
 }
 
 VALUE godot_rb_cVariant_i_nonzero_(VALUE self) {
