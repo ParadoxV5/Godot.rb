@@ -179,37 +179,17 @@ const GDExtensionScriptInstanceInfo godot_rb_RubyScript_inst_info = {
   i(free)
 };
 
-GDExtensionInterfaceScriptInstanceCreate gdext_script_instance_create;
-/** @return {GDExtensionScriptInstancePtr} in {Variant} form */
-VALUE godot_rb_cRubyScript_i_instance_create(VALUE self, VALUE for_object) {
-  //FIXME: Check superclass
-  for_object = godot_rb_wrap_variant(
-    rb_funcall(self, rb_intern("klass"), 0),
-    godot_rb_cVariant_get_variant(for_object)
-  ); // `klass.allocate`
-  rb_gc_register_mark_object(for_object); // Let Godot Engine lock GC
-  return godot_rb_wrap_variant(
-    godot_rb_cObject, // GDExtension API implementation uses GDExtensionObjectPtr
-    gdext_script_instance_create(
-      &godot_rb_RubyScript_inst_info,
-      (GDExtensionScriptInstanceDataPtr)for_object // typedef GDExtensionScriptInstanceDataPtr VALUE
-    )
-  );
-}
-
 
 VALUE godot_rb_cRubyLanguage_INSTANCE;
 
 void godot_rb_init_RubyScript(void) {
   gdext_variant_new_copy = (GDExtensionInterfaceVariantNewCopy)godot_rb_get_proc("variant_new_copy");
   gdext_object_set_instance = (GDExtensionInterfaceObjectSetInstance)godot_rb_get_proc("object_set_instance");
-  gdext_script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   
   godot_rb_require_relative(ruby_script);
   godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
   rb_gc_register_mark_object(godot_rb_cRubyScript);
   rb_define_alloc_func(godot_rb_cRubyScript, godot_rb_cRubyScript_m_allocate);
-  rb_define_method(godot_rb_cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
   
   string_name_RubyScript = godot_rb_chars_to_string_name("RubyScript");
   GDExtensionStringName string_name_ScriptExtension = godot_rb_chars_to_string_name("ScriptExtension");

@@ -13,7 +13,6 @@
   x(StringName, get_instance_base_type, void) \
   x(Object, get_language, void) \
   x(String, get_source_code, void) \
-  x(Object, instance_create, Object) \
   x(bool, instance_has, Object) \
   x(bool, is_tool, void) \
   x(bool, is_valid, void) \
@@ -88,6 +87,29 @@ VALUE godot_rb_RubyScript_virtual_arg_Object(GDExtensionObjectPtr* object_ptr_pt
 X
 #undef x
 
+void godot_rb_RubyScript_impl_get_class(va_list* args) {
+  VALUE* self = va_arg(*args, VALUE*); // reüsable variable
+  *self = rb_funcall(*self, rb_intern("klass"), 0);
+}
+GDExtensionInterfaceScriptInstanceCreate gdext_script_instance_create;
+/** @return {GDExtensionScriptInstancePtr} in {Variant} form */
+void godot_rb_RubyScript_virtual_instance_create(
+  VALUE self, const GDExtensionObjectPtr*const* for_object_ptr_ptr, GDExtensionScriptInstancePtr* r_ret
+) {
+  //FIXME: Check superclass
+  GDExtensionObjectPtr for_object_object_ptr = **for_object_ptr_ptr;
+  GDExtensionVariantPtr for_object_variant = godot_rb_variant_alloc();
+  godot_rb_gdextension.variant_from_object_ptr(for_object_variant, &for_object_object_ptr);
+  if RB_LIKELY(godot_rb_protect(godot_rb_RubyScript_impl_get_class, &self)) {
+    self = godot_rb_wrap_variant(self, for_object_variant); // `klass.allocate` with variable reüse
+    rb_gc_register_mark_object(self); // Let Godot Engine lock GC
+    *r_ret = gdext_script_instance_create(
+      &godot_rb_RubyScript_inst_info,
+      (GDExtensionScriptInstanceDataPtr)self // typedef VALUE GDExtensionScriptInstanceDataPtr
+    );
+  }
+}
+
 
 /** `Hash[GDExtensionConstStringNamePtr, GDExtensionClassCallVirtual]` – mapping pointers as integers
   (`GDExtensionConstStringName` are de-duplicated)
@@ -104,12 +126,14 @@ GDExtensionClassCallVirtual godot_rb_RubyScript_inst_get_virtual(
 
 
 GDExtensionClassGetVirtual godot_rb_init_RubyScript_inst_get_virtual() {
+  gdext_script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   TABLE = rb_hash_new_capa(32); // Count from docs/JSON
   #define x(_0, func, _2) rb_hash_aset(TABLE, \
     ULL2NUM((uintptr_t)godot_rb_chars_to_string_name("_"#func)), \
     ULL2NUM((uintptr_t)godot_rb_RubyScript_virtual_##func) \
   );
   X
+  x(void*, instance_create, Object)
   #undef x
   rb_hash_freeze(TABLE);
   rb_gc_register_mark_object(TABLE);
