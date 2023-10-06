@@ -11,11 +11,6 @@ module Godot
   class Variant
     include Godot
     VARIANT_TYPE = -1 # “one does not simply `initialize' a Variant”
-    def self.demodulized_name
-      #StringName.new(*name&.[](7..)) # https://github.com/soutaro/steep/issues/926
-      demodulized = name&.[](7..) # `Godot::` has 7 chars
-      demodulized ? StringName.new(demodulized) : StringName.new
-    end
     
     alias _init initialize
     

@@ -2,6 +2,7 @@ module Godot
   # until we have RBS integration
   class ScriptExtension < Object end
   class RubyScript[C < Object] < ScriptExtension
+    def self.base_class_name: ...
     
     attr_reader klass: singleton(Object)? # https://github.com/ruby/rbs/issues/1542
     def initialize: (?singleton(Object)?) -> void

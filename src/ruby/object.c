@@ -1,7 +1,6 @@
 #include "variants.h"
 
 VALUE godot_rb_cObject;
-ID idRUBY_SCRIPT;
 
 GDExtensionInterfaceClassdbConstructObject gdext_classdb_construct_object;
 VALUE godot_rb_object_ptr_class(GDExtensionConstObjectPtr object_ptr) {
@@ -14,36 +13,25 @@ VALUE godot_rb_object_ptr_class(GDExtensionConstObjectPtr object_ptr) {
 }
 
 VALUE godot_rb_cObject_m_allocate(VALUE self) {
-  VALUE ruby_script = rb_const_get_from(self, idRUBY_SCRIPT);
-  GDExtensionStringName class_name = godot_rb_obj_to_string_name(
-    RB_UNLIKELY(NIL_P(ruby_script))
-    // Godot native type
-    ? rb_funcallv_public(self, rb_intern("demodulized_name"), 0, (VALUE[]){})
-    // Godot.rb {RubyScript} class
-    : rb_funcallv_public(ruby_script, rb_intern("_get_instance_base_type"), 0, (VALUE[]){})
-  );
+  GDExtensionStringName class_name =
+    godot_rb_obj_to_string_name(rb_funcallv_public(self, rb_intern("base_class_name"), 0, (VALUE[]){}));
   GDExtensionObjectPtr object_ptr = gdext_classdb_construct_object(&class_name);
   GDExtensionVariantPtr variant = godot_rb_variant_alloc();
   godot_rb_gdextension.variant_from_object_ptr(variant, &object_ptr);
   godot_rb_gdextension.string_name_destroy(&class_name);
-  /*FIXME: this calls {#initialize}
-  if RB_LIKELY(!NIL_P(ruby_script)) // Godot.rb {RubyScript} class
-    rb_funcall(instance, rb_intern("set_script"), 1, ruby_script);
-  */
   return godot_rb_wrap_variant(self, variant);
 }
-/** Stop `initialize(…)` from becoming `Object(…)` (rather than `Object.new(…)`, which calls {#_init}) */
-VALUE godot_rb_cObject_i_initialize(RB_UNUSED_VAR(VALUE self)) {}
 //TODO: translate `super` in {#initialize} as {#_init} … except how do I call `super` from Ruby to Godot anyways ??
+/*FIXME: attach script, but that calls {#initialize}
+if RB_LIKELY(!NIL_P(ruby_script)) // Godot.rb {RubyScript} class
+  rb_funcall(instance, rb_intern("set_script"), 1, ruby_script);
+*/
 
-init(Object, OBJECT)
-  godot_rb_cObject = cObject;
-  idRUBY_SCRIPT = rb_intern("RUBY_SCRIPT");
-  /** The {RubyScript} that manages this subclass, or `nil` if it didn’t come from Godot.rb */
-  rb_const_set(cObject, idRUBY_SCRIPT, Qnil);
-  rb_alias(cObject, rb_intern("call"), rb_intern("godot_send"));
+void godot_rb_init_Object(void) {
+  godot_rb_require_relative(object);
+  godot_rb_cObject = godot_rb_get_module(Object);
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = godot_rb_cObject;
   gdext_classdb_construct_object =
     (GDExtensionInterfaceClassdbConstructObject)godot_rb_get_proc("classdb_construct_object");
-  rb_define_alloc_func(cObject, godot_rb_cObject_m_allocate);
-  rb_define_method(cObject, "initialize", godot_rb_cObject_i_initialize, 0);
+  rb_define_alloc_func(godot_rb_cObject, godot_rb_cObject_m_allocate);
 }

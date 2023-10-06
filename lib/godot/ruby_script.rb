@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 module Godot
   class RubyScript < ScriptExtension
+    def self.base_class_name = StringName.new 'ScriptExtension'
+    
     # The parsed class, which may be de-sync with {#source_code} until {#_reload}ed
     attr_reader :klass
     def initialize(klass = nil)
@@ -33,16 +35,7 @@ module Godot
     def _get_base_script
       klass.superclass.const_get :RUBY_SCRIPT if klass
     end
-    def _get_instance_base_type
-      return StringName.new unless klass
-      super_klass = klass.superclass
-      super_script = super_klass.const_get :RUBY_SCRIPT
-      if super_script
-        super_script._get_instance_base_type
-      else # Godot native type
-        super_klass.demodulized_name
-      end
-    end
+    def _get_instance_base_type = klass ? klass.base_class_name : StringName.new
     
     # !
     # Error _reload ( bool keep_state ) virtual

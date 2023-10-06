@@ -34,7 +34,9 @@ module Godot
   class Object < Variant
     VARIANT_TYPE: 24
     RUBY_SCRIPT: RubyScript[Object]? # https://github.com/soutaro/steep/issues/916
+    def self.base_class_name: () -> StringName
     def self.allocate: ...
+    def initialize: () -> void
     alias call godot_send
   end
   

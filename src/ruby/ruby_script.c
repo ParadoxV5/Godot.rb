@@ -202,12 +202,8 @@ void godot_rb_init_RubyScript(void) {
   rb_gc_register_mark_object(godot_rb_cRubyScript);
   rb_define_method(godot_rb_cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
   
-  string_name_RubyScript = godot_rb_obj_to_string_name(
-    rb_funcallv_public(godot_rb_cRubyScript, rb_intern("demodulized_name"), 0, (VALUE[]){})
-  );
-  GDExtensionStringName string_name_ScriptExtension = godot_rb_obj_to_string_name(
-    rb_funcallv_public(rb_class_superclass(godot_rb_cRubyScript), rb_intern("demodulized_name"), 0, (VALUE[]){})
-  );
+  string_name_RubyScript = godot_rb_chars_to_string_name("RubyScript");
+  GDExtensionStringName string_name_ScriptExtension = godot_rb_chars_to_string_name("ScriptExtension");
   ((GDExtensionInterfaceClassdbRegisterExtensionClass)godot_rb_get_proc("classdb_register_extension_class"))(
     godot_rb_library, &string_name_RubyScript, &string_name_ScriptExtension, &(GDExtensionClassCreationInfo){
       .is_virtual = false,

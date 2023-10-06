@@ -8,7 +8,6 @@ module Godot
     VARIANT_TYPE: Integer
     
     def self.allocate: () -> instance
-    def self.demodulized_name: -> StringName
     
     private def initialize_copy: (instance other) -> void
     
