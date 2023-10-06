@@ -25,6 +25,9 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self);
 GDExtensionStringName godot_rb_chars_to_string_name(const char* chars);
 
 
+VALUE godot_rb_cObject_m_allocate(VALUE self);
+
+
 /**
   FIXME: check script first
   @param object_ptr pointer to a non-`null` object

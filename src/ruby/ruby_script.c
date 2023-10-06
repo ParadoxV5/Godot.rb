@@ -99,11 +99,19 @@ GDExtensionScriptLanguagePtr godot_rb_RubyScript_inst_get_language(
 
 GDExtensionStringName string_name_RubyScript;
 GDExtensionInterfaceObjectSetInstance gdext_object_set_instance;
+VALUE godot_rb_RubyScript_impl_allocate(VALUE self, GDExtensionObjectPtr* r_object_ptr) {
+  VALUE instance = godot_rb_cObject_m_allocate(self); // manual {rb_call_super}
+  godot_rb_gdextension.object_ptr_from_variant(r_object_ptr, godot_rb_cVariant_get_variant(instance));
+  gdext_object_set_instance(*r_object_ptr, &string_name_RubyScript, (GDExtensionClassInstancePtr)instance);
+  return instance;
+}
+VALUE godot_rb_cRubyScript_m_allocate(VALUE self) {
+  GDExtensionObjectPtr unused_ret;
+  return godot_rb_RubyScript_impl_allocate(self, &unused_ret);
+}
 GDExtensionObjectPtr godot_rb_RubyScript_inst_create_instance(RB_UNUSED_VAR(void* class_userdata)) {
-  VALUE instance = rb_obj_alloc(godot_rb_cRubyScript);
   GDExtensionObjectPtr object_ptr;
-  godot_rb_gdextension.object_ptr_from_variant(&object_ptr, godot_rb_cVariant_get_variant(instance));
-  gdext_object_set_instance(object_ptr, &string_name_RubyScript, (GDExtensionClassInstancePtr)instance);
+  godot_rb_RubyScript_impl_allocate(godot_rb_cRubyScript, &object_ptr);
   return object_ptr;
 }
 
@@ -200,6 +208,7 @@ void godot_rb_init_RubyScript(void) {
   godot_rb_require_relative(ruby_script);
   godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
   rb_gc_register_mark_object(godot_rb_cRubyScript);
+  rb_define_alloc_func(godot_rb_cRubyScript, godot_rb_cRubyScript_m_allocate);
   rb_define_method(godot_rb_cRubyScript, "_instance_create", godot_rb_cRubyScript_i_instance_create, 1);
   
   string_name_RubyScript = godot_rb_chars_to_string_name("RubyScript");
@@ -218,7 +227,7 @@ void godot_rb_init_RubyScript(void) {
       i(to_string),
       i(create_instance),
       i(free_instance),
-      .get_virtual_func = godot_rb_init_RubyScript_inst_get_virtual(),
+      .get_virtual_func = godot_rb_init_RubyScript_inst_get_virtual()
       //i(get_rid), // ?
     }
   );

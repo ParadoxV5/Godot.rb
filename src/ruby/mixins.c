@@ -18,10 +18,10 @@ VALUE godot_rb_mString_i_to_godot(VALUE self) {
 }
 
 VALUE godot_rb_mSymbol_i_to_godot(VALUE self) {
-  GDExtensionStringName string = godot_rb_obj_to_string_name(self);
+  GDExtensionStringName string_name = godot_rb_obj_to_string_name(self);
   GDExtensionVariantPtr self_variant = godot_rb_variant_alloc();
-  godot_rb_gdextension.variant_from_string_name(self_variant, &string);
-  godot_rb_gdextension.string_name_destroy(&string);
+  godot_rb_gdextension.variant_from_string_name(self_variant, &string_name);
+  godot_rb_gdextension.string_name_destroy(&string_name);
   return godot_rb_wrap_variant(godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING_NAME], self_variant);
 }
 

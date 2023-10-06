@@ -97,7 +97,9 @@ VALUE TABLE;
 GDExtensionClassCallVirtual godot_rb_RubyScript_inst_get_virtual(
   RB_UNUSED_VAR(void* class_userdata), GDExtensionConstStringNamePtr name
 ) {
-  return (GDExtensionClassCallVirtual)NUM2ULL(rb_hash_aref(TABLE, ULL2NUM(*(uintptr_t*)name)));
+  VALUE address = rb_hash_aref(TABLE, ULL2NUM(*(uintptr_t*)name));
+  // This entire file would’ve been DRYed away by the time this becomes {RB_UNLIKELY}
+  return RB_LIKELY(NIL_P(address)) ? NULL : (GDExtensionClassCallVirtual)NUM2ULL(address);
 }
 
 
@@ -111,6 +113,7 @@ GDExtensionClassGetVirtual godot_rb_init_RubyScript_inst_get_virtual() {
   #undef x
   rb_hash_freeze(TABLE);
   rb_gc_register_mark_object(TABLE);
+  return godot_rb_RubyScript_inst_get_virtual;
 }
 
 static int destroy_key(VALUE key, RB_UNUSED_VAR(VALUE value), RB_UNUSED_VAR(VALUE arg)) {

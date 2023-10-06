@@ -12,8 +12,6 @@ module Godot
     include Godot
     VARIANT_TYPE = -1 # “one does not simply `initialize' a Variant”
     
-    alias _init initialize
-    
     def get(...)
       self.[](...)
     rescue KeyError => e
@@ -70,6 +68,7 @@ module Godot
       end
     end
     
+    alias _init initialize
     alias == eql?
     def to_godot = self
   end

@@ -70,6 +70,12 @@ module Godot
     # ?
     # def _get_rpc_config: () -> Variant
     
-    def new(...) = klass.new(...)
+    def new(...)
+      # Temporary workaround until script initializing finds insight
+      # {Kernel#tap} somehow isn’t loaded
+      instance = klass.new(...)
+      instance.set_script self
+      instance
+    end
   end
 end
