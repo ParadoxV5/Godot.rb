@@ -25,7 +25,7 @@ module Godot
         name.to_s,
         args,
         receiver: self
-      ) if name.start_with? '_'
+      ) unless %w[has_singleton class_exists get_parent_class set_script register_script_language].include? name.to_s
       super
     end
   end

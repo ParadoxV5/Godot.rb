@@ -31,7 +31,6 @@ module Godot
     alias _can_instantiate _is_valid
     def _instance_has(obj) = klass ? obj.instance_of?(klass) : false
     
-    # TODO: what are its other purpose – besides convenience – if every reflection includes inheritance?
     def _get_base_script
       klass.superclass.const_get :RUBY_SCRIPT if klass
     end

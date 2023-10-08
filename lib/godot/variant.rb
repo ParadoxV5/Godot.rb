@@ -69,6 +69,7 @@ module Godot
     end
     
     alias _init initialize
+    public :_init
     alias == eql?
     def to_godot = self
   end

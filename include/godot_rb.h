@@ -17,7 +17,6 @@ extern GDExtensionClassLibraryPtr godot_rb_library;
 
 /** @deprecated Members shall be moved to file-private globals instead. */
 extern struct godot_rb_gdextension {
-  //TODO: Categorize
   GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
   GDExtensionInterfacePrintScriptErrorWithMessage print_script_error_with_message;
   GDExtensionInterfaceMemAlloc mem_alloc;
@@ -117,7 +116,7 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
 extern rb_encoding* godot_rb_encoding_UTF32;
 
 #define godot_rb_error(message) \
-  godot_rb_gdextension.print_error_with_message  (message, message, __func__, __FILE__, __LINE__, false)
+  godot_rb_gdextension.print_error_with_message(message, message, __func__, __FILE__, __LINE__, false)
 /** `begin`–`rescue`s the passed function.
   If an exception occurs, log a Script Error or, for non-{rb_eStandardError}s, a generic Error;
   also ping the Godot Engine Editor if exception backtrace is available
