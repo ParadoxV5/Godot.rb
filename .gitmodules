@@ -1,0 +1,3 @@
+[submodule "godot"]
+	path = include/godot
+	url = https://github.com/ParadoxV5/godot-headers
