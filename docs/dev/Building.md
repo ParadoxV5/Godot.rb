@@ -38,11 +38,11 @@ The `Rakefile` has all the building steps. Ruby [bundles](https://github.com/rub
 
 * RubyInstaller without MSYS2 (neither Devkit nor separately installed) plus a separate `gcc`
   (such as [MinGW](https://www.mingw-w64.org)) also do; but without MSYS2,
-  the Linux/MSYS2 commands above will certainly fail, and you also miss out utilities for auxiliary development tasks.
+  the Linux/MSYS2 conveniences above will fail, and you also miss out utilities for auxiliary development tasks.
   To substitute those Linux/MSYS2 commands:
   ```shell
-  rake --version
-  # Confirm the Rake version is suitable as recommended by the `Gemfile`
+  gem list rake json
+  # Confirm the Rake and JSON versions are suitable as recommended by the `Gemfile`
   rake
   ```
 

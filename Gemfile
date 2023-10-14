@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 ruby '~> 3.0', engine: 'ruby', engine_version: '~> 3.0'
 
 gem 'rake', '~> 13.0.0'
+gem 'json', '~> 2.6'
 
 # Development Apps
 group :development do
