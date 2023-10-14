@@ -3,7 +3,7 @@
 Reference: [Godot Docs: Feature tags § Default features](https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html#default-features)
 
 ## Appendix: Output Structure
-* `bin/`
+* `build/`
   * `<architecture>/`
     * `<platform>/`
       (incompatibilities are more likely across different arches than platforms)

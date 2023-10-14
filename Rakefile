@@ -30,10 +30,10 @@ warn 'non-RubyInstaller2 not supported', category: :experimental unless RubyInst
 # @return `"src"`
 SRC = 'src'
 # Output root directory
-# @return `"bin"`
-BIN = 'bin'
+# @return `"build"`
+BIN = 'build'
 # Output directory
-# @return `"bin/<architecture>/<platform>/"`
+# @return `"build/<architecture>/<platform>/"`
 # @see OS
 OUT = File.join(BIN, OS, '')
 
@@ -56,7 +56,7 @@ out_enc_dir = File.join(out_archdir, 'enc')
 file_create out_enc_dir => out_archdir
 
 # symlinks of `libruby` & dependencies in the output directory and their originals
-# @return `{"bin/<architecture>/<platform>/<lib.so>" => "/<path>/<to>/<lib.so>", …}`
+# @return `{"build/<architecture>/<platform>/<lib.so>" => "/<path>/<to>/<lib.so>", …}`
 LIBS = {
   File.join(OUT, LIBRUBY_NAME) => File.join(LIBRUBY_DIR, LIBRUBY_NAME),
   out_enc_dir => File.join(rubyarchdir, 'enc')
@@ -128,7 +128,7 @@ BUILD_FLAGS.map do|build, flags|
   multitask build => [*o, out]
   
   o_dir
-end => o_dirs # {"…/.debug.o" => "…/debug.lib", …}`
+end => o_dirs # ["…/.debug.o", …]`
 
 desc 'compile Godot.rb for debug builds & symlink libs'
 task default: [BUILD_FLAGS.each_key.first, :libruby]

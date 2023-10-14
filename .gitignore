@@ -1,8 +1,7 @@
+/build/
+
 # JetBrains
 /**/.idea/
-
-# C
-/bin/
 
 # Ruby
 /.bundle/

@@ -41,7 +41,7 @@
 
 Copyright (c) 2014-present Godot Engine contributors. https://godotengine.org/license/
 
-### Bundled 3rd-party libraries in [`bin/`](bin/) (in builds)
+### Bundled 3rd-party libraries in [`build/`](build/)
 
 #### “`libruby`” – [Ruby](https://www.ruby-lang.org) (“CRuby”)
 Distributing in compliance with [its custom terms](https://github.com/ruby/ruby/blob/HEAD/COPYING#L25-L30)
