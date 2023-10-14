@@ -2,6 +2,9 @@
 
 warn 'only CRuby supported', category: :experimental if 'ruby' != RUBY_ENGINE
 
+
+# Defines #
+
 # @return `"<architecture>/<platform>"`
 # @see RbConfig::CONFIG
 OS = File.join(
@@ -70,6 +73,9 @@ end
 
 rake_output_message "<architecture/platform>\t#{OS}"
 
+
+# C #
+
 src_dir_size = SRC.size
 # C sources and file names of their corresponding  intermediate `.o`s
 # @return `{"src/*.c" => "*.o"}`
@@ -130,16 +136,18 @@ BUILD_FLAGS.map do|build, flags|
   o_dir
 end => o_dirs # ["…/.debug.o", …]`
 
-desc 'compile Godot.rb for debug builds & symlink libs'
-task default: [BUILD_FLAGS.each_key.first, :libruby]
-desc 'compile Godot.rb for all build types & symlink libs'
-task all: (BUILD_FLAGS.keys << 'libruby')
 
-desc "symlink `libruby` and dependencies"
-multitask libruby: LIBS.keys
+# Tasks #
+
+desc 'build Godot.rb for debug builds'
+task default: [BUILD_FLAGS.each_key.first, :additional_files]
+desc 'build Godot.rb for all build types'
+task all: (BUILD_FLAGS.keys << 'additional_files')
+
 LIBS.each {|symlink, lib| file_create symlink => OUT do
   ln_sf lib, symlink
 end }
+multitask additional_files: (LIBS.keys)
 
 desc "delete the intermediate directories such as `#{o_dirs.first}`"
 task :mostlyclean do
