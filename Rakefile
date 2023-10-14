@@ -137,6 +137,33 @@ BUILD_FLAGS.map do|build, flags|
 end => o_dirs # ["…/.debug.o", …]`
 
 
+# Ruby #
+
+extension_api = File.join 'include', 'godot', 'extension_api.json'
+# Database of method Hashes
+# ```
+# Class
+# method␉12345
+# ```
+hashes_tsv = File.join(BIN, 'hashes.tsv')
+file hashes_tsv => :extension_api
+
+task :extension_api => [BIN, extension_api] do
+  require 'json'
+  json = JSON.load_file extension_api
+  File.open hashes_tsv, 'w' do|tsv|
+    json['classes'].each do|klass_data|
+      tsv.puts klass_data['name']
+      klass_data['methods']&.then do|methods|
+        tsv.puts( methods.filter_map do|method_data|
+          method_data['hash']&.then {|hash| "#{method_data['name']}\t#{hash}" }
+        end )
+      end
+    end
+  end
+end
+
+
 # Tasks #
 
 desc 'build Godot.rb for debug builds'
@@ -147,7 +174,7 @@ task all: (BUILD_FLAGS.keys << 'additional_files')
 LIBS.each {|symlink, lib| file_create symlink => OUT do
   ln_sf lib, symlink
 end }
-multitask additional_files: (LIBS.keys)
+multitask additional_files: (LIBS.keys.push hashes_tsv)
 
 desc "delete the intermediate directories such as `#{o_dirs.first}`"
 task :mostlyclean do
