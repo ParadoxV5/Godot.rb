@@ -27,7 +27,7 @@ static bool core(void) {
   return godot_rb_protect(Init_enc);
 }
 
-static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
+static void servers_unprotected(RB_UNUSED_VAR(va_list* args)) {
   // Load {Godot}
   godot_rb_require_relative(version);
   godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
@@ -43,12 +43,16 @@ static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
     rb_gc_register_mark_object(godot_rb_cVariants[i]);
   // Load Ruby Integration
   godot_rb_init_Mixins();
+}
+static bool servers(void) { return godot_rb_protect(servers_unprotected); }
+
+static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
   godot_rb_init_Engine();
   godot_rb_init_RubyScript();
 }
 static bool scene(void) { return godot_rb_protect(scene_unprotected); }
 
-static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, NULL, scene};
+static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, servers, scene};
 void godot_rb_setup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel p_level) {
   bool (*func)(void) = godot_rb_setup_functions[p_level];
   if RB_LIKELY(func) {
