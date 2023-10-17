@@ -139,27 +139,38 @@ end => o_dirs # ["…/.debug.o", …]`
 
 # Ruby #
 
+hash_files = %w[core editor].to_h do|api_type|
+  tsv = File.join BIN, "#{api_type}.hashes.tsv"
+  # Each task executes at most once
+  file tsv => :extension_api
+  [api_type, tsv]
+end
+
 extension_api = File.join 'include', 'godot', 'extension_api.json'
-# Database of method Hashes
+# Database of method hashes
 # ```
 # Class
 # method␉12345
 # ```
-hashes_tsv = File.join(BIN, 'hashes.tsv')
-file hashes_tsv => :extension_api
-
 task :extension_api => [BIN, extension_api] do
   require 'json'
   json = JSON.load_file extension_api
-  File.open hashes_tsv, 'w' do|tsv|
+  files = hash_files.transform_values do|tsv|
+    File.open tsv, 'w'
+  rescue => e
+    warn e.full_message
+  end
+  begin
     json['classes'].each do|klass_data|
-      tsv.puts klass_data['name']
-      klass_data['methods']&.then do|methods|
-        tsv.puts( methods.filter_map do|method_data|
-          method_data['hash']&.then {|hash| "#{method_data['name']}\t#{hash}" }
-        end )
+      files[klass_data['api_type']]&.then do|tsv|
+        tsv.puts klass_data['name']
+        klass_data['methods']&.each do|method_data|
+          method_data['hash']&.then { tsv.puts "#{method_data['name']}\t#{_1}" }
+        end
       end
     end
+  ensure
+    files.each_value { _1&.close }
   end
 end
 
@@ -174,7 +185,8 @@ task all: (BUILD_FLAGS.keys << 'additional_files')
 LIBS.each {|symlink, lib| file_create symlink => OUT do
   ln_sf lib, symlink
 end }
-multitask additional_files: (LIBS.keys.push hashes_tsv)
+multitask additional_files: ( LIBS.keys.push *hash_files.values )
+
 
 desc "delete the intermediate directories such as `#{o_dirs.first}`"
 task :mostlyclean do
