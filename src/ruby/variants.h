@@ -59,7 +59,7 @@ void godot_rb_init_String(void);
 void godot_rb_init_StringName(void);
 void godot_rb_init_Object(void);
 void godot_rb_init_Mixins(void);
-void godot_rb_init_Engine(void);
+void godot_rb_init_Objects(GDExtensionInitializationLevel init_level);
 void godot_rb_init_RubyScript(void);
 void godot_rb_destroy_RubyLanguage(void);
 

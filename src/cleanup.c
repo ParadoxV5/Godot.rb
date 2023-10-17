@@ -10,12 +10,12 @@ static void (* const godot_rb_cleanup_functions[GDEXTENSION_MAX_INITIALIZATION_L
   NULL,
   godot_rb_destroy_RubyLanguage
 };
-void godot_rb_cleanup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel p_level) {
-  void (*func)(void) = godot_rb_cleanup_functions[p_level];
+void godot_rb_cleanup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel init_level) {
+  void (*func)(void) = godot_rb_cleanup_functions[init_level];
   if RB_UNLIKELY(func) {
-    printf("cleaning up Godot.rb init level %u...\n", p_level);
+    printf("cleaning up Godot.rb init level %u...\n", init_level);
     func();
-    godot_rb_init_levels[p_level] = false;
-    printf("Godot.rb init level %u cleaned up.\n", p_level);
+    godot_rb_init_levels[init_level] = false;
+    printf("Godot.rb init level %u cleaned up.\n", init_level);
   }
 }

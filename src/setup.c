@@ -47,7 +47,7 @@ static void servers_unprotected(RB_UNUSED_VAR(va_list* args)) {
 static bool servers(void) { return godot_rb_protect(servers_unprotected); }
 
 static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
-  godot_rb_init_Engine();
+  godot_rb_init_Objects(GDEXTENSION_INITIALIZATION_SCENE);
   godot_rb_init_RubyScript();
 }
 static bool scene(void) { return godot_rb_protect(scene_unprotected); }
