@@ -7,7 +7,8 @@
 
 // GDExtension (initialized by entry function) //
 
-extern bool godot_rb_init_levels[GDEXTENSION_MAX_INITIALIZATION_LEVEL];
+// The level Godot.rb have initialized + 1
+extern GDExtensionInitializationLevel godot_rb_init_level_next;
 
 extern GDExtensionInterfaceGetProcAddress godot_rb_get_proc;
 extern GDExtensionClassLibraryPtr godot_rb_library;

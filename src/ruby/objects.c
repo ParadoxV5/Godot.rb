@@ -14,8 +14,8 @@ VALUE godot_rb_Engine_get_singleton(RB_UNUSED_VAR(VALUE self), VALUE name) {
   return godot_rb_Engine_impl_get_singleton(godot_rb_obj_to_string_name(name));
 }
 
-void godot_rb_init_Objects(GDExtensionInitializationLevel init_level) {
-  if RB_UNLIKELY(init_level == GDEXTENSION_INITIALIZATION_SCENE) {
+void godot_rb_init_Objects(bool first_time) {
+  if RB_UNLIKELY(first_time) {
     gdext_global_get_singleton = (GDExtensionInterfaceGlobalGetSingleton) godot_rb_get_proc("global_get_singleton");
     VALUE Engine = godot_rb_Engine_impl_get_singleton(godot_rb_chars_to_string_name("Engine"));
     rb_const_set(godot_rb_mGodot, rb_intern("Engine"), Engine);

@@ -6,7 +6,6 @@ void Init_enc(RB_UNUSED_VAR(va_list* args)) {
   rb_require("enc/encdb.so"),
   rb_require("enc/trans/transdb.so");
 }
-
 /**
   Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
   https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
@@ -27,11 +26,15 @@ static bool core(void) {
   return godot_rb_protect(Init_enc);
 }
 
-static void servers_unprotected(RB_UNUSED_VAR(va_list* args)) {
+VALUE godot_rb_mGodot_m_init_level(RB_UNUSED_VAR(VALUE self)) {
+  return INT2FIX(godot_rb_init_level_next - 1);
+}
+static void servers(RB_UNUSED_VAR(va_list* args)) {
   // Load {Godot}
   godot_rb_require_relative(version);
   godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
   rb_gc_register_mark_object(godot_rb_mGodot);
+  rb_define_singleton_method(godot_rb_mGodot, "init_level", godot_rb_mGodot_m_init_level, 0);
   // Load Variants
   godot_rb_init_Variant();
   godot_rb_init_String();
@@ -44,24 +47,21 @@ static void servers_unprotected(RB_UNUSED_VAR(va_list* args)) {
   // Load Ruby Integration
   godot_rb_init_Mixins();
 }
-static bool servers(void) { return godot_rb_protect(servers_unprotected); }
 
-static void scene_unprotected(RB_UNUSED_VAR(va_list* args)) {
-  godot_rb_init_Objects(GDEXTENSION_INITIALIZATION_SCENE);
+static void scene(RB_UNUSED_VAR(va_list* args)) {
+  godot_rb_init_Objects(true);
   godot_rb_init_RubyScript();
 }
-static bool scene(void) { return godot_rb_protect(scene_unprotected); }
 
-static bool (* const godot_rb_setup_functions[GDEXTENSION_MAX_INITIALIZATION_LEVEL])(void) = {core, servers, scene};
-void godot_rb_setup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel p_level) {
-  bool (*func)(void) = godot_rb_setup_functions[p_level];
-  if RB_LIKELY(func) {
-    if RB_UNLIKELY(p_level && !godot_rb_init_levels[p_level - 1])
-      return;
-    printf("setting up Godot.rb init level %u...\n", p_level);
-    if RB_UNLIKELY(!func())
-      return;
+static void editor(RB_UNUSED_VAR(va_list* args)) {
+  godot_rb_init_Objects(false);
+}
+
+static void (* const unprotected_functions[])(RB_UNUSED_VAR(va_list* args)) = {NULL, servers, scene, editor};
+void godot_rb_setup(RB_UNUSED_VAR(void* userdata), GDExtensionInitializationLevel init_level) {
+  if RB_LIKELY(godot_rb_init_level_next == init_level) {
+    printf("setting up Godot.rb init level %u...\n", init_level);
+    if RB_LIKELY(RB_LIKELY(init_level) ? godot_rb_protect(unprotected_functions[init_level]) : core())
+      printf("Godot.rb init level %u set up.\n", godot_rb_init_level_next++);
   }
-  godot_rb_init_levels[p_level] = true;
-  printf("Godot.rb init level %u set up.\n", p_level);
 }
