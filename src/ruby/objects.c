@@ -28,8 +28,8 @@ void godot_rb_init_Objects(bool first_time) {
     rb_const_set(godot_rb_mGodot, rb_intern("Engine"), Engine);
     rb_define_singleton_method(Engine, "get_singleton", godot_rb_Engine_get_singleton, 1);
   }
-  rb_load(rb_str_new_lit("objects"), false);
-  // Temporary solution: mute `Object#method_missing` and `Object#respond_to_missing?`
+  rb_load(rb_str_new_lit("./addons/Godot.rb/lib/godot/objects.rb"), false);
+  // Temporary solution: mute `Object#method_missing` and `ObjeGct#respond_to_missing?`
   if RB_UNLIKELY(first_time) {
     rb_define_method(godot_rb_cObject, "method_missing", rb_method_missing, -1);
     rb_define_method(godot_rb_cObject, "respond_to_missing?", obj_respond_to_missing, 2);

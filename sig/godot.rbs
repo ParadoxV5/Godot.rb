@@ -1,3 +1,7 @@
 module Godot
   VERSION: ::String
+  GDEXTENSION_API_TYPES: ::Array[::String?]
+  
+  def self.init_level: () -> Integer
+  private def self.__const_get: (::String name) -> singleton(Object)
 end
