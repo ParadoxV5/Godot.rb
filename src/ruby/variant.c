@@ -109,17 +109,21 @@ VALUE godot_rb_cVariant_i__aset(VALUE self, VALUE key, VALUE value)
   a(godot_rb_obj_get_variant(value), variant_set, value)
 
 
-void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, VALUE func, VALUE args, VALUE var) {
+void godot_rb_variant_call(
+  godot_rb_variant_call_function function,
+  VALUE self,
+  VALUE func,
+  int argc, const VALUE* argv,
+  VALUE var
+) {
   
   GDExtensionVariantPtr self_variant = godot_rb_obj_get_variant(self);
-  long argc = RARRAY_LEN(args);
-  GDExtensionConstVariantPtr argv[argc];
-  VALUE* arg0_p = RARRAY_PTR(args);
-  for(long i = 0; i < argc; ++i)
-    argv[i] = godot_rb_obj_get_variant(arg0_p[i]);
+  GDExtensionConstVariantPtr variant_argv[argc];
+  for(int i = 0; i < argc; ++i)
+    variant_argv[i] = godot_rb_obj_get_variant(argv[i]);
   
   GDExtensionCallError error;
-  function(self_variant, func, argc, argv, var, &error);
+  function(self_variant, func, argc, variant_argv, var, &error);
   switch(error.error) {
     case GDEXTENSION_CALL_OK:
       return;
@@ -145,7 +149,10 @@ void godot_rb_variant_call(godot_rb_variant_call_function function, VALUE self, 
     }
     
     case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
-      VALUE kwargs = rb_hash_new_capa(1);
+      VALUE
+        args = rb_ary_new_from_values(argc, argv),
+        kwargs = rb_hash_new_capa(1)
+      ;
       rb_hash_aset(kwargs, ID2SYM(rb_intern("receiver")), self);
       rb_exc_raise(rb_class_new_instance_kw( 4, (VALUE[]){
         rb_sprintf("undefined method `%"PRIsVALUE"', or cannot call it with %+"PRIsVALUE, func, args),
@@ -168,7 +175,7 @@ static void godot_rb_cVariant_impl_initialize(
   GDExtensionVariantPtr self_variant,
   RB_UNUSED_VAR(VALUE func),
   long argc,
-  GDExtensionConstVariantPtr* argv,
+  GDExtensionConstVariantPtr const* argv,
   VALUE self,
   GDExtensionCallError* r_error
 ) {
@@ -182,16 +189,16 @@ static void godot_rb_cVariant_impl_initialize(
     );
   godot_rb_gdextension.variant_construct(variant_type, self_variant, argv, argc, r_error);
 }
-VALUE godot_rb_cVariant_i_initialize(VALUE self, VALUE args) {
-  godot_rb_variant_call(godot_rb_cVariant_impl_initialize, self, rb_intern("initialize"), args, self);
-  return args;
+VALUE godot_rb_cVariant_i_initialize(int argc, const VALUE* argv, VALUE self) {
+  godot_rb_variant_call(godot_rb_cVariant_impl_initialize, self, ID2SYM(rb_intern("initialize")), argc, argv, self);
+  return self;
 }
 
 static void DEPRECATED(godot_rb_cVariant_impl_godot_send)(
   GDExtensionVariantPtr self_variant,
   VALUE meth,
   long argc,
-  GDExtensionConstVariantPtr* argv,
+  GDExtensionConstVariantPtr const* argv,
   GDExtensionVariantPtr r_return,
   GDExtensionCallError* r_error
 ) {
@@ -200,15 +207,15 @@ static void DEPRECATED(godot_rb_cVariant_impl_godot_send)(
   godot_rb_gdextension.string_name_destroy(&meth_string_name);
 }
 VALUE DEPRECATED(godot_rb_cVariant_i_godot_send)(int argc, const VALUE* argv, VALUE self) {
-  VALUE meth, args;
-  rb_scan_args(argc, argv, "1*", &meth, &args);
+  rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
   GDExtensionVariantPtr ret_variant = godot_rb_variant_alloc();
   // {VALUE} ↔️ {void*} casts are exact
   godot_rb_variant_call(
     (godot_rb_variant_call_function)godot_rb_cVariant_impl_godot_send,
     self,
-    meth,
-    args,
+    argv[0],
+    --argc,
+    &argv[1],
     (VALUE)ret_variant
   );
   return godot_rb_parse_variant(ret_variant);
@@ -250,7 +257,7 @@ void godot_rb_init_Variant() {
   godot_rb_cVariant = godot_rb_get_module(Variant);
   variant_to_bool   = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL  );
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_m_allocate);
-  rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -2);
+  rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -1);
   rb_define_private_method(godot_rb_cVariant, "initialize_copy", godot_rb_cVariant_i_initialize_copy, 1);
   #define m(meth, func, arity) rb_define_method(godot_rb_cVariant, #meth, godot_rb_cVariant_i_##func, arity);
   m([]        , _aref     ,  1)
