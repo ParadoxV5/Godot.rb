@@ -45,6 +45,7 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
     case GDEXTENSION_VARIANT_TYPE_OBJECT:
       if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
         // “`godot_rb_parse_object`”
+        //TODO: unavailablility in SERVERS
         GDExtensionConstObjectPtr object_ptr;
         godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
         return godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
@@ -186,7 +187,7 @@ VALUE godot_rb_cVariant_i_initialize(VALUE self, VALUE args) {
   return args;
 }
 
-static void godot_rb_cVariant_impl_godot_send(
+static void DEPRECATED(godot_rb_cVariant_impl_godot_send)(
   GDExtensionVariantPtr self_variant,
   VALUE meth,
   long argc,
@@ -198,7 +199,7 @@ static void godot_rb_cVariant_impl_godot_send(
   godot_rb_gdextension.variant_call(self_variant, &meth_string_name, argv, argc, r_return, r_error);
   godot_rb_gdextension.string_name_destroy(&meth_string_name);
 }
-VALUE godot_rb_cVariant_i_godot_send(int argc, VALUE* argv, VALUE self) {
+VALUE DEPRECATED(godot_rb_cVariant_i_godot_send)(int argc, const VALUE* argv, VALUE self) {
   VALUE meth, args;
   rb_scan_args(argc, argv, "1*", &meth, &args);
   GDExtensionVariantPtr ret_variant = godot_rb_variant_alloc();

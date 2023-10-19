@@ -16,17 +16,5 @@ module Godot
     
     # Stop `initialize(…)` from becoming `Object(…)` (rather than `Object.new(…)`, which calls {#_init})
     def initialize; end
-    alias call godot_send
-    
-    # Temporarily disable this to hot fix infinite loop due to `super` still calls on `self`
-    def method_missing(name, *args)
-      raise NoMethodError.new(
-        "undefined method `#{name}' for #{inspect}",
-        name.to_s,
-        args,
-        receiver: self
-      ) unless %w[has_singleton class_exists get_parent_class set_script register_script_language].include? name.to_s
-      super
-    end
   end
 end

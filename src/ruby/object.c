@@ -7,7 +7,6 @@ VALUE godot_rb_object_ptr_class(GDExtensionConstObjectPtr object_ptr) {
   GDExtensionStringName class_name_str;
   godot_rb_gdextension.object_get_class_name(object_ptr, godot_rb_library, &class_name_str);
   VALUE klass = rb_const_get_at(godot_rb_mGodot, godot_rb_id_from_string_name(&class_name_str, 0));
-  // calls {Godot#const_missing} as needed
   godot_rb_gdextension.string_name_destroy(&class_name_str);
   return klass;
 }

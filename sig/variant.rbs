@@ -13,7 +13,7 @@ module Godot
     
     def initialize: (*variant_like args) -> void
     alias _init initialize
-    def godot_send: (interned meth, *variant_like args) -> variant
+    %a{steep:deprecated} def godot_send: (interned meth, *variant_like args) -> variant
     
     def [] : (variant_like key) -> variant
     def get: (variant_like key) -> variant?
@@ -23,8 +23,6 @@ module Godot
     def has_key: (variant_like key) -> bool
     def key?: (untyped key) -> bool # `untyped` instead of `top`: https://github.com/soutaro/steep/issues/918
     def has_method: (interned name) -> bool
-    def respond_to_missing?: (Symbol | ::String name, ?boolish include_all) -> bool
-    def method_missing: (Symbol | ::String name, *variant_like args) -> variant
     
     def hash: ...
     #def eql?: ...

@@ -29,14 +29,17 @@ module Godot
     rescue TypeError
       false
     end
-    def respond_to_missing?(name, _include_all = false) # https://github.com/soutaro/steep/issues/913
+    
+    # @deprecated
+    def respond_to_missing?(name, _include_all) # https://github.com/soutaro/steep/issues/913
       case name[-1] # again, Ruby suffixes are special
       when '=' then key? name[..-1]
       when '?' then has_method "is_#{name[..-1]}"
       else has_method name or key? name
       end or super
     end
-    def method_missing(name, *args)
+    # @deprecated
+    def method_missing(name, *args, **kwargs)
     # Zeroth, Ruby suffixes are special
       case name[-1]
       when '='
@@ -73,14 +76,4 @@ module Godot
     alias == eql?
     def to_godot = self
   end
-  
-  def self.const_missing(name) = const_set(name,
-    if Engine.has_singleton(name) # First, check Singletons
-      Engine.get_singleton(name) #: Object
-    elsif ClassDB.class_exists(name) # Second, check classes
-      Class.new const_get(ClassDB.get_parent_class(name)) #: singleton(Object)
-    else
-      super # raise {NameError}
-    end
-  )
 end

@@ -37,7 +37,6 @@ module Godot
     def self.base_class_name: () -> StringName
     def self.allocate: ...
     def initialize: () -> void
-    alias call godot_send
   end
   
 end
