@@ -119,9 +119,9 @@ VALUE TABLE;
 GDExtensionClassCallVirtual godot_rb_RubyScript_inst_get_virtual(
   RB_UNUSED_VAR(void* class_userdata), GDExtensionConstStringNamePtr name
 ) {
-  VALUE address = rb_hash_aref(TABLE, ULL2NUM(*(uintptr_t*)name));
+  VALUE address = rb_hash_aref(TABLE, LL2NUM(*(intptr_t*)name));
   // This entire file would’ve been DRYed away by the time this becomes {RB_UNLIKELY}
-  return RB_LIKELY(NIL_P(address)) ? NULL : (GDExtensionClassCallVirtual)NUM2ULL(address);
+  return RB_LIKELY(NIL_P(address)) ? NULL : (GDExtensionClassCallVirtual)NUM2LL(address);
 }
 
 
@@ -129,8 +129,8 @@ GDExtensionClassGetVirtual godot_rb_init_RubyScript_inst_get_virtual() {
   gdext_script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   TABLE = rb_hash_new_capa(32); // Count from docs/JSON
   #define x(_0, func, _2) rb_hash_aset(TABLE, \
-    ULL2NUM((uintptr_t)godot_rb_chars_to_string_name("_"#func)), \
-    ULL2NUM((uintptr_t)godot_rb_RubyScript_virtual_##func) \
+    LL2NUM((intptr_t)godot_rb_chars_to_string_name("_"#func)), \
+    LL2NUM((intptr_t)godot_rb_RubyScript_virtual_##func) \
   );
   X
   x(void*, instance_create, Object)
@@ -141,7 +141,7 @@ GDExtensionClassGetVirtual godot_rb_init_RubyScript_inst_get_virtual() {
 }
 
 static int destroy_key(VALUE key, RB_UNUSED_VAR(VALUE value), RB_UNUSED_VAR(VALUE arg)) {
-  GDExtensionStringName name = (GDExtensionStringName)NUM2ULL(key);
+  GDExtensionStringName name = (GDExtensionStringName)NUM2LL(key);
   godot_rb_gdextension.string_name_destroy(&name);
   return ST_CONTINUE;
 }

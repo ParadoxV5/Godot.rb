@@ -31,7 +31,7 @@ module Godot
       next unless name
       if hash # method
         unless klass.method_defined? name, false
-          klass.__send__ :__godot_bind, name, hash
+          klass.__send__ :__godot_bind, name, hash.to_i
           # Prefix ➡️ Suffix
           prefix, n = name.split '_', 2
           if n # 'name'.split('_', 2)[1] #=> %w[name][1]

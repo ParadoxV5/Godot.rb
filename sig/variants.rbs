@@ -37,6 +37,7 @@ module Godot
     def self.base_class_name: () -> StringName
     def self.allocate: ...
     def initialize: () -> void
+    private def self.__godot_bind: (String name, Integer hash) -> Symbol
   end
   
 end
