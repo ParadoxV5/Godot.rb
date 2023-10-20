@@ -19,6 +19,9 @@ module Godot
     end
   end
   
+  class Array[out E < Variant] < Variant::AbstractArray[E]
+    VARIANT_TYPE: 28
+  end
   
   class PackedByteArray < Variant::AbstractArray[Int]
     VARIANT_TYPE: 29

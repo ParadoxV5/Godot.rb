@@ -41,8 +41,20 @@ static void servers(RB_UNUSED_VAR(va_list* args)) {
   godot_rb_init_StringName();
   godot_rb_init_Object();
   godot_rb_require_relative(array);
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_ARRAY] = godot_rb_get_module(Array);
+  GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_PACKED_BYTE_ARRAY;
+  #define a(type) godot_rb_cVariants[i++] = godot_rb_get_module(Packed##type##Array);
+  a(Byte)
+  a(Int32)
+  a(Int64)
+  a(Float32)
+  a(Float64)
+  a(String)
+  a(Vector2)
+  a(Vector3)
+  a(Color)
   // Skip NIL since it points to the same class as BOOL
-  for(GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
+  for(i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
     rb_gc_register_mark_object(godot_rb_cVariants[i]);
   // Load Ruby Integration
   godot_rb_init_Mixins();

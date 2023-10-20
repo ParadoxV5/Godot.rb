@@ -37,6 +37,10 @@ module Godot
     end
   end
   
+  class Array < Variant::AbstractArray
+    VARIANT_TYPE = 28
+  end
+  
   %w[
     Byte
     Int32
