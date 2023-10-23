@@ -26,11 +26,10 @@ VALUE godot_rb_mSymbol_i_to_godot(VALUE self) {
 }
 
 void godot_rb_init_Mixins() {
-  godot_rb_require_relative(mixins);
-  const VALUE space = godot_rb_get_module(Mixins);
-  
+  const VALUE mMixins = rb_define_module_under(godot_rb_mGodot, "Mixins");
   #define d(module) \
-    mod = rb_const_get(space, rb_intern(#module)); \
+    mod = rb_define_module_under(mMixins, #module); \
+    rb_include_module(rb_c##module, mod); \
     rb_define_method(mod, "to_godot", godot_rb_m##module##_i_to_godot, 0);
   #define t(Trilean, variant_type) \
     d(Trilean##Class) \
