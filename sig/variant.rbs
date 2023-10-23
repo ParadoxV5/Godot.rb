@@ -2,7 +2,7 @@ module Godot
   interface _ToGodot[out G < Variant] def to_godot: () -> G end
   
   type variant_like = _ToGodot[Variant]
-  type variant = Variant | bool?
+  type variant = Variant | bool? | Integer | Float
   class Variant
     include Godot
     VARIANT_TYPE: Integer

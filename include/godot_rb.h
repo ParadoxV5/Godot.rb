@@ -72,7 +72,7 @@ extern GDExtensionVariantPtr godot_rb_variant_alloc();
 VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant);
 /** @note
   The variant will be freed when the returned Variant gets GC-ed or,
-  for auto-converted variants (i.e., the trileans), by the time this function returns.
+  for auto-converted variants (trileans, ints and floats), by the time this function returns.
 */
 VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant);
 

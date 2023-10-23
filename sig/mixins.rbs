@@ -9,8 +9,11 @@ module Godot
     module  FalseClass include _ToGodot[Variant] def nonzero?: () -> false end
     class ::FalseClass include FalseClass end
     
-    module  Integer include _ToGodot[Int] end
+    module  Integer include _ToGodot[Variant] end
     class ::Integer include Integer end
+    
+    module  Float include _ToGodot[Variant] end
+    class ::Float include Float end
     
     module  String include _ToGodot[Godot::String] end
     class ::String include String end

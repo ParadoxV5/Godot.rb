@@ -1,11 +1,5 @@
 module Godot
   
-  class Int < Variant
-  end
-  
-  class Float < Variant
-  end
-  
   class String < Variant
     VARIANT_TYPE: 4
     def to_s: () -> ::String
