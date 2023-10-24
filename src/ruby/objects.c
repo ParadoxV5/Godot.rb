@@ -32,12 +32,10 @@ void godot_rb_cObject_impl_call(
 }
 VALUE godot_rb_cObject_call(
   RB_UNUSED_VAR(VALUE arg),
-  VALUE method_bind,
+  VALUE var, // Variable reüse: `method_bind` in, `ret_variant` out
   int argc, const VALUE* argv,
   RB_UNUSED_VAR(VALUE blk)
 ) {
-  // Variable reüse: `method_bind` in, `ret_variant` out
-  void* var = (void*)&method_bind;
   ID meth;
   rb_frame_method_id_and_class(&meth, NULL);
   // {VALUE} ↔️ {void**} casts are exact
@@ -53,25 +51,28 @@ VALUE godot_rb_cObject_call(
 
 GDExtensionInterfaceClassdbGetMethodBind gdext_classdb_get_method_bind;
 VALUE godot_rb_cObject_m__godot_bind(VALUE self, VALUE name, VALUE hash) {
-  GDExtensionStringName string_name = godot_rb_obj_to_string_name(name);
+  GDExtensionStringName
+    string_name = godot_rb_obj_to_string_name(name),
+    class = godot_rb_obj_to_string_name(rb_funcallv_public(self, rb_intern("base_class_name"), 0, (VALUE[]){}));
+      //TODO: at this frequency, might as well consider moving it to pure C
   name = rb_block_call(
     self,
     rb_intern("define_method"),
     1, (VALUE[]){name},
     godot_rb_cObject_call,
     (VALUE)gdext_classdb_get_method_bind(
-      godot_rb_obj_to_string_name(rb_funcallv_public(self, rb_intern("base_class_name"), 0, (VALUE[]){})),
-        //TODO: at this frequency, might as well consider moving it to pure C
+      &class,
       &string_name,
-      NUM2LL(hash) //FIXME: buffer-based integer conversion, similar to that in {godot_rb_protect}
+      NUM2LL(hash) // SIZEOF_LONG_LONG ≥ 64 = sizeof(GDExtensionInt)
     )
   );
   godot_rb_gdextension.string_name_destroy(&string_name);
+  godot_rb_gdextension.string_name_destroy(&class);
   return name;
 }
 
 VALUE DEPRECATED(rb_method_missing)(RB_UNUSED_VAR(int argc), const VALUE* argv, VALUE self) {
-  rb_raise(rb_eNoMethodError, "undefined method `%"PRIsVALUE"' for %+"PRIsVALUE, self, argc ? *argv : Qnil, self);
+  rb_raise(rb_eNoMethodError, "undefined method `%"PRIsVALUE"' for %+"PRIsVALUE, argc ? *argv : Qnil, self);
 }
 VALUE DEPRECATED(obj_respond_to_missing)(
   RB_UNUSED_VAR(VALUE obj), RB_UNUSED_VAR(VALUE mid), RB_UNUSED_VAR(VALUE priv)

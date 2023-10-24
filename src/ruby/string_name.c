@@ -23,7 +23,7 @@ GDExtensionStringName godot_rb_obj_to_string_name(VALUE self) {
     GDExtensionString string;
     // Second, optimize for {String}s
     if RB_UNLIKELY(rb_obj_is_instance_of(self, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_STRING]))
-      godot_rb_gdextension.string_name_from_variant(&string, godot_rb_cVariant_get_variant(self));
+      godot_rb_gdextension.string_from_variant(&string, godot_rb_cVariant_get_variant(self));
     else {
       VALUE self_string;
       // Specialized Strings come from regular Strings, so we convert to String rather than Symbol
