@@ -53,8 +53,8 @@ static void servers(RB_UNUSED_VAR(va_list* args)) {
   a(Vector2)
   a(Vector3)
   a(Color)
-  // Skip NIL since it points to the same class as BOOL
-  for(i = GDEXTENSION_VARIANT_TYPE_BOOL; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
+  // Skip the first three since they point at the same class as FLOAT
+  for(i = GDEXTENSION_VARIANT_TYPE_FLOAT; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
     rb_gc_register_mark_object(godot_rb_cVariants[i]);
   // Load Ruby Integration
   godot_rb_init_Mixins();

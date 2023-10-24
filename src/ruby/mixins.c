@@ -9,6 +9,15 @@ f(Nil, false)
 f(True, true)
 f(False, false)
 
+//GDExtensionTypeFromVariantConstructorFunc gdext_int_from_variant;
+GDExtensionVariantFromTypeConstructorFunc gdext_variant_from_int;
+VALUE godot_rb_mInteger_i_to_godot(VALUE self) {
+  GDExtensionInt integer = NUM2LL(self); // SIZEOF_LONG_LONG ≥ 64 = sizeof(GDExtensionInt)
+  GDExtensionVariantPtr self_variant = godot_rb_variant_alloc();
+  gdext_variant_from_int(self_variant, &integer);
+  return godot_rb_wrap_variant(godot_rb_cVariant, self_variant);
+}
+
 VALUE godot_rb_mString_i_to_godot(VALUE self) {
   GDExtensionString string = godot_rb_obj_to_string(self);
   GDExtensionVariantPtr self_variant = godot_rb_variant_alloc();
@@ -39,7 +48,6 @@ void godot_rb_init_Mixins() {
     rb_define_method(mod, "nonzero?", godot_rb_m##Trilean##Class_i_nonzero_, 0); \
     rb_define_method(mod, "inspect",  godot_rb_m##Trilean##Class_i_inspect , 0);
   
-  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_NIL] = godot_rb_cVariant;
   godot_rb_mNilClass_variant = rb_obj_alloc(godot_rb_cVariant); // Utilizing `Variant.allocate`
   VALUE t(Nil, NIL)
   
@@ -53,8 +61,14 @@ void godot_rb_init_Mixins() {
     godot_rb_m##Boolean##Class_variant = godot_rb_wrap_variant(godot_rb_cVariant, variant); \
     t(Boolean, BOOL)
   GDExtensionVariantPtr b(True, true) b(False, false)
-  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL] = godot_rb_cVariant;
   
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_NIL  ] =
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL ] =
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_INT  ] =
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_FLOAT] = godot_rb_cVariant;
+  
+  gdext_variant_from_int = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_INT);
+  d(Integer)
   d(String)
   d(Symbol)
 }

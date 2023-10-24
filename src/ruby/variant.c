@@ -38,7 +38,7 @@ VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
   return other;
 }
 
-GDExtensionTypeFromVariantConstructorFunc variant_to_bool;
+GDExtensionTypeFromVariantConstructorFunc gdext_variant_to_bool, gdext_variant_to_int;
 VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
   GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
   switch(variant_type) {
@@ -50,20 +50,25 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
         godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
         return godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
       }
-      
       //fall-through
     case GDEXTENSION_VARIANT_TYPE_NIL:
       godot_rb_gdextension.variant_destroy(variant);
       return Qnil;
     case GDEXTENSION_VARIANT_TYPE_BOOL: {
       GDExtensionBool the_bool;
-      variant_to_bool(&the_bool, variant);
+      gdext_variant_to_bool(&the_bool, variant);
       godot_rb_gdextension.variant_destroy(variant);
       return the_bool ? Qtrue : Qfalse;
     }
-    default:;
+    case GDEXTENSION_VARIANT_TYPE_INT: {
+      GDExtensionInt integer;
+      gdext_variant_to_int(&integer, variant);
+      godot_rb_gdextension.variant_destroy(variant);
+      return LL2NUM(integer); // SIZEOF_LONG_LONG ≥ 64 = sizeof(GDExtensionInt)
+    }
+    default:
+      return godot_rb_wrap_variant(godot_rb_cVariants[variant_type], variant);
   }
-  return godot_rb_wrap_variant(godot_rb_cVariants[variant_type], variant);
 }
 
 
@@ -255,7 +260,8 @@ void godot_rb_init_Variant() {
   variant_hash = (GDExtensionInterfaceVariantHash)godot_rb_get_proc("variant_hash");
   godot_rb_require_relative(variant);
   godot_rb_cVariant = godot_rb_get_module(Variant);
-  variant_to_bool   = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL  );
+  gdext_variant_to_bool = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL);
+  gdext_variant_to_int  = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_INT );
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_m_allocate);
   rb_define_private_method(godot_rb_cVariant, "initialize", godot_rb_cVariant_i_initialize, -1);
   rb_define_private_method(godot_rb_cVariant, "initialize_copy", godot_rb_cVariant_i_initialize_copy, 1);
