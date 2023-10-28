@@ -3,7 +3,7 @@
 module Godot
   module RubyScript::Autoloads
     public_class_method :remove_const
-    Godot.include self
+    Godot.prepend self
   end
   
   # Singleton pattern (singleton {INSTANCE} alone conflicts with {RubyScript} design)
@@ -13,7 +13,8 @@ module Godot
     # TODO: don’t generate a new {Variant} on every call
     
     def _get_name = 'Ruby'
-    def _get_type = 'RubyScript'
+    def _get_type = 'RubyScript'.to_godot
+    def _handles_global_class_type(type) = _get_type == type
     def _get_extension = 'rb'
     def _get_recognized_extensions = PackedStringArray.from %w[rb rbw gemspec]
     def _get_comment_delimiters = PackedStringArray['#'] # What `=begin`-`=end`?
@@ -22,6 +23,8 @@ module Godot
     def _can_inherit_from_file = true
     # Whether or not users get to name classes themselves – no for both GDScript and C#
     def _has_named_classes = false
+    # RDoc or Yardoc?
+    def _supports_documentation = false
     
     # Same _as {add_named_global_constant}, but does not set if the value is falsy. This is because
     # [Godot Engine preloads `nil`s](https://github.com/godotengine/godot/blob/4.1.1-stable/main/main.cpp#L3009)
@@ -37,6 +40,10 @@ module Godot
     
     # ??
     def _frame = nil
+    def _finish
+      #TODO clear all user scripts
+    end
+    
     # !
     # Dictionary _get_global_class_name ( String path ) virtual const
     # 
@@ -72,18 +79,14 @@ module Godot
     # !
     # void _reload_all_scripts ( ) virtual
     # void _reload_tool_script ( Script script, bool soft_reload ) virtual
-    # bool _supports_documentation ( ) virtual const
     # void _thread_enter ( ) virtual
     # void _thread_exit ( ) virtual
     # String _validate_path ( String path ) virtual const
     # 
     # ?
-    # void _finish ( ) virtual
-    # void _frame ( ) virtual
     # Dictionary[] _get_public_annotations ( ) virtual const
     # Dictionary _get_public_constants ( ) virtual const
     # Dictionary[] _get_public_functions ( ) virtual const
-    # bool _handles_global_class_type ( String type ) virtual const
     # bool _is_using_templates ( ) virtual
     # String _make_function ( String class_name, String function_name, PackedStringArray function_args ) virtual const
     # Script _make_template ( String template, String class_name, String base_class_name ) virtual const

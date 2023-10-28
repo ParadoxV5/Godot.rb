@@ -3,13 +3,15 @@ module Godot
   class ScriptLanguageExtension < Object end
   class RubyLanguage < ScriptLanguageExtension
     def self._get_name: () -> ::String
-    def self._get_type: () -> ::String
+    def self._get_type: () -> String
+    def _handles_global_class_type: (bot type) -> bool
     def self._get_extension: () -> ::String
     def self._get_recognized_extensions: () -> PackedStringArray
     def self._get_comment_delimiters: () -> PackedStringArray
     def self._get_string_delimiters: () -> PackedStringArray
     def self._can_inherit_from_file: () -> bool
     def self._has_named_classes: () -> bool
+    def self._supports_documentation: () -> false
     
     #def _add_global_constant: [T < variant_like] (interned name, T value) -> T
       # https://github.com/ruby/rbs/issues/1471
@@ -19,6 +21,7 @@ module Godot
     
     def _create_script: () -> RubyScript[Object]
     def _frame: () -> void
+    def _finish: () -> void
     
     INSTANCE: RubyLanguage
   end

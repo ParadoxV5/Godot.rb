@@ -11,6 +11,7 @@ module Godot
     def _get_source_code: () -> String
     alias _set_source_code source_code=
     def _has_source_code: () -> bool
+    def _reload: (bool keep_state) -> (0|1)
     
     def _get_language: () -> RubyLanguage
     def _is_tool: () -> bool

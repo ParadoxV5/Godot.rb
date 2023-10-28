@@ -17,6 +17,10 @@ module Godot
     alias _set_source_code source_code=
     def _has_source_code = source_code.nonzero?
     
+    def _reload(_keep_state)
+      1 # TODO
+    end
+    
     def _get_language = Godot::RubyLanguage::INSTANCE
     # TODO: LSP integration
     def _is_tool = true
@@ -37,7 +41,6 @@ module Godot
     def _get_instance_base_type = klass ? klass.base_class_name : StringName.new
     
     # !
-    # Error _reload ( bool keep_state ) virtual
     # void _update_exports ( ) virtual
     # 
     # ! Standard Reflection

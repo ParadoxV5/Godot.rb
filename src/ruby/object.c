@@ -20,7 +20,6 @@ VALUE godot_rb_cObject_m_allocate(VALUE self) {
   godot_rb_gdextension.string_name_destroy(&base_class_name);
   return godot_rb_wrap_variant(self, variant);
 }
-//TODO: translate `super` in {#initialize} as {#_init} … except how do I call `super` from Ruby to Godot anyways ??
 /*FIXME: attach script, but that calls {#initialize}
 if RB_LIKELY(!NIL_P(ruby_script)) // Godot.rb {RubyScript} class
   rb_funcall(instance, rb_intern("set_script"), 1, ruby_script);
