@@ -1,0 +1,63 @@
+module Godot
+  class Dictionary[unchecked out K < Variant, unchecked out V < Variant] < Variant
+    VARIANT_TYPE: 27
+    def self.from: [K < Variant, V < Variant] (Enumerable[[_ToGodot[K], _ToGodot[V]]] enum) -> instance
+    def self.[]: [V < Variant] (**_ToGodot[V] elems) -> instance
+    
+    def []: (_ToGodot[K] key) -> V
+    def get: (_ToGodot[K] key) -> V?
+    def []=: (_ToGodot[K] key, _ToGodot[V] value) -> V
+    def set: (_ToGodot[K] key, _ToGodot[V] value) -> V
+  end
+  
+  
+  #class AbstractArray[E < variant] < Variant
+  # https://github.com/ruby/rbs/issues/1471
+  class Variant::AbstractArray[unchecked out E < Variant] < Variant      
+    def self.from: [E < Variant] (Enumerable[_ToGodot[E]] enum) -> instance
+    def self.[]: [E < Variant] (*_ToGodot[E] elems) -> instance
+    
+    type index = Integer | Float
+    def []: (index key) -> E
+    def get: (index key) -> E?
+    def []=: (index key, _ToGodot[E] value) -> E
+    def set: (index key, _ToGodot[E] value) -> E?
+    
+    include _Each[E]
+    def each: () -> Enumerator[E, self]
+            | ...
+    include Enumerable[E]
+  end
+  
+  class Array[unchecked out E < Variant] < Variant::AbstractArray[E]
+    VARIANT_TYPE: 28
+  end
+  
+  class PackedByteArray < Variant::AbstractArray[Variant]
+    VARIANT_TYPE: 29
+  end
+  class PackedInt32Array < Variant::AbstractArray[Variant]
+    VARIANT_TYPE: 30
+  end
+  class PackedInt64Array < Variant::AbstractArray[Variant]
+    VARIANT_TYPE: 31
+  end
+  class PackedFloat32Array < Variant::AbstractArray[Variant]
+    VARIANT_TYPE: 32
+  end
+  class PackedFloat64Array < Variant::AbstractArray[Variant]
+    VARIANT_TYPE: 33
+  end
+  class PackedStringArray < Variant::AbstractArray[String]
+    VARIANT_TYPE: 34
+  end
+  class PackedVector2Array < Variant::AbstractArray[Vector2]
+    VARIANT_TYPE: 35
+  end
+  class PackedVector3Array < Variant::AbstractArray[Vector3]
+    VARIANT_TYPE: 36
+  end
+  class PackedColorArray < Variant::AbstractArray[Color]
+    VARIANT_TYPE: 37
+  end
+end

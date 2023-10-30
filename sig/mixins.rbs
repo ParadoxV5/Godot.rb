@@ -20,8 +20,5 @@ module Godot
     
     module  Symbol include _ToGodot[StringName] end
     class ::Symbol include Symbol end
-    
-    module  Hash include _ToGodot[Dictionary] end
-    class ::Hash[unchecked out K, unchecked out V] include Hash end
   end
 end

@@ -1,22 +1,39 @@
 # frozen_string_literal: true
 module Godot
+  class Dictionary < Variant
+    VARIANT_TYPE = 27
+    
+    def self.from(enum)
+      dictionary = new
+      enum.each_with_index do|pair, index|
+        if pair.size != 2
+          raise ArgumentError, "wrong array length at #{index} (expected 2, was #{pair.size})"
+        end
+        # https://github.com/soutaro/steep/issues/947
+        # dictionary.[]=(*pair)
+        key, value = pair
+        dictionary[key] = value
+      end
+      dictionary
+    end
+    def self.[](**elems) = from(elems)
+  end
+  
   class Variant
     class AbstractArray < Variant
       include Enumerable
       
       def self.from(enum)
         array = new
-        size = enum.size
+        size = enum.lazy.size
         if size
           array.resize(size)
           enum.each_with_index {|elem, index| array[index] = elem }
         else
-          # Stop at {StopIteration}
-          loop { array[index] = enum.next }
+          enum.each { array.push_back = _1 }
         end
         array
       end
-      
       def self.[](*elems) = from(elems)
       
       def each(&blk)

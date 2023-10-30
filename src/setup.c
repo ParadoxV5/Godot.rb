@@ -40,7 +40,8 @@ static void servers(RB_UNUSED_VAR(va_list* args)) {
   godot_rb_init_String();
   godot_rb_init_StringName();
   godot_rb_init_Object();
-  godot_rb_require_relative(array);
+  godot_rb_require_relative(enumerable);
+  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_DICTIONARY] = godot_rb_get_module(Dictionary);
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_ARRAY] = godot_rb_get_module(Array);
   GDExtensionVariantType i = GDEXTENSION_VARIANT_TYPE_PACKED_BYTE_ARRAY;
   #define a(type) godot_rb_cVariants[i++] = godot_rb_get_module(Packed##type##Array);
