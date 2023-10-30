@@ -4,30 +4,20 @@ module Godot
     class AbstractArray < Variant
       include Enumerable
       
-      def self.from(enum, **kwargs)
-        array = new(**kwargs)
-        enum = enum.to_enum
-        size = enum.size || 0
-        array.resize(size)
-        begin
-          size.times { array[_1] = enum.next }
-        rescue StopIteration
-          # ignore
+      def self.from(enum)
+        array = new
+        size = enum.size
+        if size
+          array.resize(size)
+          enum.each_with_index {|elem, index| array[index] = elem }
         else
+          # Stop at {StopIteration}
           loop { array[index] = enum.next }
         end
         array
       end
       
-      def self.[](*elems, **kwargs)
-        array = new(**kwargs)
-        array.resize(elems.size)
-        elems.each_with_index do|elem, index|
-          #@type var elem: untyped
-          array[index] = elem
-        end
-        array
-      end
+      def self.[](*elems) = from(elems)
       
       def each(&blk)
         return to_enum { size } unless blk

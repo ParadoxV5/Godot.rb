@@ -3,8 +3,8 @@ module Godot
     #class AbstractArray[E < variant] < Variant
     # https://github.com/ruby/rbs/issues/1471
     class AbstractArray[unchecked out E < Variant] < Variant      
-      def self.from: [E < Variant] (_Each[_ToGodot[E]] enum, **bot kwargs) -> instance
-      def self.[]: [E < Variant] (*_ToGodot[E] elems, **bot kwargs) -> instance
+      def self.from: [E < Variant] (Enumerable[_ToGodot[E]] enum) -> instance
+      def self.[]: [E < Variant] (*_ToGodot[E] elems) -> instance
       
       type index = Integer | Float
       def []: (index key) -> E
