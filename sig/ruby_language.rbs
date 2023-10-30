@@ -2,26 +2,35 @@ module Godot
   # until we have RBS integration
   class ScriptLanguageExtension < Object end
   class RubyLanguage < ScriptLanguageExtension
-    def self._get_name: () -> ::String
-    def self._get_type: () -> String
-    def _handles_global_class_type: (bot type) -> bool
-    def self._get_extension: () -> ::String
-    def self._get_recognized_extensions: () -> PackedStringArray
-    def self._get_comment_delimiters: () -> PackedStringArray
-    def self._get_string_delimiters: () -> PackedStringArray
-    def self._can_inherit_from_file: () -> bool
-    def self._has_named_classes: () -> bool
-    def self._supports_documentation: () -> false
+    def _get_name: () -> ::String
+    def _get_type: () -> String
+    def _handles_global_class_type: (top type) -> bool
+    def _get_extension: () -> ::String
+    def _get_recognized_extensions: () -> PackedStringArray
+    def _get_comment_delimiters: () -> PackedStringArray
+    def _get_string_delimiters: () -> PackedStringArray
+    def _can_inherit_from_file: () -> bool
+    def _has_named_classes: () -> bool
+    def _is_using_templates: () -> bool
+    def _supports_documentation: () -> bool
+    def _supports_builtin_mode: () -> bool
+    def _validate_path: (top path) -> ''
     
     #def _add_global_constant: [T < variant_like] (interned name, T value) -> T
       # https://github.com/ruby/rbs/issues/1471
-    def self._add_global_constant: (interned name, variant_like value) -> variant_like
-    def self._add_named_global_constant: (interned name, variant_like value) -> variant_like
-    def self._remove_named_global_constant: (interned name) -> top
+    def _add_global_constant: (interned name, variant_like value) -> variant_like
+    def _add_named_global_constant: (interned name, variant_like value) -> variant_like
+    def _remove_named_global_constant: (interned name) -> top
     
     def _create_script: () -> RubyScript[Object]
     def _frame: () -> void
     def _finish: () -> void
+    
+    def _debug_get_current_stack_info: () -> Array[Dictionary[bot, bot]]
+    
+    def _get_public_annotations: () -> Array[Dictionary[bot, bot]]
+    def _get_public_constants: () -> Dictionary[bot, bot]
+    def _get_public_functions: () -> Array[Dictionary[bot, bot]]
     
     INSTANCE: RubyLanguage
   end
