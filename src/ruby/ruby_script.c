@@ -41,6 +41,9 @@ static void call_impl(va_list* args) {
     // Godot Engine too would manage the `r_ret` reference.
     gdext_variant_new_copy(r_ret, godot_rb_obj_get_variant(self));
 }
+void godot_rb_RubyScript_inst_free_list(
+  RB_UNUSED_VAR(GDExtensionScriptInstanceDataPtr self), void* list
+) { godot_rb_gdextension.mem_free(list); }
 
 
 GDExtensionBool godot_rb_RubyScript_inst_set(
@@ -51,12 +54,78 @@ GDExtensionBool godot_rb_RubyScript_inst_get(
   GDExtensionClassInstancePtr self, GDExtensionConstStringNamePtr name, GDExtensionVariantPtr r_value
 ) { return godot_rb_protect(call_impl, self, name, 0, 0, (GDExtensionConstVariantPtr[]){}, r_value); }
 
+// TODO: Properties
+const GDExtensionPropertyInfo* godot_rb_RubyScript_inst_get_property_list(
+  GDExtensionClassInstancePtr self, uint32_t* r_count
+) {
+  *r_count = 0;
+  return NULL;
+}
+GDExtensionBool godot_rb_RubyScript_inst_property_can_revert(
+  GDExtensionClassInstancePtr self, GDExtensionConstStringNamePtr name
+) { return false; }
+GDExtensionBool godot_rb_RubyScript_inst_property_get_revert(
+  GDExtensionClassInstancePtr self, GDExtensionConstStringNamePtr name, GDExtensionVariantPtr r_ret
+) { return false; }
+
 /** @return the {GDExtensionObjectPtr} attached by this {GDExtensionScriptInstancePtr} */
 GDExtensionObjectPtr godot_rb_RubyScript_inst_get_owner(GDExtensionScriptInstanceDataPtr self) {
   GDExtensionObjectPtr object;
   godot_rb_gdextension.object_ptr_from_variant(&object, godot_rb_cVariant_get_variant((VALUE)self));
   return object;
 }
+
+// TODO
+void godot_rb_RubyScript_inst_get_property_state(
+  GDExtensionScriptInstanceDataPtr self, GDExtensionScriptInstancePropertyStateAdd add_func, void* userdata
+) {
+}
+
+/**
+  TODO? RBS Integration
+  @return an array of methods including those of the `super` scripts’
+*/
+const GDExtensionMethodInfo* godot_rb_RubyScript_inst_get_method_list(
+  GDExtensionScriptInstanceDataPtr self, uint32_t* r_count
+) {
+  VALUE methods = rb_funcallv_public((VALUE)self, rb_intern("public_methods"), 0, (VALUE[]){});
+  long count = rb_array_len(methods);
+  *r_count = (uint32_t)count; // `long` is at least 32 bits
+  GDExtensionMethodInfo* method_info = godot_rb_gdextension.mem_alloc(sizeof(const GDExtensionMethodInfo[count]));
+  for(long i = 0; i < count; ++i) {
+    VALUE method_symbol = rb_ary_entry(methods, i);
+    method_info[i].name = godot_rb_gdextension.mem_alloc(sizeof(GDExtensionStringName));
+    *(GDExtensionStringName*)method_info[i].name = godot_rb_obj_to_string_name(method_symbol);
+    method_info[i].return_value.type = GDEXTENSION_VARIANT_TYPE_NIL;
+    method_info[i].return_value.name = godot_rb_gdextension.mem_alloc(sizeof(GDExtensionStringName));
+    // method_info[i].return_value.class_name ?
+    method_info[i].return_value.hint_string = godot_rb_gdextension.mem_alloc(sizeof(GDExtensionString));
+    godot_rb_gdextension.string_new_with_latin1_chars(method_info[i].return_value.hint_string, "");
+    godot_rb_gdextension.string_name_from_string(
+      method_info[i].return_value.name,
+      (const GDExtensionConstTypePtr[]){method_info[i].return_value.hint_string}
+    );
+    method_info[i].flags = GDEXTENSION_METHOD_FLAG_NORMAL;
+    method_info[i].id = i;
+    //FIXME: DRY pending
+    method_info[i].argument_count = 0;
+    method_info[i].arguments = (GDExtensionPropertyInfo[]){}; 
+    method_info[i].default_argument_count = 0;
+    method_info[i].default_arguments = (GDExtensionVariantPtr[]){};
+  }
+}
+
+// TODO
+GDExtensionVariantType godot_rb_RubyScript_inst_get_property_type(
+  GDExtensionScriptInstanceDataPtr self, GDExtensionConstStringNamePtr name, GDExtensionBool* r_is_valid
+) {
+  *r_is_valid = false;
+  return GDEXTENSION_VARIANT_TYPE_NIL;
+}
+
+GDExtensionBool godot_rb_RubyScript_inst_has_method(
+  GDExtensionScriptInstanceDataPtr self, GDExtensionConstStringNamePtr name
+) { return rb_respond_to((VALUE)self, godot_rb_id_from_string_name(name, '\0')); }
 
 void godot_rb_RubyScript_inst_call(GDExtensionScriptInstanceDataPtr self,
   GDExtensionConstStringNamePtr name,
@@ -75,7 +144,11 @@ void godot_rb_RubyScript_inst_call(GDExtensionScriptInstanceDataPtr self,
   ) ? GDEXTENSION_CALL_OK : GDEXTENSION_CALL_ERROR_INVALID_METHOD;
 }
 
-void to_string_unprotected(va_list* args) {
+// TODO
+void godot_rb_RubyScript_inst_notification(GDExtensionClassInstancePtr self, int32_t notification) {
+}
+
+static void to_string_unprotected(va_list* args) {
   VALUE string = rb_obj_as_string(va_arg(*args, VALUE));
   *va_arg(*args, GDExtensionString*) = godot_rb_obj_to_string(string);
 }
@@ -91,11 +164,21 @@ GDExtensionBool godot_rb_RubyScript_inst_refcount_decremented(
   RB_UNUSED_VAR(GDExtensionScriptInstanceDataPtr self)
 ) { return true; }
 
+GDExtensionObjectPtr godot_rb_RubyScript_inst_get_script(GDExtensionScriptInstanceDataPtr self) {
+  GDExtensionObjectPtr object;
+  godot_rb_gdextension.object_ptr_from_variant(
+    &object,
+    godot_rb_obj_get_variant(rb_const_get_at(CLASS_OF((VALUE)self), rb_intern("RUBY_SCRIPT")))
+  );
+  return object;
+}
+
 GDExtensionScriptLanguagePtr godot_rb_RubyLanguage_object;
 /** @param self How can this instance not be Godot.rb? Only if Godot Engine confuses something up. */
 GDExtensionScriptLanguagePtr godot_rb_RubyScript_inst_get_language(
   RB_UNUSED_VAR(GDExtensionScriptInstanceDataPtr self)
 ) { return godot_rb_RubyLanguage_object; }
+
 
 GDExtensionStringName string_name_RubyScript;
 GDExtensionInterfaceObjectSetInstance gdext_object_set_instance;
@@ -123,28 +206,6 @@ void godot_rb_RubyScript_inst_free_instance(RB_UNUSED_VAR(void* class_userdata),
   godot_rb_RubyScript_inst_free(self);
 }
 
-/*
-! Standard Reflection
-const GDExtensionMethodInfo* get_method_list(GDExtensionScriptInstanceDataPtr p_instance, uint32_t* r_count);
-void free_method_list(GDExtensionScriptInstanceDataPtr p_instance, const GDExtensionMethodInfo* p_list);
-GDExtensionBool has_method(GDExtensionScriptInstanceDataPtr p_instance, GDExtensionConstStringNamePtr p_name);
-
-! Extended Reflection
-const GDExtensionPropertyInfo get_property_list(GDExtensionClassInstancePtr self, uint32_t* r_count);
-void free_property_list(GDExtensionClassInstancePtr p_instance, const GDExtensionPropertyInfo* p_list);
-GDExtensionBool property_can_revert(GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name);
-GDExtensionBool property_get_revert(
-  GDExtensionClassInstancePtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionVariantPtr r_ret
-);
-void get_property_state(
-  GDExtensionScriptInstanceDataPtr p_instance, GDExtensionScriptInstancePropertyStateAdd p_add_func, void* p_userdata
-);
-GDExtensionVariantType get_property_type(
-  GDExtensionScriptInstanceDataPtr p_instance, GDExtensionConstStringNamePtr p_name, GDExtensionBool* r_is_valid
-);
-void notification(GDExtensionClassInstancePtr p_instance, int32_t p_what);
-GDExtensionObjectPtr godot_rb_RubyScript_inst_get_script(GDExtensionScriptInstanceDataPtr self);
-*/
 /*TODO: Ask the Godot community for a description on placeholders and fallbacks
 GDExtensionBool godot_rb_RubyScript_inst_is_placeholder(GDExtensionScriptInstanceDataPtr self);
 GDExtensionBool godot_rb_RubyScript_inst_set_fallback(
@@ -160,21 +221,21 @@ const GDExtensionScriptInstanceInfo godot_rb_RubyScript_inst_info = {
   #define i(func) .func##_func = godot_rb_RubyScript_inst_##func
   i(set),
   i(get),
-  //i(get_property_list),
-  //i(free_property_list),
-  //i(property_can_revert),
-  //i(property_get_revert),
+  i(get_property_list),
+  .free_property_list_func = (GDExtensionScriptInstanceFreePropertyList)godot_rb_RubyScript_inst_free_list,
+  i(property_can_revert),
+  i(property_get_revert),
   i(get_owner),
-  //i(get_property_state),
-  //i(get_method_list),
-  //i(free_method_list),
-  //i(get_property_type),
-  //i(has_method),
+  i(get_property_state),
+  i(get_method_list),
+  .free_method_list_func = (GDExtensionScriptInstanceFreeMethodList)godot_rb_RubyScript_inst_free_list,
+  i(get_property_type),
+  i(has_method),
   i(call),
-  //i(notification),
+  i(notification),
   i(to_string),
   i(refcount_decremented),
-  //i(get_script),
+  i(get_script),
   i(get_language),
   i(free)
 };
@@ -199,11 +260,11 @@ void godot_rb_init_RubyScript(void) {
       .is_abstract = false,
       i(set),
       i(get),
-      //i(get_property_list),
-      //i(free_property_list),
-      //i(property_can_revert),
-      //i(property_get_revert),
-      //i(notification),
+      i(get_property_list),
+      .free_property_list_func = (GDExtensionClassFreePropertyList)godot_rb_RubyScript_inst_free_list,
+      i(property_can_revert),
+      i(property_get_revert),
+      i(notification),
       i(to_string),
       i(create_instance),
       i(free_instance),

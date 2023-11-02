@@ -35,6 +35,7 @@ extern struct godot_rb_gdextension {
   GDExtensionInterfaceVariantBooleanize variant_booleanize;
   GDExtensionInterfaceStringToUtf8Chars  string_to_utf8_chars;
   GDExtensionInterfaceStringToUtf32Chars string_to_utf32_chars;
+  GDExtensionInterfaceStringNewWithLatin1Chars string_new_with_latin1_chars;
   GDExtensionInterfaceStringNewWithUtf32CharsAndLen string_new_with_utf32_chars_and_len;
   GDExtensionInterfaceObjectGetClassName object_get_class_name;
   // String APIs

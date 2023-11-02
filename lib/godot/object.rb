@@ -6,7 +6,7 @@ module Godot
     
     def self.base_class_name
       if const_defined? :RUBY_SCRIPT, false # {RubyScript} class
-        superclass&.base_class_name or StringName.new
+        superclass&.base_class_name or StringName.new # FIXME: Object.base_class_name ends up here
       else # Godot native class
         # StringName.new(*name&.delete_prefix('Godot::')) # https://github.com/soutaro/steep/issues/926
         demodulized_name = name&.delete_prefix('Godot::')

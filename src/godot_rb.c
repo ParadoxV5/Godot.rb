@@ -40,6 +40,7 @@ GDExtensionBool godot_rb_main(
   l(VariantBooleanize, variant_booleanize)
   l(StringToUtf8Chars,  string_to_utf8_chars)
   l(StringToUtf32Chars, string_to_utf32_chars)
+  l(StringNewWithLatin1Chars, string_new_with_latin1_chars)
   l(StringNewWithUtf32CharsAndLen, string_new_with_utf32_chars_and_len)
   l(ObjectGetClassName, object_get_class_name)
   // Load GDExtension API
