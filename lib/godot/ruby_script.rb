@@ -74,10 +74,7 @@ module Godot
     
     def new(...)
       # Temporary workaround until script initializing finds insight
-      # {Kernel#tap} somehow isn’t loaded
-      instance = klass.new(...)
-      instance.set_script self
-      instance
+      klass.new(...).tap { _1.set_script self }
     end
   end
 end

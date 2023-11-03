@@ -48,9 +48,7 @@ module Godot
     end
   end
   #TODO: do similar treatment with {Variant}. code reüse potential?
-  #FIXME: there is no `Kernel#then`
-  api_type = GDEXTENSION_API_TYPES[init_level]
-  if api_type
+  GDEXTENSION_API_TYPES[init_level]&.then do|api_type|
     klass = self #: Module?
     File.foreach(
       "./addons/Godot.rb/build/#{api_type}.hashes.tsv",

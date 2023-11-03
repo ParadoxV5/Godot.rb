@@ -1,11 +1,6 @@
 #include "setup.h"
 #include "ruby/variants.h"
 
-/** Load encodings – for some reason they are separate in `rubyarchhdrdir` */
-void Init_enc(RB_UNUSED_VAR(va_list* args)) {
-  rb_require("enc/encdb.so"),
-  rb_require("enc/trans/transdb.so");
-}
 /**
   Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.
   https://github.com/ruby/ruby/blob/v3_2_2/ruby.c#L2783-L2784
@@ -17,13 +12,15 @@ static bool core(void) {
   int argc = 1;
   char** argv = &arg0;
   ruby_sysinit(&argc, &argv);
-  if RB_UNLIKELY(ruby_setup()) {
-    godot_rb_error("Ruby ran into a problem while starting.");
-    return false;
+  int error = ruby_setup();
+  if RB_LIKELY(!error) {
+    if RB_LIKELY(ruby_executable_node(ruby_options(1, (char*[]){"-e "}), &error)) {
+      ruby_script(arg0);
+      return true;
+    }
   }
-  ruby_script(arg0);
-  ruby_init_loadpath();
-  return godot_rb_protect(Init_enc);
+  godot_rb_error("Ruby ran into a problem while starting.");
+  return false;
 }
 
 VALUE godot_rb_mGodot_m_init_level(RB_UNUSED_VAR(VALUE self)) {
