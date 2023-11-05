@@ -260,6 +260,7 @@ void godot_rb_init_Variant() {
   variant_hash = (GDExtensionInterfaceVariantHash)godot_rb_get_proc("variant_hash");
   godot_rb_require_relative(variant);
   godot_rb_cVariant = godot_rb_get_module(Variant);
+  rb_gc_register_address(&godot_rb_cVariant);
   gdext_variant_to_bool = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_BOOL);
   gdext_variant_to_int  = godot_rb_gdextension.get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_INT );
   rb_define_alloc_func(godot_rb_cVariant, godot_rb_cVariant_m_allocate);

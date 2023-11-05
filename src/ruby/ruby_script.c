@@ -254,7 +254,7 @@ void godot_rb_init_RubyScript(void) {
   
   godot_rb_require_relative(ruby_script);
   godot_rb_cRubyScript = godot_rb_get_module(RubyScript);
-  rb_gc_register_mark_object(godot_rb_cRubyScript);
+  rb_gc_register_address(&godot_rb_cRubyScript);
   rb_define_alloc_func(godot_rb_cRubyScript, godot_rb_cRubyScript_m_allocate);
   
   string_name_RubyScript = godot_rb_chars_to_string_name("RubyScript");
@@ -281,7 +281,7 @@ void godot_rb_init_RubyScript(void) {
   
   godot_rb_require_relative(ruby_language);
   godot_rb_cRubyLanguage_INSTANCE = rb_const_get_at(godot_rb_get_module(RubyLanguage), rb_intern("INSTANCE"));
-  rb_gc_register_mark_object(godot_rb_cRubyLanguage_INSTANCE);
+  rb_gc_register_address(&godot_rb_cRubyLanguage_INSTANCE);
   godot_rb_gdextension.object_ptr_from_variant(
     &godot_rb_RubyLanguage_object,
     godot_rb_cVariant_get_variant(godot_rb_cRubyLanguage_INSTANCE)

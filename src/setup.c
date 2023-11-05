@@ -30,7 +30,7 @@ static void servers(RB_UNUSED_VAR(va_list* args)) {
   // Load {Godot}
   godot_rb_require_relative(version);
   godot_rb_mGodot = rb_const_get(rb_cObject, rb_intern("Godot"));
-  rb_gc_register_mark_object(godot_rb_mGodot);
+  rb_gc_register_address(&godot_rb_mGodot);
   rb_define_singleton_method(godot_rb_mGodot, "init_level", godot_rb_mGodot_m_init_level, 0);
   // Load Variants
   godot_rb_init_Variant();
@@ -51,9 +51,9 @@ static void servers(RB_UNUSED_VAR(va_list* args)) {
   a(Vector2)
   a(Vector3)
   a(Color)
-  // Skip the first three since they point at the same class as FLOAT
-  for(i = GDEXTENSION_VARIANT_TYPE_FLOAT; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
-    rb_gc_register_mark_object(godot_rb_cVariants[i]);
+  // Skip the first four since they don’t have unique classes
+  for(i = GDEXTENSION_VARIANT_TYPE_STRING; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
+    rb_gc_register_address(&godot_rb_cVariants[i]);
   // Load Ruby Integration
   godot_rb_init_Mixins();
 }

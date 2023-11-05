@@ -42,7 +42,7 @@ void godot_rb_init_Mixins() {
     rb_define_method(mod, "to_godot", godot_rb_m##module##_i_to_godot, 0);
   #define t(Trilean, variant_type) \
     d(Trilean##Class) \
-    rb_gc_register_mark_object(godot_rb_m##Trilean##Class_variant); \
+    rb_gc_register_address(&godot_rb_m##Trilean##Class_variant); \
     mod = rb_singleton_class(godot_rb_m##Trilean##Class_variant); \
     rb_const_set(mod, godot_rb_idVARIANT_TYPE, INT2FIX(GDEXTENSION_VARIANT_TYPE_##variant_type)); \
     rb_define_method(mod, "nonzero?", godot_rb_m##Trilean##Class_i_nonzero_, 0); \
@@ -61,11 +61,6 @@ void godot_rb_init_Mixins() {
     godot_rb_m##Boolean##Class_variant = godot_rb_wrap_variant(godot_rb_cVariant, variant); \
     t(Boolean, BOOL)
   GDExtensionVariantPtr b(True, true) b(False, false)
-  
-  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_NIL  ] =
-  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL ] =
-  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_INT  ] =
-  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_FLOAT] = godot_rb_cVariant;
   
   gdext_variant_from_int = godot_rb_gdextension.get_variant_from_type_constructor(GDEXTENSION_VARIANT_TYPE_INT);
   d(Integer)

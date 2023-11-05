@@ -28,6 +28,7 @@ if RB_LIKELY(!NIL_P(ruby_script)) // Godot.rb {RubyScript} class
 void godot_rb_init_Object(void) {
   godot_rb_require_relative(object);
   godot_rb_cObject = godot_rb_get_module(Object);
+  rb_gc_register_address(&godot_rb_cObject);
   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT] = godot_rb_cObject;
   gdext_classdb_construct_object =
     (GDExtensionInterfaceClassdbConstructObject)godot_rb_get_proc("classdb_construct_object");

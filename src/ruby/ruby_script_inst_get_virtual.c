@@ -128,6 +128,7 @@ GDExtensionClassCallVirtual godot_rb_RubyScript_inst_get_virtual(
 GDExtensionClassGetVirtual godot_rb_init_RubyScript_inst_get_virtual() {
   gdext_script_instance_create = (GDExtensionInterfaceScriptInstanceCreate)godot_rb_get_proc("script_instance_create");
   TABLE = rb_hash_new_capa(32); // Count from docs/JSON
+  rb_gc_register_address(&TABLE);
   #define x(_0, func, _2) rb_hash_aset(TABLE, \
     LL2NUM((intptr_t)godot_rb_chars_to_string_name("_"#func)), \
     LL2NUM((intptr_t)godot_rb_RubyScript_virtual_##func) \
@@ -136,7 +137,6 @@ GDExtensionClassGetVirtual godot_rb_init_RubyScript_inst_get_virtual() {
   x(void*, instance_create, Object)
   #undef x
   rb_hash_freeze(TABLE);
-  rb_gc_register_mark_object(TABLE);
   return godot_rb_RubyScript_inst_get_virtual;
 }
 

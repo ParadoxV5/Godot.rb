@@ -51,7 +51,8 @@ init(String, STRING)
   // Endian test for UTF-32 -> `char[]`
   volatile char32_t sample = 1;
   godot_rb_encoding_UTF32 = rb_enc_find(RB_LIKELY(*(char*)&sample) ? "UTF-32LE" : "UTF-32BE");
-  rb_gc_register_mark_object(encoding_UTF32 = rb_enc_from_encoding(godot_rb_encoding_UTF32));
+  encoding_UTF32 = rb_enc_from_encoding(godot_rb_encoding_UTF32);
+  rb_gc_register_address(&encoding_UTF32);
   rb_define_method(cString, "to_s"  , godot_rb_cString_i_to_s  , 0);
   rb_define_method(cString, "to_str", godot_rb_cString_i_to_str, 0);
   rb_define_method(cString, "to_sym", godot_rb_cString_i_to_sym, 0);
