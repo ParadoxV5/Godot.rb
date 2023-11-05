@@ -140,18 +140,8 @@ void godot_rb_variant_call(
     case GDEXTENSION_CALL_ERROR_INSTANCE_IS_NULL:
       rb_frozen_error_raise(self, "%+"PRIsVALUE" is null (you might have freed it)", self);
       
-    case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
-      char* expectation; switch(error.expected) {
-        case GDEXTENSION_VARIANT_TYPE_BOOL  : expectation = " (expected true|false)"; break;
-        case GDEXTENSION_VARIANT_TYPE_NIL   : expectation = " (expected nil)"; break;
-        default: expectation = "";
-      }
-      rb_raise(rb_eTypeError,
-        "wrong argument type %"PRIsVALUE"%s",
-        godot_rb_cVariants[error.argument],
-        expectation
-      );
-    }
+    case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT:
+      rb_raise(rb_eTypeError, "wrong argument type");
     
     case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
       VALUE

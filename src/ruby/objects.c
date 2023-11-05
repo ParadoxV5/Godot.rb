@@ -71,7 +71,7 @@ VALUE godot_rb_cObject_m__godot_bind(VALUE self, VALUE name, VALUE hash) {
   return name;
 }
 
-VALUE DEPRECATED(rb_method_missing)(RB_UNUSED_VAR(int argc), const VALUE* argv, VALUE self) {
+VALUE DEPRECATED(rb_method_missing)(int argc, const VALUE* argv, VALUE self) {
   rb_raise(rb_eNoMethodError, "undefined method `%"PRIsVALUE"' for %+"PRIsVALUE, argc ? *argv : Qnil, self);
 }
 VALUE DEPRECATED(obj_respond_to_missing)(

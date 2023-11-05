@@ -49,7 +49,7 @@ void godot_rb_RubyScript_inst_free_list(
 
 GDExtensionBool godot_rb_RubyScript_inst_set(
   GDExtensionClassInstancePtr self, GDExtensionConstStringNamePtr name, GDExtensionConstVariantPtr value
-) { return godot_rb_protect(call_impl, self, name, '=', 1, (GDExtensionConstVariantPtr[]){value}, NULL); }
+) { return godot_rb_protect(call_impl, self, name, (int)'=', 1, (GDExtensionConstVariantPtr[]){value}, NULL); }
 
 GDExtensionBool godot_rb_RubyScript_inst_get(
   GDExtensionClassInstancePtr self, GDExtensionConstStringNamePtr name, GDExtensionVariantPtr r_value

@@ -28,7 +28,7 @@ const char* name,
 godot_rb_RubyScript_virtual_convert_ret convert_ret, // {NULL}able
 GDExtensionUninitializedTypePtr r_ret, // ignored if `convert_ret` is {NULL}
 godot_rb_RubyScript_virtual_convert_arg convert_arg, // {NULL}able
-const GDExtensionConstTypePtr* arg_ptr // ignored (skipped) if `convert_arg` is {NULL}
+const GDExtensionConstTypePtr* arg_ptr // ignored if `convert_arg` is {NULL}
 ``` */
 void godot_rb_RubyScript_virtual_impl(va_list* args) {
   VALUE self = va_arg(*args, VALUE);
@@ -36,11 +36,12 @@ void godot_rb_RubyScript_virtual_impl(va_list* args) {
   godot_rb_RubyScript_virtual_convert_ret convert_ret = va_arg(*args, godot_rb_RubyScript_virtual_convert_ret);
   GDExtensionUninitializedTypePtr r_ret = va_arg(*args, GDExtensionUninitializedTypePtr);
   godot_rb_RubyScript_virtual_convert_arg convert_arg = va_arg(*args, godot_rb_RubyScript_virtual_convert_arg);
+  const GDExtensionConstTypePtr* arg_ptr = va_arg(*args, const GDExtensionConstTypePtr*);
   VALUE ret = rb_funcallv_public(
     self,
     rb_intern(name),
     RB_UNLIKELY(convert_arg) ? 1 : 0,
-    RB_UNLIKELY(convert_arg) ? (VALUE[]){convert_arg(*va_arg(*args, const GDExtensionConstTypePtr*))} : (VALUE[]){}
+    RB_UNLIKELY(convert_arg) ? (VALUE[]){convert_arg(*arg_ptr)} : (VALUE[]){}
   );
   if RB_LIKELY(convert_ret)
     convert_ret(r_ret, ret);
