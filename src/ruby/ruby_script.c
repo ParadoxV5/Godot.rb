@@ -25,11 +25,11 @@ GDExtensionInterfaceVariantNewCopy gdext_variant_new_copy;
 static void call_impl(va_list* args) {
   VALUE self = va_arg(*args, VALUE);
   GDExtensionConstStringNamePtr string_name = va_arg(*args, GDExtensionConstStringNamePtr);
-  ID name = godot_rb_id_from_string_name(string_name, va_arg(*args, int));
+  ID name = godot_rb_id_from_string_name(string_name, (char)va_arg(*args, int));
   int argc = va_arg(*args, int);
   const GDExtensionConstVariantPtr* argv = va_arg(*args, const GDExtensionConstVariantPtr*);
   VALUE method_args[argc];
-  for(GDExtensionInt i = 0; i < argc; ++i) {
+  for(int i = 0; i < argc; ++i) {
     // Godot Engine would manage `argv` entries, so we make reference copies that the Ruby GC manages separately.
     GDExtensionVariantPtr arg = godot_rb_variant_alloc();
     gdext_variant_new_copy(arg, argv[i]);
@@ -41,6 +41,7 @@ static void call_impl(va_list* args) {
     // Godot Engine too would manage the `r_ret` reference.
     gdext_variant_new_copy(r_ret, godot_rb_obj_get_variant(self));
 }
+
 void godot_rb_RubyScript_inst_free_list(
   RB_UNUSED_VAR(GDExtensionScriptInstanceDataPtr self), void* list
 ) { godot_rb_gdextension.mem_free(list); }
@@ -59,7 +60,7 @@ const GDExtensionPropertyInfo* godot_rb_RubyScript_inst_get_property_list(
   GDExtensionClassInstancePtr self, uint32_t* r_count
 ) {
   *r_count = 0;
-  return NULL;
+  return godot_rb_gdextension.mem_alloc(0);
 }
 GDExtensionBool godot_rb_RubyScript_inst_property_can_revert(
   GDExtensionClassInstancePtr self, GDExtensionConstStringNamePtr name
@@ -113,6 +114,7 @@ const GDExtensionMethodInfo* godot_rb_RubyScript_inst_get_method_list(
     method_info[i].default_argument_count = 0;
     method_info[i].default_arguments = (GDExtensionVariantPtr[]){};
   }
+  return method_info;
 }
 
 // TODO
@@ -137,11 +139,14 @@ void godot_rb_RubyScript_inst_call(GDExtensionScriptInstanceDataPtr self,
     Only `TOO_MANY_ARGUMENTS/`TOO_FEW_ARGUMENTS`
     (“ArgumentError: wrong number of arguments (given `argument`, expected `expected`))
     make sense goïng from Ruby land to GDExtension world.
-    For consistency and laziness, they too will join the `INVALID_METHOD` umbrella.
+    For consistency and laziness, they too will join the `INVALID_ARGUMENT` umbrella.
   */
-  r_error->error = RB_LIKELY(
-    godot_rb_protect(call_impl, self, name, 0, argc, argv, r_ret)
-  ) ? GDEXTENSION_CALL_OK : GDEXTENSION_CALL_ERROR_INVALID_METHOD;
+  r_error->error =
+    RB_LIKELY(godot_rb_RubyScript_inst_has_method(self, name))
+    ? RB_LIKELY(godot_rb_protect(call_impl, self, name, 0, (int)argc, argv, r_ret))
+      ? GDEXTENSION_CALL_OK
+      : GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT
+    : GDEXTENSION_CALL_ERROR_INVALID_METHOD;
 }
 
 // TODO
@@ -194,7 +199,7 @@ VALUE godot_rb_cRubyScript_m_allocate(VALUE self) {
 }
 GDExtensionObjectPtr godot_rb_RubyScript_inst_create_instance(RB_UNUSED_VAR(void* class_userdata)) {
   GDExtensionObjectPtr object_ptr;
-  godot_rb_RubyScript_impl_allocate(godot_rb_cRubyScript, &object_ptr);
+  rb_gc_register_mark_object(godot_rb_RubyScript_impl_allocate(godot_rb_cRubyScript, &object_ptr));
   return object_ptr;
 }
 

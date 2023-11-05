@@ -3,7 +3,7 @@
 // Based on [`gdextension_interface.h`](include/godot/gdextension_interface.h):
 // Copyright (c) 2014-present Godot Engine contributors. https://godotengine.org/license/
 
-#include "../../include/godot/gdextension_interface.h"
+#include "../../include/godot/godot/gdextension_interface.h"
 
 /* INTERFACE */
 GDExtensionInterfaceGetGodotVersion get_godot_version;

@@ -67,6 +67,8 @@ VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
       return LL2NUM(integer); // SIZEOF_LONG_LONG ≥ 64 = sizeof(GDExtensionInt)
     }
     default:
+      if RB_UNLIKELY(!godot_rb_cVariants[variant_type])
+        printf("%d\n", variant_type);
       return godot_rb_wrap_variant(godot_rb_cVariants[variant_type], variant);
   }
 }
@@ -140,16 +142,14 @@ void godot_rb_variant_call(
       
     case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
       char* expectation; switch(error.expected) {
-        case GDEXTENSION_VARIANT_TYPE_OBJECT: expectation = ""; break;
         case GDEXTENSION_VARIANT_TYPE_BOOL  : expectation = " (expected true|false)"; break;
         case GDEXTENSION_VARIANT_TYPE_NIL   : expectation = " (expected nil)"; break;
-        default: expectation = " (expected %"PRIsVALUE")";
+        default: expectation = "";
       }
       rb_raise(rb_eTypeError,
         "wrong argument type %"PRIsVALUE"%s",
         godot_rb_cVariants[error.argument],
-        expectation,
-        godot_rb_cVariants[error.expected]
+        expectation
       );
     }
     
@@ -169,7 +169,7 @@ void godot_rb_variant_call(
     
     default: // TOO_MANY_ARGUMENTS, TOO_FEW_ARGUMENTS
       rb_raise(rb_eArgError,
-        "wrong number of arguments (given %ld, expected %"PRId32")",
+        "wrong number of arguments (given %d, expected %"PRId32")",
         argc,
         error.expected ? error.expected : error.argument // https://github.com/godotengine/godot/pull/80844
       );
