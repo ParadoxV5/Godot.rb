@@ -8,7 +8,7 @@ gem 'json', '~> 2.6'
 # Development Apps
 group :development do
   group :type_check do
-    gem 'rbs', github: 'ruby/rbs', ref: 'edce24f', require: false
+    gem 'rbs', '~> 3.3.0', require: false
     gem 'steep', '~> 1.6.0', require: false
   end
   group :documentation do
