@@ -9,7 +9,7 @@ gem 'json', '~> 2.6'
 group :development do
   group :type_check do
     gem 'rbs', github: 'ruby/rbs', ref: 'edce24f', require: false
-    gem 'steep', '~> 1.5.0', require: false
+    gem 'steep', '~> 1.6.0', require: false
   end
   group :documentation do
     gem 'yard', '~> 0.9.0', require: false
