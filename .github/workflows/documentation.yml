@@ -33,7 +33,7 @@ jobs:
     - name: Package YARD
       run: bundle exec yard doc
     
-    - uses: actions/upload-pages-artifact@v2
+    - uses: actions/upload-pages-artifact@v3
       with:
         path: doc
   
