@@ -14,7 +14,7 @@ static bool core(void) {
   ruby_sysinit(&argc, &argv);
   int error = ruby_setup();
   if RB_LIKELY(!error) {
-    if RB_LIKELY(ruby_executable_node(ruby_options(1, (char*[]){"-e "}), &error)) {
+    if RB_LIKELY(ruby_executable_node(ruby_options(2, (char*[]){"ruby", "-e "}), &error)) {
       ruby_script(arg0);
       return true;
     }
