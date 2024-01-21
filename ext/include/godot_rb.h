@@ -2,7 +2,7 @@
 #define GODOT_RB_H
 
 #include <ruby.h>
-#include <godot/godot/gdextension_interface.h>
+#include <godot/gdextension_interface.h>
 
 
 // GDExtension (initialized by entry function) //

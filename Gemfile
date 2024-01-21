@@ -2,13 +2,13 @@
 source 'https://rubygems.org'
 ruby '~> 3.3', engine: 'ruby', engine_version: '~> 3.3'
 
-gem 'rake', '~> 13.1.0'
-gem 'json', '~> 2.6'
+gem 'rake-compiler', '~> 1.2.0'
+gem 'json', '~> 2.7'
 
 # Development Apps
 group :development do
   group :type_check do
-    gem 'rbs', '~> 3.4.1', require: false
+    gem 'rbs', '~> 3.4.2', require: false
     gem 'steep', '~> 1.6.0', require: false
   end
   group :documentation do
