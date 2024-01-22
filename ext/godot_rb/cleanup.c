@@ -1,4 +1,4 @@
-#include "ruby/variants.h"
+#include "variants.h"
 
 static void core(void) {
   if RB_UNLIKELY(ruby_cleanup(EXIT_SUCCESS))

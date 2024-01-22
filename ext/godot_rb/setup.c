@@ -1,5 +1,5 @@
 #include "setup.h"
-#include "ruby/variants.h"
+#include "variants.h"
 
 /**
   Ruby keeps a copy of the argc/v pointers’ contents, though it seems to only use `argv[0]` occasionally.

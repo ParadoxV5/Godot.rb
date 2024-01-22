@@ -112,3 +112,5 @@ bool godot_rb_protect(void (* function)(va_list* args), ...) {
   }
   return true;
 }
+
+void Init_godot_rb() {}
