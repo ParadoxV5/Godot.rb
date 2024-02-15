@@ -1,3 +1,5 @@
+/generated/
+
 # JetBrains
 /**/.idea/
 
@@ -5,5 +7,4 @@
 /.gem_rbs_collection/
 /Gemfile.lock
 /rbs_collection.lock.yaml
-/lib/*.so
 /tmp/
