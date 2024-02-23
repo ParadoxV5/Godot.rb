@@ -8,6 +8,7 @@ on:
     - docs/**
     - lib/**
     - README.md
+    - Gemfile
 
 concurrency:
   group: pages
