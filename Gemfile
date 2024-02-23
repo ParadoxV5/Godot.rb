@@ -11,6 +11,6 @@ group :development do
   end
   group :documentation do
     gem 'yard', '~> 0.9.0', require: false
-    gem 'commonmarker', '~> 1.0.0', require: false
+    gem 'commonmarker', '~> 0.23.10', require: false
   end
 end
