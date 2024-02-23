@@ -134,7 +134,7 @@ extern rb_encoding* godot_rb_encoding_UTF32;
 bool godot_rb_protect(void (*function)(va_list* args), ...);
 
 /** Entry Function */
-__attribute__((used)) GDExtensionBool godot_rb_main(
+__attribute__((used)) GDExtensionBool Init_godot_rb(
   GDExtensionInterfaceGetProcAddress get_proc_address,
   GDExtensionClassLibraryPtr library,
   GDExtensionInitialization* r_initialization

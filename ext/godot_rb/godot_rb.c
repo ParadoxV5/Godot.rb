@@ -9,7 +9,7 @@ GDExtensionClassLibraryPtr godot_rb_library = NULL;
 struct godot_rb_gdextension godot_rb_gdextension;
 VALUE godot_rb_mGodot;
 
-GDExtensionBool godot_rb_main(
+GDExtensionBool Init_godot_rb(
   GDExtensionInterfaceGetProcAddress get_proc_address,
   GDExtensionClassLibraryPtr library,
   GDExtensionInitialization* r_initialization
@@ -112,5 +112,3 @@ bool godot_rb_protect(void (* function)(va_list* args), ...) {
   }
   return true;
 }
-
-void Init_godot_rb() {}
