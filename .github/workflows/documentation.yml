@@ -24,7 +24,7 @@ jobs:
       with:
         submodules: recursive
     
-    - uses: actions/configure-pages@v4
+    - uses: actions/configure-pages@v5
     
     - uses: ruby/setup-ruby@v1
       with:
