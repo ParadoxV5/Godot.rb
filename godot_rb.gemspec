@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'lib/godot_rb/version'
 
-Gem::Specification.new do |spec|
+Gem::Specification.new do|spec|
   spec.name = 'Godot.rb'
   spec.summary = 'CRuby in Godot Engine; see Homepage/README'
   spec.version = Godot::VERSION
@@ -18,7 +18,11 @@ Gem::Specification.new do |spec|
     'documentation_uri' => "https://rubydoc.info/gems/#{spec.name}"
   }
   
-  spec.files = Dir['**/*']
+  spec.files = Dir['**/*'].grep_v Regexp.union *%w[
+    rbs_collection.yaml
+    Steepfile
+  ]
+  spec.extensions = %w[Rakefile]
   
   spec.required_ruby_version = '~> 3.3.0'
   spec.add_runtime_dependency 'json', '~> 2.7'

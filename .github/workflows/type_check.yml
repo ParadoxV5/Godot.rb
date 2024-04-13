@@ -1,14 +1,19 @@
 name: Check Types with Steep
 on:
   push:
-    paths: &paths
+    paths:
     - .github/workflows/type_check.yml
     - lib/**
     - sig/**
     - Gemfile
     - '*.gemspec'
   pull_request:
-    paths: *paths
+    paths:
+    - .github/workflows/type_check.yml
+    - lib/**
+    - sig/**
+    - Gemfile
+    - '*.gemspec'
 jobs:
   
   type_check:

@@ -10,7 +10,7 @@ group :development do
     gem 'steep', '~> 1.6.0', require: false
   end
   group :documentation do
-    gem 'yard', '~> 0.9.0', require: false
-    gem 'commonmarker', '~> 0.23.10', require: false
+    gem 'yard', github: 'ParadoxV5/yard', tag: 'commonmarker-1.0_1', require: false
+    gem 'commonmarker', '~> 1.0.4', require: false
   end
 end
