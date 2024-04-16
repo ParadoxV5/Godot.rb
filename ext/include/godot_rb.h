@@ -1,25 +1,15 @@
 #ifndef GODOT_RB_H
 #define GODOT_RB_H
-
 #include <ruby.h>
 #include <godot/gdextension_interface.h>
 
-
-// GDExtension (initialized by entry function) //
-
-// The level Godot.rb have initialized + 1
-extern GDExtensionInitializationLevel godot_rb_init_level_next;
-
-extern GDExtensionInterfaceGetProcAddress godot_rb_get_proc;
-extern GDExtensionClassLibraryPtr godot_rb_library;
+extern GDExtensionInterfaceGetProcAddress godot_proc;
 
 
-// GDExtension Interface (initialized by entry function) //
+// GDExtension Interface (initialized by entry function)
 
 /** @deprecated Members shall be moved to file-private globals instead. */
 extern struct godot_rb_gdextension {
-  GDExtensionInterfacePrintErrorWithMessage print_error_with_message;
-  GDExtensionInterfacePrintScriptErrorWithMessage print_script_error_with_message;
   GDExtensionInterfaceMemAlloc mem_alloc;
   GDExtensionInterfaceMemFree  mem_free;
   GDExtensionInterfaceGetVariantToTypeConstructor   get_variant_to_type_constructor;
@@ -123,15 +113,15 @@ void godot_rb_variant_call(
 /** (initialized at level `SERVERS`) */
 extern rb_encoding* godot_rb_encoding_UTF32;
 
-#define godot_rb_error(message) \
-  godot_rb_gdextension.print_error_with_message(message, message, __func__, __FILE__, __LINE__, false)
 /** `begin`–`rescue`s the passed function.
-  If an exception occurs, log a Script Error or, for non-{rb_eStandardError}s, a generic Error;
-  also ping the Godot Engine Editor if exception backtrace is available
+  If an exception occurs, log a Script Error or, for non-{rb_eStandardError}s, a generic Error.
+  Also immediately return if the current thread is found to be non-Ruby.
+  (It is a CRuby limitation that the Ruby APIs segfault when non-Ruby threads call them.)
   
-  (assumes level `CORE` set up)
+  @param ret may be `NULL`
+  @note This assumes that init level `CORE` is set up.
 */
-bool godot_rb_protect(void (*function)(va_list* args), ...);
+bool godot_rb_protect(VALUE* ret, VALUE (* function)(VALUE arg), VALUE arg);
 
 /** Entry Function */
 __attribute__((used)) GDExtensionBool Init_godot_rb(
