@@ -6,77 +6,39 @@
 extern GDExtensionInterfaceGetProcAddress godot_proc;
 
 
-// GDExtension Interface (initialized by entry function)
+// Ruby Binding Constants //
 
-/** @deprecated Members shall be moved to file-private globals instead. */
-extern struct godot_rb_gdextension {
-  GDExtensionInterfaceMemAlloc mem_alloc;
-  GDExtensionInterfaceMemFree  mem_free;
-  GDExtensionInterfaceGetVariantToTypeConstructor   get_variant_to_type_constructor;
-  GDExtensionInterfaceGetVariantFromTypeConstructor get_variant_from_type_constructor;
-  GDExtensionInterfaceVariantConstruct  variant_construct;
-  GDExtensionInterfaceVariantNewNil     variant_new_nil;
-  GDExtensionInterfaceVariantDuplicate  variant_duplicate;
-  GDExtensionInterfaceVariantDestroy    variant_destroy;
-  GDExtensionInterfaceVariantGetType    variant_get_type;
-  GDExtensionInterfaceVariantGet        variant_get;
-  GDExtensionInterfaceVariantSet        variant_set;
-  GDExtensionInterfaceVariantCall       variant_call;
-  GDExtensionInterfaceVariantBooleanize variant_booleanize;
-  GDExtensionInterfaceStringToUtf8Chars  string_to_utf8_chars;
-  GDExtensionInterfaceStringToUtf32Chars string_to_utf32_chars;
-  GDExtensionInterfaceStringNewWithLatin1Chars string_new_with_latin1_chars;
-  GDExtensionInterfaceStringNewWithUtf32CharsAndLen string_new_with_utf32_chars_and_len;
-  GDExtensionInterfaceObjectGetClassName object_get_class_name;
-  // String APIs
-  GDExtensionTypeFromVariantConstructorFunc string_from_variant;
-  GDExtensionVariantFromTypeConstructorFunc variant_from_string;
-  GDExtensionPtrDestructor string_destroy;
-  // StringName APIs
-  GDExtensionTypeFromVariantConstructorFunc string_name_from_variant;
-  GDExtensionPtrConstructor string_from_string_name;
-  GDExtensionPtrConstructor string_name_from_string;
-  GDExtensionVariantFromTypeConstructorFunc variant_from_string_name;
-  GDExtensionPtrDestructor string_name_destroy;
-  // Object APIs
-  GDExtensionTypeFromVariantConstructorFunc object_ptr_from_variant;
-  GDExtensionVariantFromTypeConstructorFunc variant_from_object_ptr;
-  GDExtensionPtrDestructor object_destroy;
-} godot_rb_gdextension;
-
-
-// Ruby Binding Constants (initialized at level `SERVERS`) //
-
-extern VALUE godot_rb_mGodot;
-extern VALUE godot_rb_cVariant;
-extern VALUE godot_rb_cObject;
+/**
+  This array repurposes elements corresponding to immediate values –
+  which are converted on-the-spot – for storing general classes and modules
+  * `GDEXTENSION_VARIANT_TYPE_NIL` ➡ {Godot}
+  * `GDEXTENSION_VARIANT_TYPE_BOOL` ➡ {Godot::Variant}
+  * `GDEXTENSION_VARIANT_TYPE_INT` ➡ *unassigned*
+  * `GDEXTENSION_VARIANT_TYPE_FLOAT` ➡ *unassigned*
+  * `GDEXTENSION_VARIANT_TYPE_STRING`.. ➡ corresponding subclass
+*/
 extern VALUE godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
+#define godot_rb_mGodot   godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_NIL   ]
+#define godot_rb_cVariant godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL  ]
+#define godot_rb_cObject  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT]
 
-#define godot_rb_idVARIANT_TYPE rb_intern("VARIANT_TYPE")
+// Variant Helpers //
 
-
-// Variant Helpers (initialized at level `SERVERS`) //
-
-extern GDExtensionVariantPtr godot_rb_variant_alloc();
-
-/** @note The variant will be freed when the returned Variant gets GC-ed. */
-VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant);
-/** @note
-  The variant will be freed when the returned Variant gets GC-ed or,
-  for auto-converted variants (trileans, ints and floats), by the time this function returns.
+/** @return
+  the Ruby version of the immediate value or
+  a GC-independent instance of the corresponding {Godot::Variant} class from godot_rb_cVariants
 */
-VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant);
-
+VALUE godot_rb_type_ptr_to_ruby(GDExtensionVariantType type_id, GDExtensionConstTypePtr ptr);
 /**
-  Like {#godot_rb_cVariant_to_variant}, but calls {#to_godot} as needed
-  @note Do not free the returned variant; GC takes care of it
+  @param self
+    1. if `nil`, do nothing
+    2. if {Godot::Variant}, call create a new, GC-independent copy of `self`’s data at `ret`
+    3. if immediate-value variant, convert it and store the C version at `ret`
+    4. else, UB
+  @param ret return buffer
+  @return `ret`
 */
-GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self);
-/**
-  @param self must be a Godot::Variant; use {#godot_rb_obj_to_variant} if not necessarily
-  @note Do not free the returned variant; GC takes care of it
-*/
-GDExtensionVariantPtr godot_rb_cVariant_get_variant(VALUE self);
+GDExtensionTypePtr godot_rb_ruby_to_type_ptr(VALUE self, GDExtensionUninitializedTypePtr ret);
 
 /** @see godot_rb_variant_call */
 typedef void (* godot_rb_variant_call_function)(

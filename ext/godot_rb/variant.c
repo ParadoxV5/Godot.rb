@@ -1,84 +1,107 @@
-#include "variants.h"
-VALUE godot_rb_cVariant, godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
+#include "godot_rb.h"
 
-/** Fetch size from `extension_api.json` */
-#define VARIANT_SIZE 40
-size_t godot_rb_cVariant_size(RB_UNUSED_VAR(const void* data)) { return VARIANT_SIZE; }
-void godot_rb_cVariant_free(GDExtensionVariantPtr data) {
-  godot_rb_gdextension.variant_destroy(data);
-  godot_rb_gdextension.mem_free(data);
-}
-rb_data_type_t godot_rb_cVariant_type = {
-  .wrap_struct_name = "Godot::Variant",
-  .function = {
-    .dsize = godot_rb_cVariant_size,
-    .dfree = godot_rb_cVariant_free
-  },
-  .flags = RUBY_TYPED_FREE_IMMEDIATELY
-};
+GDExtensionInterfaceVariantGetPtrConstructor godot_variant_get_ptr_constructor;
 
-GDExtensionUninitializedVariantPtr godot_rb_variant_alloc() {
-  GDExtensionUninitializedVariantPtr mem = godot_rb_gdextension.mem_alloc(VARIANT_SIZE);
-  if RB_LIKELY(mem)
-    return mem;
-  rb_raise(rb_eNoMemError, "Godot Engine out of memory");
+
+VALUE godot_rb_cVariants[];
+/**
+  * `GDEXTENSION_VARIANT_TYPE_NIL`..`GDEXTENSION_VARIANT_TYPE_FLOAT` ➡ 0 (same reason as godot_rb_cVariants)
+  * `GDEXTENSION_VARIANT_TYPE_STRING`.. ➡ corresponding T_DATA info
+  
+  `void* data` holds `godot_variant_get_ptr_constructor(type_id, 1)`
+*/
+rb_data_type_t godot_rb_cVariant_types[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
+//TODO `.dcompact`: Support moving for Ruby objects sent to Godot
+
+ID idTYPE_ID;
+
+rb_data_type_t* godot_rb_cVariant_get_type(VALUE klass) {
+  return &godot_rb_cVariant_types[RB_FIX2INT(rb_const_get_from(klass, idTYPE_ID))];
 }
-VALUE godot_rb_wrap_variant(VALUE klass, GDExtensionVariantPtr variant) {
-  return TypedData_Wrap_Struct(klass, &godot_rb_cVariant_type, variant);
+
+
+GDExtensionUninitializedTypePtr godot_rb_cVariant_alloc(rb_data_type_t* type_p) {
+  return ruby_xcalloc(1, type_p->function.dsize(NULL));
 }
-//TODO: Documentation: warn that `#allocate`d variants are semi-unusable
 VALUE godot_rb_cVariant_m_allocate(VALUE self) {
-  GDExtensionVariantPtr variant = godot_rb_variant_alloc();
-  godot_rb_gdextension.variant_new_nil(variant); // Zero-initialize it to prevent invalid GC frees
-  return godot_rb_wrap_variant(self, variant);
+  rb_data_type_t* type_p = godot_rb_cVariant_get_type(self);
+  return TypedData_Wrap_Struct(self, type_p, godot_rb_cVariant_alloc(type_p));
 }
 
+/** Copy a pointer – dup the data for pass-by-value {Godot::Variant::Composite}, ref for {Godot::Variant::RefCounted}
+  @param to return buffer
+  @return `to`
+  @note uses constructor #1 `(Variant from)` cached in `void* data` of godot_rb_cVariant_types
+*/
+GDExtensionTypePtr godot_rb_cVariant_copy_ptr(
+  rb_data_type_t* type_p, GDExtensionConstTypePtr from, GDExtensionUninitializedTypePtr to
+) {
+  ((GDExtensionPtrConstructor)type_p->data)(to, (GDExtensionConstTypePtr[1]){from});
+  return to;
+}
 VALUE godot_rb_cVariant_i_initialize_copy(VALUE self, VALUE other) {
-  godot_rb_gdextension.variant_duplicate(godot_rb_cVariant_get_variant(self), godot_rb_obj_get_variant(other), false);
+  rb_data_type_t* type_p = godot_rb_cVariant_get_type(rb_class_of(self));
+  godot_rb_cVariant_copy_ptr(
+    type_p,
+    rb_check_typeddata(other, type_p),
+    rb_check_typeddata(self, type_p)
+  );
   return other;
 }
 
-GDExtensionTypeFromVariantConstructorFunc gdext_variant_to_bool, gdext_variant_to_int;
-VALUE godot_rb_parse_variant(GDExtensionVariantPtr variant) {
-  GDExtensionVariantType variant_type = godot_rb_gdextension.variant_get_type(variant);
-  switch(variant_type) {
-    case GDEXTENSION_VARIANT_TYPE_OBJECT:
-      if RB_LIKELY(godot_rb_gdextension.variant_booleanize(variant)) { // Non-null check
-        // “`godot_rb_parse_object`”
-        //TODO: unavailablility in SERVERS
-        GDExtensionConstObjectPtr object_ptr;
-        godot_rb_gdextension.object_ptr_from_variant(&object_ptr, variant);
-        return godot_rb_wrap_variant(godot_rb_object_ptr_class(object_ptr), variant);
+
+VALUE godot_rb_type_ptr_to_ruby(GDExtensionVariantType type_id, GDExtensionConstTypePtr ptr) {
+  if RB_LIKELY(ptr) { // non-`NULL` check
+    switch(type_id) {
+      case GDEXTENSION_VARIANT_TYPE_BOOL:
+        return *(GDExtensionBool*)ptr ? Qtrue : Qfalse;
+      case GDEXTENSION_VARIANT_TYPE_INT:
+        return RB_LL2NUM(*(GDExtensionInt*)ptr); // `SIZEOF_LONG_LONG` ≥ 8.0 = `sizeof(GDExtensionInt)`
+      case GDEXTENSION_VARIANT_TYPE_FLOAT: // C++ `double`
+        return rb_float_new(*(double*)ptr);
+      default: {
+        const VALUE klass = godot_rb_cVariants[type_id];
+        rb_data_type_t* type_p = godot_rb_cVariant_get_type(klass);
+        GDExtensionUninitializedTypePtr obj_ptr = godot_rb_cVariant_alloc(type_p);
+        godot_rb_cVariant_copy_ptr(type_p, ptr, obj_ptr);
+        return TypedData_Wrap_Struct(type_id == GDEXTENSION_VARIANT_TYPE_OBJECT
+            ? godot_rb_object_ptr_class(*(GDExtensionConstObjectPtr const*)ptr)
+            : klass
+          , type_p, obj_ptr);
       }
-      //fall-through
-    case GDEXTENSION_VARIANT_TYPE_NIL:
-      godot_rb_gdextension.variant_destroy(variant);
-      return Qnil;
-    case GDEXTENSION_VARIANT_TYPE_BOOL: {
-      GDExtensionBool the_bool;
-      gdext_variant_to_bool(&the_bool, variant);
-      godot_rb_gdextension.variant_destroy(variant);
-      return the_bool ? Qtrue : Qfalse;
+      case GDEXTENSION_VARIANT_TYPE_NIL:
+        // do nothing
     }
-    case GDEXTENSION_VARIANT_TYPE_INT: {
-      GDExtensionInt integer;
-      gdext_variant_to_int(&integer, variant);
-      godot_rb_gdextension.variant_destroy(variant);
-      return LL2NUM(integer); // SIZEOF_LONG_LONG ≥ 64 = sizeof(GDExtensionInt)
-    }
-    default:
-      if RB_UNLIKELY(!godot_rb_cVariants[variant_type])
-        printf("%d\n", variant_type);
-      return godot_rb_wrap_variant(godot_rb_cVariants[variant_type], variant);
   }
+  return Qnil;
 }
 
-
-GDExtensionVariantPtr godot_rb_cVariant_get_variant(VALUE self) {
-  return rb_check_typeddata(self, &godot_rb_cVariant_type);
-}
-GDExtensionVariantPtr godot_rb_obj_get_variant(VALUE self) {
-  return godot_rb_cVariant_get_variant(rb_convert_type(self, RUBY_T_DATA, "Godot::Variant", "to_godot"));
+GDExtensionTypePtr godot_rb_ruby_to_type_ptr(VALUE self, GDExtensionUninitializedTypePtr ret) {
+  switch(rb_type(self)) {
+    case T_FALSE:
+      *(GDExtensionBool*)ret = false;
+      break;
+    case T_TRUE:
+      *(GDExtensionBool*)ret = true;
+      break;
+    case T_FIXNUM:
+    case T_BIGNUM:
+      #if(SIZEOF_LONG_LONG * CHAR_BIT > 64)
+        #error `long long` overflows `GDExtensionInt`
+      #endif
+      *(GDExtensionInt*)ret = rb_num2ll(self);
+      break;
+    case T_FLOAT:
+      *(double*)ret = rb_float_value(self); // C++ `double`
+      break;
+    case T_DATA: {
+      rb_data_type_t* type_p = godot_rb_cVariant_get_type(rb_class_of(self));
+      return godot_rb_cVariant_copy_ptr(type_p, rb_check_typeddata(self, type_p), ret);
+    }
+    case T_NIL:
+    default: // what
+  }
+  return ret;
 }
 
 

@@ -2,7 +2,6 @@
 
 GDExtensionInterfaceGetProcAddress godot_proc;
 GDExtensionClassLibraryPtr godot_rb_lib_p;
-VALUE godot_rb_mGodot;
 
 GDExtensionInterfacePrintErrorWithMessage godot_print_error_with_message;
 GDExtensionInterfacePrintScriptErrorWithMessage godot_print_script_error_with_message;
