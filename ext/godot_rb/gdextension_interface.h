@@ -1,4 +1,4 @@
-#include "../include/godot_rb.h"
+#include <godot/gdextension_interface.h>
 
 extern GDExtensionClassLibraryPtr godot_rb_lib_p;
 

@@ -1,4 +1,5 @@
-#include "godot_rb.h"
+#include <godot_rb.h>
+#include "gdextension_interface.h"
 
 GDExtensionInterfaceGetProcAddress godot_proc;
 GDExtensionClassLibraryPtr godot_rb_lib_p;

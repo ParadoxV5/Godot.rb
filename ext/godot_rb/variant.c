@@ -1,4 +1,5 @@
-#include "godot_rb.h"
+#include <godot_rb.h>
+#include "gdextension_interface.h"
 
 GDExtensionInterfaceVariantGetPtrConstructor godot_variant_get_ptr_constructor;
 
