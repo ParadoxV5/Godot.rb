@@ -22,6 +22,14 @@ extern VALUE godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
 #define godot_rb_cVariant godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_BOOL  ]
 #define godot_rb_cObject  godot_rb_cVariants[GDEXTENSION_VARIANT_TYPE_OBJECT]
 
+/**
+  This repurposes the element for `Nil` (which is always 0 by definition) to store the size for `Variant`.
+  Elements for other immediate types are reserved but not set as Godot.rb treat them individually.
+*/
+size_t godot_rb_cVariant_sizes[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
+#define godot_rb_cVariant_size godot_rb_cVariant_sizes[GDEXTENSION_VARIANT_TYPE_NIL]
+
+
 // Variant Helpers //
 
 /** @return
@@ -84,6 +92,7 @@ extern rb_encoding* godot_rb_encoding_UTF32;
   @note This assumes that init level `CORE` is set up.
 */
 bool godot_rb_protect(VALUE* ret, VALUE (* function)(VALUE arg), VALUE arg);
+
 
 /** Entry Function */
 __attribute__((used)) GDExtensionBool Init_godot_rb(

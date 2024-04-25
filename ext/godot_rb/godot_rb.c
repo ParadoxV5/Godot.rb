@@ -4,8 +4,8 @@
 GDExtensionInterfaceGetProcAddress godot_proc;
 GDExtensionClassLibraryPtr godot_rb_lib_p;
 
-GDExtensionInterfacePrintErrorWithMessage godot_print_error_with_message;
-GDExtensionInterfacePrintScriptErrorWithMessage godot_print_script_error_with_message;
+godot_proc_decl(PrintErrorWithMessage,       print_error_with_message);
+godot_proc_decl(PrintScriptErrorWithMessage, print_script_error_with_message);
 #define godot_rb_error(func, message) godot_print_error_with_message(message, message, func, __FILE__, __LINE__, false)
 
 

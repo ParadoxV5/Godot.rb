@@ -1,18 +1,9 @@
-#include <godot_rb.h>
-#include "gdextension_interface.h"
-
-GDExtensionInterfaceVariantGetPtrConstructor godot_variant_get_ptr_constructor;
+#include "variant.h"
 
 
-VALUE godot_rb_cVariants[];
-/**
-  * `GDEXTENSION_VARIANT_TYPE_NIL`..`GDEXTENSION_VARIANT_TYPE_FLOAT` ➡ 0 (same reason as godot_rb_cVariants)
-  * `GDEXTENSION_VARIANT_TYPE_STRING`.. ➡ corresponding T_DATA info
-  
-  `void* data` holds `godot_variant_get_ptr_constructor(type_id, 1)`
-*/
-rb_data_type_t godot_rb_cVariant_types[GDEXTENSION_VARIANT_TYPE_VARIANT_MAX];
-//TODO `.dcompact`: Support moving for Ruby objects sent to Godot
+VALUE godot_rb_cVariants[]; //TODO init
+rb_data_type_t godot_rb_cVariant_types[] = {};
+size_t godot_rb_cVariant_sizes[];
 
 ID idTYPE_ID;
 
@@ -100,7 +91,7 @@ GDExtensionTypePtr godot_rb_ruby_to_type_ptr(VALUE self, GDExtensionUninitialize
       return godot_rb_cVariant_copy_ptr(type_p, rb_check_typeddata(self, type_p), ret);
     }
     case T_NIL:
-    default: // what
+    default: // wat
   }
   return ret;
 }
