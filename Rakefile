@@ -22,7 +22,7 @@ Rake::ExtensionTask.new 'godot_rb' do|ext|
 end
 
 # Glue Code Entry Task
-GLUE_RB = %w[core editor].to_h { [_1, File.join OUT, "#{_1}.rb"] }
+GLUE_RB = %w[core editor].to_h { [_1, File.join(OUT, "#{_1}.rb")] }
 glue = GLUE_RB.values.push File.join(OUT, 'godot.rbs'), GLUE_C
 glue.each { file _1 => :extension_api } # Each task executes at most once
 desc 'Generate glue code'
@@ -42,13 +42,12 @@ task :extension_api => [GLUE_C_ERB, EXTENSION_API, OUT] do
   string_name_default_size = 0
   build_configurations = json.delete('builtin_class_sizes').to_h do|config|
     sizes = config.fetch('sizes').drop(N_IMMEDIATES).to_h(&:values)
-    sizes['Nil'] = sizes.delete 'Variant' # repurpose slot as noted in C
     string_name_size = sizes.fetch 'StringName'
     string_name_default_size = string_name_size if string_name_size > string_name_default_size
     [
       config.fetch('build_configuration'),
       sizes.map {|name, size| <<-"C" }.join
-        godot_rb_cVariant_sizes[GDEXTENSION_VARIANT_TYPE_#{name}] = #{size};
+        godot_rb_cVariant_sizes[gdvt#{name}] = #{size};
       C
     ]
   end
@@ -57,6 +56,7 @@ task :extension_api => [GLUE_C_ERB, EXTENSION_API, OUT] do
   json.delete('builtin_classes')
     .drop(N_IMMEDIATES)
     .to_h { _1.values_at 'name', 'has_destructor' } => type_has_destructors
+  type_has_destructors['Object'] = false # not included in `builtin_classes`
   
   json.delete('classes')
     .find { _1['name'] == 'OS' }

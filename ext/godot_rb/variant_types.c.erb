@@ -1,5 +1,4 @@
-#include "variant.h"
-
+#include "../ext/godot_rb/variant.h" // per {Rake::ExtensionTask} default
 
 godot_proc_decl(VariantGetPtrConstructor    , variant_get_ptr_constructor      );
 godot_proc_decl(VariantGetPtrDestructor     , variant_get_ptr_destructor       );
@@ -7,7 +6,6 @@ godot_proc_decl(StringNameNewWithLatin1Chars, string_name_new_with_latin1_chars)
 godot_proc_decl(ObjectMethodBindPtrcall     , object_method_bind_ptrcall       );
 godot_proc_decl(GlobalGetSingleton          , global_get_singleton             );
 godot_proc_decl(ClassdbGetMethodBind        , classdb_get_method_bind          );
-
 
 <% type_has_destructors.each do|type, has_destructor| %>
   <%# Use preprocessor’s lookup to avoid case converting in each ERB var. %>
@@ -24,7 +22,6 @@ godot_proc_decl(ClassdbGetMethodBind        , classdb_get_method_bind          )
     ruby_xfree(ptr);
   }
 <% end %>
-
 
 void Init_variant_types() {
   godot_proc_get(VariantGetPtrConstructor    , variant_get_ptr_constructor      );
@@ -53,6 +50,7 @@ void Init_variant_types() {
   <% end %>
   ruby_xfree(str.names);
   
+  #define gdvtVariant GDEXTENSION_VARIANT_TYPE_NIL // resolves to slot repurpose
   if RB_LIKELY(is_single) {
     if RB_UNLIKELY(is_32) {
       <%= build_configurations.fetch 'float_32' %>
@@ -76,11 +74,11 @@ void Init_variant_types() {
     godot_rb_cVariant_types[i].function.dfree = <% if has_destructor %>
       godot_rb_cVariant_<%= type %>_dfree
     <% else %>
-      RUBY_DEFAULT_FREE;
-    <% end %>
+      RUBY_DEFAULT_FREE
+    <% end %>;
     godot_rb_cVariant_types[i].function.dsize = godot_rb_cVariant_<%= type %>_dsize;
-    godot_rb_cVariant_types[i].parent = godot_rb_cVariant_type; //TODO
-    godot_rb_cVariant_types[i].data = godot_variant_get_ptr_constructor(i, 1); // `from` constructor
+    godot_rb_cVariant_types[i].parent = godot_rb_cVariant_type; <%#TODO%>
+    godot_rb_cVariant_types[i].data = godot_variant_get_ptr_constructor(i, 1); <%# `from` constructor %>
   <% end %>
   
   //TODO `.dmark` & `.dcompact`: Support moving for Ruby objects sent to Godot
