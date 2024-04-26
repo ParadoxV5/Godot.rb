@@ -2,7 +2,83 @@
 
 
 godot_proc_decl(VariantGetPtrConstructor    , variant_get_ptr_constructor      );
+godot_proc_decl(VariantGetPtrDestructor     , variant_get_ptr_destructor       );
+godot_proc_decl(StringNameNewWithLatin1Chars, string_name_new_with_latin1_chars);
+godot_proc_decl(ObjectMethodBindPtrcall     , object_method_bind_ptrcall       );
+godot_proc_decl(GlobalGetSingleton          , global_get_singleton             );
+godot_proc_decl(ClassdbGetMethodBind        , classdb_get_method_bind          );
+
+
+<%
+type_has_destructors.each do|type, has_destructor|
+  if has_destructor
+%>
+  void godot_rb_cVariant_<%= type %>_dfree(GDExtensionTypePtr ptr) {
+    godot_variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_<%= type %>)(ptr);
+    ruby_xfree(ptr);
+  }
+<% end %>
+size_t godot_rb_cVariant_<%= type %>_dsize(RB_UNUSED_VAR(GDExtensionTypePtr ptr)) {
+  return godot_rb_cVariant_sizes[GDEXTENSION_VARIANT_TYPE_<%= type %>];
+}
+<% end %>
 
 
 void Init_variant_types() {
+  godot_proc_get(VariantGetPtrConstructor    , variant_get_ptr_constructor      );
+  godot_proc_get(VariantGetPtrDestructor     , variant_get_ptr_destructor       );
+  GODOT_PROC_SAVE(StringNewWithLatin1Chars   , string_new_with_latin1_chars     )
+  godot_proc_get(StringNameNewWithLatin1Chars, string_name_new_with_latin1_chars);
+  godot_proc_get(ObjectMethodBindPtrcall     , object_method_bind_ptrcall       );
+  godot_proc_get(GlobalGetSingleton          , global_get_singleton             );
+  godot_proc_get(ClassdbGetMethodBind        , classdb_get_method_bind          );
+  
+  // `OS.has_feature(name)`
+  union str {
+    GDExtensionStringNamePtr names; // [`OS`, `has_feature`]
+    GDExtensionStringPtr tag;
+  } str = {ruby_xmalloc2(2, <%= string_name_default_size %>)};
+  godot_string_name_new_with_latin1_chars(&str.names[0], "OS", true); // `true` ➡ do _not_ destroy, simply `free`
+  godot_string_name_new_with_latin1_chars(&str.names[1], "has_feature", true);
+  GDExtensionMethodBindPtr godot_OS_i_has_feature = godot_classdb_get_method_bind(&str.names[0], &str.names[1], <%= hash_has_feature %>);
+  GDExtensionConstObjectPtr os = godot_global_get_singleton(&str.names[0]);
+  <% %w[single 32].each do|tag| %>
+    GDExtensionBool is_<%= tag %>;
+    godot_string_new_with_latin1_chars(str.tag, "<%= tag %>");
+    godot_object_method_bind_ptrcall(godot_OS_i_has_feature, os, str.tag, &is_<%= tag %>);
+    godot_variant_get_ptr_destructor(GDEXTENSION_VARIANT_TYPE_STRING)(str.tag);
+  <% end %>
+  ruby_xfree(str.names);
+  
+  if RB_LIKELY(is_single) {
+    if RB_UNLIKELY(is_32) {
+      <%= build_configurations.fetch 'float_32' %>
+    } else {
+      <%= build_configurations.fetch 'float_64' %>
+    }
+  } else {
+    if RB_UNLIKELY(is_32) {
+      <%= build_configurations.fetch 'double_32' %>
+    } else {
+      <%= build_configurations.fetch 'double_64' %>
+    }
+  }
+  
+  for(GDExtensionVariantType i = 0; i < GDEXTENSION_VARIANT_TYPE_VARIANT_MAX; ++i)
+    godot_rb_cVariant_types[i].flags = RUBY_TYPED_FREE_IMMEDIATELY; //TODO: RUBY_TYPED_FROZEN_SHAREABLE
+  
+  <% type_has_destructors.each do|type, has_destructor| %>
+    #define i GDEXTENSION_VARIANT_TYPE_<%= type %>
+    godot_rb_cVariant_types[i].wrap_struct_name = "Godot::<%= type %>";
+    godot_rb_cVariant_types[i].function.dfree = <% if has_destructor %>
+      godot_rb_cVariant_<%= type %>_dfree
+    <% else %>
+      RUBY_DEFAULT_FREE;
+    <% end %>
+    godot_rb_cVariant_types[i].function.dsize = godot_rb_cVariant_<%= type %>_dsize;
+    godot_rb_cVariant_types[i].parent = godot_rb_cVariant_type; //TODO
+    godot_rb_cVariant_types[i].data = godot_variant_get_ptr_constructor(i, 1); // `from` constructor
+  <% end %>
+  
+  //TODO `.dmark` & `.dcompact`: Support moving for Ruby objects sent to Godot
 }
