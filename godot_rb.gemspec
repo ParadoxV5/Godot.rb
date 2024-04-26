@@ -25,10 +25,11 @@ Gem::Specification.new do|spec|
   spec.extensions = %w[Rakefile]
   
   spec.required_ruby_version = '~> 3.3.0'
-  spec.add_runtime_dependency 'json', '~> 2.7'
-  spec.add_development_dependency 'rake-compiler', '~> 1.2.0'
+  spec.add_dependency 'erb', '~> 4.0'
+  spec.add_dependency 'json', '~> 2.7'
+  spec.add_dependency 'rake-compiler', '~> 1.2.0'
   if RUBY_PLATFORM.eql? 'x64-mingw-ucrt'
-    spec.add_development_dependency 'mingw-make', '~> 1.0'
+    spec.add_dependency 'mingw-make', '~> 1.0'
   end
   spec.requirements.push(
     'CRuby (not JRuby, etc.)',

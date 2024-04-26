@@ -42,7 +42,8 @@ void Init_variant_types() {
   } str = {ruby_xmalloc2(2, <%= string_name_default_size %>)};
   godot_string_name_new_with_latin1_chars(&str.names[0], "OS", true); // `true` ➡ do _not_ destroy, simply `free`
   godot_string_name_new_with_latin1_chars(&str.names[1], "has_feature", true);
-  GDExtensionMethodBindPtr godot_OS_i_has_feature = godot_classdb_get_method_bind(&str.names[0], &str.names[1], <%= hash_has_feature %>);
+  GDExtensionMethodBindPtr godot_OS_i_has_feature =
+    godot_classdb_get_method_bind(&str.names[0], &str.names[1], <%= hash_OS_has_feature %>);
   GDExtensionConstObjectPtr os = godot_global_get_singleton(&str.names[0]);
   <% %w[single 32].each do|tag| %>
     GDExtensionBool is_<%= tag %>;
