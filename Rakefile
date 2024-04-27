@@ -12,82 +12,11 @@ CLOBBER << OUT = 'generated'
 
 # C
 Rake::ExtensionTask.new 'godot_rb' do|ext|
-  CLEAN << GLUE_C = File.join(ext.ext_dir, 'variant_types.c')
-  GLUE_C_ERB = "#{GLUE_C}.erb"
   ext.lib_dir = OUT
-  ext.source_pattern = '*.c{,.erb}'
+  ext.source_pattern = '*.{c,h}{,.erb}'
+  ext.extra_sources.add File.join(ext.ext_dir, '*.rb'), 'ext/include/**/*.h', 'ext/include/godot/extension_api_with_docs.json'
   ext.no_native = true
-end
-
-# Glue Code Entry Task
-GLUE_RB = %w[core editor].to_h { [_1, File.join(OUT, "#{_1}.rb")] }
-glue = GLUE_RB.values.push File.join(OUT, 'godot.rbs'), GLUE_C
-glue.each { file _1 => :extension_api } # Each task executes at most once
-desc 'Generate glue code'
-task(glue:)
-
-
-# Common Glue Code Generator Task
-EXTENSION_API = 'ext/include/godot/extension_api_with_docs.json'
-task :extension_api => [GLUE_C_ERB, EXTENSION_API, OUT] do
-  require 'json'
-  require 'erb'
-  puts "> loading #{EXTENSION_API}"
-  json = JSON.load_file EXTENSION_API
-  N_IMMEDIATES = 4
-  
-  puts '| processing variant sizes'
-  string_name_default_size = 0
-  build_configurations = json.delete('builtin_class_sizes').to_h do|config|
-    sizes = config.fetch('sizes').drop(N_IMMEDIATES).to_h(&:values)
-    string_name_size = sizes.fetch 'StringName'
-    string_name_default_size = string_name_size if string_name_size > string_name_default_size
-    [
-      config.fetch('build_configuration'),
-      sizes.map do|name, size|
-        "godot_rb_cVariant_sizes[gdvt#{name}] = #{size};"
-      end.join("\n")
-    ]
-  end
-  
-  puts '| processing variant classes'
-  json.delete('builtin_classes')
-    .drop(N_IMMEDIATES)
-    .to_h { _1.values_at 'name', 'has_destructor' } => type_has_destructors
-  type_has_destructors['Object'] = false # not included in `builtin_classes`
-  
-  json.delete('classes')
-    .find { _1['name'] == 'OS' }
-    .delete('methods')
-    .find { _1['name'] == 'has_feature' }
-    .fetch('hash') => hash_OS_has_feature
-  
-  puts "< generating #{GLUE_C}"
-  File.write GLUE_C, ERB.new(File.read GLUE_C_ERB).result_with_hash(
-    string_name_default_size:,
-    build_configurations:,
-    type_has_destructors:,
-    hash_OS_has_feature:
-  )
-  
-  #TODO (creating empty files to prevent task reïnvoking)
-  touch(GLUE_RB.values, verbose:)
-  # files = GLUE_RB.transform_values do|path|
-  #   File.open path, 'w'
-  # rescue => e
-  #   warn e.full_message
-  # end
-  # begin
-  #   json['classes'].each do|klass_data|
-  #     files[klass_data['api_type']]&.then do|rb|
-  #       klass_data['methods']&.each do|method_data|
-  #         method_data['hash']&.then { _1 }
-  #       end
-  #     end
-  #   end
-  # ensure
-  #   files.each_value { _1&.close }
-  # end
+  CLEAN << File.join(ext.ext_dir, 'variant_types.c')
 end
 
 
@@ -141,5 +70,5 @@ multitask dll_symlinks: libs.map {|name, lib_path|
 }
 
 # Entry Task
-desc 'Build Godot.rb, complete with glue code, the `.gdextension` and Ruby DLL symlinks'
-multitask default: %i[compile glue gdextension dll_symlinks]
+desc 'Build Godot.rb, including symlinks for Ruby shared libraries'
+multitask default: %i[compile gdextension dll_symlinks]
