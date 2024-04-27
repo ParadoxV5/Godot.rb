@@ -1,4 +1,5 @@
 /generated/
+/ext/godot_rb/variant_types.c
 
 # VSCode
 .vscode/

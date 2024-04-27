@@ -8,16 +8,14 @@ end
 
 
 # Output directory
-OUT = 'generated'
-CLOBBER << OUT
+CLOBBER << OUT = 'generated'
 
 # C
-GLUE_C = 'tmp/variant_types.c' # {Rake::ExtensionTask} defaults
-GLUE_C_ERB = 'ext/godot_rb/variant_types.c.erb' # ditto
-task 'compile:godot_rb': GLUE_C
 Rake::ExtensionTask.new 'godot_rb' do|ext|
+  CLEAN << GLUE_C = File.join(ext.ext_dir, 'variant_types.c')
+  GLUE_C_ERB = "#{GLUE_C}.erb"
   ext.lib_dir = OUT
-  ext.source_pattern = '**/*.c'
+  ext.source_pattern = '*.c{,.erb}'
   ext.no_native = true
 end
 
@@ -30,7 +28,7 @@ task(glue:)
 
 
 # Common Glue Code Generator Task
-EXTENSION_API = './ext/include/godot/extension_api_with_docs.json'
+EXTENSION_API = 'ext/include/godot/extension_api_with_docs.json'
 task :extension_api => [GLUE_C_ERB, EXTENSION_API, OUT] do
   require 'json'
   require 'erb'
@@ -46,9 +44,9 @@ task :extension_api => [GLUE_C_ERB, EXTENSION_API, OUT] do
     string_name_default_size = string_name_size if string_name_size > string_name_default_size
     [
       config.fetch('build_configuration'),
-      sizes.map {|name, size| <<-"C" }.join
-        godot_rb_cVariant_sizes[gdvt#{name}] = #{size};
-      C
+      sizes.map do|name, size|
+        "godot_rb_cVariant_sizes[gdvt#{name}] = #{size};"
+      end.join("\n")
     ]
   end
   
@@ -72,6 +70,8 @@ task :extension_api => [GLUE_C_ERB, EXTENSION_API, OUT] do
     hash_OS_has_feature:
   )
   
+  #TODO (creating empty files to prevent task reïnvoking)
+  touch(GLUE_RB.values, verbose:)
   # files = GLUE_RB.transform_values do|path|
   #   File.open path, 'w'
   # rescue => e
@@ -114,7 +114,7 @@ file gdextension => OUT do
       'bsd'
     else # Linux & unknowns
       plat
-    end} = "#{File.expand_path 'godot_rb.so', OUT}"
+    end} = "#{File.join OUT, "godot_rb.#{RbConfig::CONFIG.fetch 'DLEXT'}"}"
   INI
     # [dependencies]
     # arch.plat = {
@@ -124,8 +124,8 @@ end
 
 # Ruby DLL symlinks
 # Windows RubyInstaller2 has it in `bindir` rather than `libdir`
-so_dir = RbConfig::CONFIG[defined?(RubyInstaller) ? 'bindir' : 'libdir']
-libruby_so = RbConfig::CONFIG['LIBRUBY_SO']
+so_dir = RbConfig::CONFIG.fetch(defined?(RubyInstaller) ? 'bindir' : 'libdir')
+libruby_so = RbConfig::CONFIG.fetch 'LIBRUBY_SO'
 libs = {libruby_so => File.join(so_dir, libruby_so)}
 if defined? RubyInstaller
   %w[libgmp-10.dll].each do|lib|
